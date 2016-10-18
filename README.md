@@ -60,7 +60,7 @@ For example, to convert a data object to bytes you do the following:
           case unsigned
         }
     ```
-To begin working with the S3SignerAWS class, initialize an instance as shown below:
+To begin working with the S3SignerAWS class, initialize an instance similar to example shown below:
 
 ```ruby
     let s3Signer = S3SignerAWS(accessKey: "YOUR_AWS_PUBLIC_KEY", secretKey: "YOUR_AWS_SECRET_KEY", region: .usStandard_usEast1)  
@@ -106,7 +106,7 @@ PUT
           }
         }
   ```
-Delete
+DELETE
 
 ```ruby
     do {
