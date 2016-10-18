@@ -20,6 +20,7 @@ I wrote the majority of this for personal use on the [Vapor Server](https://vapo
     - [V4 Authorization Header](#v4-authorization-header)
     - [V4 Pre-Signed URL](#v4-pre-signed-url)
     - [V2 Pre-Signed URL](#v2-pre-signed-url)
+  - [Known Limitations](#known-limitations)
 
 ## Integration
 **Swift Package Manager**
@@ -170,3 +171,5 @@ V4 is the only authorization accepted by all s3 regions, however, since I had th
 ```ruby
     let presignedURL = presignedURLV2(urlString: String, expiration: TimeFromNow) throws -> String
 ```
+### Known Limitations
+- bucket names that contain "-" may get a 403 response("Signature does not match") from AWS.
