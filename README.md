@@ -121,6 +121,39 @@ Delete
         }
       }
 ```
+**Vapor PUT example**
+
+```ruby
+    drop.put("uploadTestImage") { request in
+
+    let signer = S3SignerAWS(accessKey: "key", secretKey: "secretKey", region: .usStandard_usEast1)
+    
+    guard let bodyBytes = request.body.bytes, let url = URL(string: "https://s3.amazonaws.com/bucketName/testUploadImage.png") else { return "Bad Request" }
+    
+    let headers = try signer.authHeaderV4(httpMethod: .put, urlString: url.absoluteString, headers: [:], payload: .bytes(bodyBytes))
+
+    var request = URLRequest(url: url)
+    request.httpMethod = HTTPMethod.put.rawValue
+    request.httpBody = Data(bytes: bodyBytes)
+    
+    for header in headers {
+        request.setValue(header.value, forHTTPHeaderField: header.key)
+    }
+    
+    let session = URLSession(configuration: .default)
+    
+    let task = session.dataTask(with: request, completionHandler: { data, response, error in
+        print("ERROR: \(error)")
+        
+        print("RESPONSE: \(response)")
+    })
+    task.resume()
+
+    return task.response?.description ?? "request complete"
+    
+}
+```
+
 ### V4 Pre-Signed URL
 
 Similar to the ease of generating authentication headers, to generate a pre-signed url:
