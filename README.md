@@ -45,9 +45,10 @@ To install with swift package manager, add the package to your `Package.swift` f
 Requests can either have a signed payload or an unsigned payload.
 * _S3SignerAWS was built using `Vapor Server` frameworks and uses `Bytes` as the payload data type. `Bytes` is a typealias of `[UInt8]`_
 For example, to convert a data object to bytes you do the following:
-      ```ruby
+
+```ruby
       let bytes = try someDataObject.makeBytes()
-      ```
+```
 * If you know the request will not have a payload, set the Payload property to none. This tells s3 that the signature was created with no payload intended
 * If you are not sure what the exact payload will be, set payload property to unsigned. This tells s3 when you made the signature, there was a possibility of a payload but you weren't sure what specific object will be uploaded.
 * `Payload` enum:
