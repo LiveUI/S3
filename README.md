@@ -94,6 +94,7 @@ PUT
       guard let url = URL(string: "S3ImageURL") else { else throw someError }
       var request = URLRequest(url: url)
       request.httpMethod = HTTPMethod.put.rawValue
+      request.httpBody = Data(bytes: bytesObject)
         for header in headers {
           request.setValue(header.key, forHTTPHeaderField: header.value)
           }
