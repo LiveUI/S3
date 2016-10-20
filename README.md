@@ -130,7 +130,7 @@ DELETE
 
     let signer = S3SignerAWS(accessKey: "key", secretKey: "secretKey", region: .usStandard_usEast1)
     
-    guard let bodyBytes = request.body.bytes, let url = URL(string: "https://s3.amazonaws.com/bucketName/testUploadImage.png") else { return "Bad Request" }
+    guard let bodyBytes = request.body.bytes, let url = URL(string: "https://s3.amazonaws.com/bucketName/testUploadImage.png") else { return throw Abort.custom(status: .badRequest, message: "some error message.") }
     
     let headers = try signer.authHeaderV4(httpMethod: .put, urlString: url.absoluteString, headers: [:], payload: .bytes(bodyBytes))
 
