@@ -8,7 +8,8 @@
 
 public enum Region {
     
-    case usStandard_usEast1,
+    case usEast1_Virginia,
+    usEast2_Ohio,
     usWest1,
     usWest2,
     euWest1,
@@ -19,11 +20,12 @@ public enum Region {
     apNortheast1,
     apNortheast2,
     saEast1,
-    custom(hostName: String, endpoint: String)
+    custom(name: String, host: String)
     
     var name: String {
         switch self {
-        case .usStandard_usEast1: return "us-east-1"
+        case .usEast1_Virginia: return "us-east-1"
+        case .usEast2_Ohio: return "us-east-2"
         case .usWest1: return "us-west-1"
         case .usWest2: return "us-west-2"
         case .euWest1: return "eu-west-1"
@@ -40,7 +42,8 @@ public enum Region {
     
     var host: String {
         switch self {
-        case .usStandard_usEast1: return "s3.amazonaws.com"
+        case .usEast1_Virginia: return "s3.amazonaws.com"
+        case .usEast2_Ohio: return "s3.us-east-2.amazonaws.com"
         case .usWest1: return "s3-us-west-1.amazonaws.com"
         case .usWest2: return "s3-us-west-2.amazonaws.com"
         case .euWest1: return "s3-eu-west-1.amazonaws.com"
@@ -51,7 +54,7 @@ public enum Region {
         case .apNortheast1: return "s3-ap-northeast-1.amazonaws.com"
         case .apNortheast2: return "s3.ap-northeast-2.amazonaws.com"
         case .saEast1: return "s3-sa-east-1.amazonaws.com"
-        case .custom(_, let endpoint): return endpoint
+        case .custom(_, let host): return host
         }
     }
 }

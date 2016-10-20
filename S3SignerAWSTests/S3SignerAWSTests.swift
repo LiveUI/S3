@@ -14,28 +14,28 @@ import Foundation
 @testable import Core
 @testable import Essentials
 
-//class S3SignerAWSTests: XCTestCase {
-//    
-//    //Testing Data from AWS
-//    
-//    let accessKey = "AKIAIOSFODNN7EXAMPLE"
-//    let testSecretKey = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
-//    
-//    var signer: S3SignerAWS = S3SignerAWS(accessKey: "AKIAIOSFODNN7EXAMPLE", secretKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY", region: Region.usStandard_usEast1)
-//   
-//    let shortDate = "20130524"
-//    let longDate = "20130524T000000Z"
-//    
-//    let regionName = "us-east-1"
-//    
-//    override func setUp() {
-//        super.setUp()
-//    }
-//    
-//    override func tearDown() {
-//        super.tearDown()
-//    }
-//    
+class S3SignerAWSTests: XCTestCase {
+    
+    //Testing Data from AWS
+    
+    let accessKey = "AKIAIOSFODNN7EXAMPLE"
+    let testSecretKey = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+    
+    var signer: S3SignerAWS = S3SignerAWS(accessKey: accessKey, secretKey: testSecretKey, region: Region.usStandard_usEast1)
+   
+    let shortDate = "20130524"
+    let longDate = "20130524T000000Z"
+    
+    let regionName = "us-east-1"
+    
+    override func setUp() {
+        super.setUp()
+    }
+    
+    override func tearDown() {
+        super.tearDown()
+    }
+    
 //    func testV4AuthHeaderPut() {
 //        var urlString: String = "https://examplebucket.s3.amazonaws.com/test$file.text"
 //        var url: URL = URL(string: urlString)!
@@ -178,7 +178,7 @@ import Foundation
 //        XCTAssert(preSignedURL == "https://examplebucket.s3.amazonaws.com/test.txt?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIOSFODNN7EXAMPLE%2F20130524%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20130524T000000Z&X-Amz-Expires=86400&X-Amz-SignedHeaders=host&X-Amz-Signature=aeeed9bbccd4d02ee5c0109b86d86835f995330da4c265957d157751f604d404", "PreSigned URL does not match")
 //        
 //    }
-
+//
 //    func testFinalQueryURLV2() {
 //        let testExpectation = expectation(description: "Wait for HTTP Response")
 //        
@@ -247,16 +247,16 @@ import Foundation
 //            }
 //        }
 //    }
-
- 
-    
-    
-    func testPerformanceExample() {
-        // This is an example of a performance test case.
-        self.measure {
-        }
-    }
-    
+//
+// 
+//    
+//    
+//    func testPerformanceExample() {
+//        // This is an example of a performance test case.
+//        self.measure {
+//        }
+//    }
+//    
 }
 
 

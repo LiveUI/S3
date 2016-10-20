@@ -182,8 +182,8 @@ public class S3SignerAWS  {
 
 
 
-////Testing Extension for Private functions//////
-
+//Testing Extension for Private functions//////
+//
 //extension S3SignerAWS {
 //    
 //    public func TcanonicalHeaders(headers: [String: String]) -> String {
