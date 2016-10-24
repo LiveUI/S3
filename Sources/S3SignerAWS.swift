@@ -148,7 +148,7 @@ public class S3SignerAWS  {
     
     fileprivate func getSignature(stringToSign: String, timeStampShort: String) throws -> String {
         let dateKey = try HMAC.make(.sha256, timeStampShort.bytes, key: "AWS4\(secretKey)".bytes)
-        let dateRegionKey = try HMAC.make(.sha256, region.name.bytes, key: dateKey)
+        let dateRegionKey = try HMAC.make(.sha256, region.rawValue.bytes, key: dateKey)
         let dateRegionServiceKey = try HMAC.make(.sha256, "s3".bytes, key: dateRegionKey)
         let signingKey = try HMAC.make(.sha256, "aws4_request".bytes, key: dateRegionServiceKey)
         let signature = try HMAC.make(.sha256, stringToSign.bytes, key: signingKey).hexString
@@ -167,7 +167,7 @@ public class S3SignerAWS  {
     }
     
     fileprivate func credentialScope(timeStampShort: String) -> String {
-        return  [timeStampShort, region.name, "s3", "aws4_request"].joined(separator: "/")
+        return  [timeStampShort, region.rawValue, "s3", "aws4_request"].joined(separator: "/")
     }
     
     private enum S3SignerError: Error {
