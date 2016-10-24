@@ -22,24 +22,6 @@ public enum Region: String {
     case saEast1 = "sa-east-1"
     
     
-//    var name: String {
-//        switch self {
-//        case .usEast1_Virginia: return "us-east-1"
-//        case .usEast2_Ohio: return "us-east-2"
-//        case .usWest1: return "us-west-1"
-//        case .usWest2: return "us-west-2"
-//        case .euWest1: return "eu-west-1"
-//        case .euCentral1: return "eu-central-1"
-//        case .apSouth1: return "ap-south-1"
-//        case .apSoutheast1: return "ap-southeast-1"
-//        case .apSoutheast2: return "ap-southeast-2"
-//        case .apNortheast1: return "ap-northeast-1"
-//        case .apNortheast2: return "ap-northeast-2"
-//        case .saEast1: return "sa-east-1"
-//        
-//        }
-//    }
-    
     var host: String {
         switch self {
         case .usEast1_Virginia: return "s3.amazonaws.com"
