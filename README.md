@@ -1,6 +1,8 @@
 # S3SignerAWS
 Generates authorization headers and pre-signed URLs for authenticating AWS S3 REST API calls
 
+**Update for Vapor Users:** Check out [VaporS3Signer Provider](https://github.com/JustinM1/VaporS3Signer.git) for easy integration with your Vapor server.
+
 I wrote the majority of this for personal use on the [Vapor Server](https://vapor.codes/) and found getting the signatures to work in a flexible and reusable way pretty painful and tedious. Hopefully this will save others some time. I tried to expand the uses beyond my specific needs, but this does not cover all use cases. It _does not_ cover chunked-uploads or POST requests(On AWS this is used for adding an object to a bucket using HTML forms). Anyone who would like to contribute is more than welcome.
 
 **NOTE -** I tried to test this as much as possible, within reason, but It's hard to be sure with so many options and the signing process being so particular. If you encounter a bug, open up an issue and I'll be happy to look into it.
