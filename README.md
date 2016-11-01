@@ -1,7 +1,7 @@
 # S3SignerAWS
 Generates authorization headers and pre-signed URLs for authenticating AWS S3 REST API calls
 
-**Update for Vapor Users:** Check out [VaporS3Signer Provider](https://github.com/JustinM1/VaporS3Signer.git) for easy integration with your Vapor server.
+**Update for Vapor Users:** Check out [VaporS3Signer](https://github.com/JustinM1/VaporS3Signer.git) a Provider for easy integration with your Vapor server.
 
 I wrote the majority of this for personal use on the [Vapor Server](https://vapor.codes/) and found getting the signatures to work in a flexible and reusable way pretty painful and tedious. Hopefully this will save others some time. I tried to expand the uses beyond my specific needs, but this does not cover all use cases. It _does not_ cover chunked-uploads or POST requests(On AWS this is used for adding an object to a bucket using HTML forms). Anyone who would like to contribute is more than welcome.
 
@@ -76,8 +76,8 @@ GET
 
 ```ruby
     do {
-      let headers = try s3Signer.authHeaderV4(httpMethod: .get, urlString: "S3ImageURL", headers: [:], payload: .none)          
-      guard let url = URL(string: "S3ImageURL") else { else throw someError }
+      let headers = try s3Signer.authHeaderV4(httpMethod: .get, urlString: "https://s3.amazonaws.com/bucketName/testUploadImage.png", headers: [:], payload: .none)          
+      guard let url = URL(string: "https://s3.amazonaws.com/bucketName/testUploadImage.png") else { else throw someError }
       var request = URLRequest(url: url)
       request.httpMethod = HTTPMethod.get.rawValue
         for header in headers {
@@ -94,8 +94,8 @@ PUT
 ```ruby
     do {
       let bytesObject = try someDataObject.makeBytes()
-      let headers = try s3Signer.authHeadersV4(httpMethod: .put, urlString: "S3ImageURL", headers: [:], payload: .bytes(bytesObject))
-      guard let url = URL(string: "S3ImageURL") else { else throw someError }
+      let headers = try s3Signer.authHeadersV4(httpMethod: .put, urlString: "https://s3.amazonaws.com/bucketName/testUploadImage.png", headers: [:], payload: .bytes(bytesObject))
+      guard let url = URL(string: "https://s3.amazonaws.com/bucketName/testUploadImage.png") else { else throw someError }
       var request = URLRequest(url: url)
       request.httpMethod = HTTPMethod.put.rawValue
       request.httpBody = Data(bytes: bytesObject)
@@ -112,8 +112,8 @@ DELETE
 
 ```ruby
     do {
-      let headers = try s3Signer.authHeadersV4(httpMethod: .delete, urlString: "S3ImageURL", headers: [:], payload: .none)
-      guard let url = URL(string: "S3ImageURL") else { else throw someError }
+      let headers = try s3Signer.authHeadersV4(httpMethod: .delete, urlString: "https://s3.amazonaws.com/bucketName/testUploadImage.png", headers: [:], payload: .none)
+      guard let url = URL(string: "https://s3.amazonaws.com/bucketName/testUploadImage.png") else { else throw someError }
       var request = URLRequest(url: url)
       request.httpMethod = HTTPMethod.delete.rawValue
         for header in headers {
@@ -124,38 +124,6 @@ DELETE
           //handle error
         }
       }
-```
-**Vapor PUT example**
-
-```ruby
-    drop.put("uploadTestImage") { request in
-
-    let signer = S3SignerAWS(accessKey: "key", secretKey: "secretKey", region: .usStandard_usEast1)
-    
-    guard let bodyBytes = request.body.bytes, let url = URL(string: "https://s3.amazonaws.com/bucketName/testUploadImage.png") else { return throw Abort.custom(status: .badRequest, message: "some error message.") }
-    
-    let headers = try signer.authHeaderV4(httpMethod: .put, urlString: url.absoluteString, headers: [:], payload: .bytes(bodyBytes))
-
-    var request = URLRequest(url: url)
-    request.httpMethod = HTTPMethod.put.rawValue
-    request.httpBody = Data(bytes: bodyBytes)
-    
-    for header in headers {
-        request.setValue(header.value, forHTTPHeaderField: header.key)
-    }
-    
-    let session = URLSession(configuration: .default)
-    
-    let task = session.dataTask(with: request, completionHandler: { data, response, error in
-        print("ERROR: \(error)")
-        
-        print("RESPONSE: \(response)")
-    })
-    task.resume()
-
-    return task.response?.description ?? "request complete"
-    
-}
 ```
 
 ### V4 Pre-Signed URL
