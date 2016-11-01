@@ -1,5 +1,5 @@
 # S3SignerAWS
-Generates authorization headers and pre-signed URLs for authenticating AWS S3 REST API calls
+Generates V4 authorization headers and pre-signed URLs for authenticating AWS S3 REST API calls
 
 **Update for Vapor Users:** Check out [VaporS3Signer](https://github.com/JustinM1/VaporS3Signer.git) a Provider for easy integration with your Vapor server.
 
