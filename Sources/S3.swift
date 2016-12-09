@@ -32,28 +32,19 @@ public enum S3Error: Swift.Error {
 }
 
 
-public struct Bucket {
-    
-}
-
-
-public struct File {
-    
-}
-
-
-// MARK: - Main
+// MARK: - S3
 
 public class S3 {
     
     public let bucketName: String?
     
     let signer: S3SignerAWS
+    private let drop: Droplet
     
     
     // MARK: Initialization
     
-    public convenience init() throws {
+    public convenience init(droplet drop: Droplet) throws {
         guard let accessKey: String = drop.config["s3", "accessKey"]?.string else {
             throw S3Error.missingCredentials("accessKey")
         }
@@ -62,16 +53,17 @@ public class S3 {
             throw S3Error.missingCredentials("secretKey")
         }
         
-        self.init(accessKey: accessKey, secretKey: secretKey)
+        self.init(droplet: drop, accessKey: accessKey, secretKey: secretKey)
     }
     
-    public init(accessKey: String, secretKey: String, bucketName: String?, region: Region) {
+    public init(droplet drop: Droplet, accessKey: String, secretKey: String, bucketName: String?, region: Region) {
+        self.drop = drop
         self.bucketName = bucketName
         self.signer = S3SignerAWS(accessKey: accessKey, secretKey: secretKey, region: region)
     }
     
-    convenience init(accessKey: String, secretKey: String, region: Region = .usEast1_Virginia) {
-        self.init(accessKey: accessKey, secretKey: secretKey, bucketName: nil, region: region)
+    public convenience init(droplet drop: Droplet, accessKey: String, secretKey: String, region: Region = .usEast1_Virginia) {
+        self.init(droplet: drop, accessKey: accessKey, secretKey: secretKey, bucketName: nil, region: region)
     }
     
     // MARK: Managing objects
@@ -86,7 +78,7 @@ public class S3 {
         var awsHeaders: [String: String] = headers
         awsHeaders["x-amz-acl"] = accessControl.rawValue
         let signingHeaders: [String: String] = try signer.authHeaderV4(httpMethod: .put, urlString: url.absoluteString, headers: awsHeaders, payload: .bytes(bytes))
-        let result: Response = try drop.client.put(fileUrl!.absoluteString, headers: self.vaporHeaders(signingHeaders), query: [:], body: Body(bytes))
+        let result: Response = try self.drop.client.put(fileUrl!.absoluteString, headers: self.vaporHeaders(signingHeaders), query: [:], body: Body(bytes))
         
         guard result.status == .ok else {
             throw S3Error.badResponse(result)
@@ -115,7 +107,7 @@ public class S3 {
         }
         
         let headers: [String: String] = try signer.authHeaderV4(httpMethod: .get, urlString: url.absoluteString, headers: [:], payload: .none)
-        let result: Response = try drop.client.get(fileUrl!.absoluteString, headers: self.vaporHeaders(headers))
+        let result: Response = try self.drop.client.get(fileUrl!.absoluteString, headers: self.vaporHeaders(headers))
         guard result.status == .ok else {
             throw S3Error.badResponse(result)
         }
@@ -128,18 +120,6 @@ public class S3 {
         return data
     }
     
-    public func copy(fileAtPath filePath: String, sourceBucketName: String, destinationFilePath: String, targetBucketName: String, targetAccessControl: AccessControlList = .privateAccess) throws {
-        
-    }
-    
-    public func copy(fileAtPath filePath: String, sourceBucketName: String, destinationFilePath: String, targetAccessControl: AccessControlList = .privateAccess) throws {
-        
-    }
-    
-    public func copy(fileAtPath filePath: String, destinationFilePath: String, targetAccessControl: AccessControlList = .privateAccess) throws {
-        
-    }
-    
     public func delete(fileAtPath filePath: String, bucketName: String? = nil) throws {
         let fileUrl: URL? = try self.buildUrl(bucketName: bucketName, fileName: filePath)
         guard let url = fileUrl else {
@@ -148,29 +128,11 @@ public class S3 {
         
         let headers: [String: String] = try signer.authHeaderV4(httpMethod: .delete, urlString: url.absoluteString, headers: [:], payload: .none)
         
-        let result: Response = try drop.client.delete(fileUrl!.absoluteString, headers: self.vaporHeaders(headers), query: [:], body: Body(""))
+        let result: Response = try self.drop.client.delete(fileUrl!.absoluteString, headers: self.vaporHeaders(headers), query: [:], body: Body(""))
         
         guard result.status == .noContent || result.status == .ok else {
             throw S3Error.badResponse(result)
         }
-    }
-    
-    // MARK: Buckets handling
-    
-    public func getBuckets(simple: Bool = true) throws -> [Bucket]? {
-        return nil
-    }
-    
-    public func createBucket(bucketName: String) throws {
-        
-    }
-    
-    public func get(contentOfBucket: String? = nil) throws -> [File]? {
-        return nil
-    }
-    
-    public func deleteBucket(bucketName: String? = nil) throws {
-        
     }
     
 }
@@ -215,4 +177,3 @@ internal extension S3 {
     }
     
 }
-
