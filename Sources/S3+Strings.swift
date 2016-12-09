@@ -13,7 +13,7 @@ public extension S3 {
     
     public func put(string: String, filePath: String, bucketName: String, contentType: String? = nil, accessControl: AccessControlList = .privateAccess) throws {
         guard let data: Data = string.data(using: String.Encoding.utf8) else {
-            throw S3Error.badStringData
+            throw Error.badStringData
         }
         var headers: [String: String] = [:]
         if contentType == nil {
@@ -31,7 +31,7 @@ public extension S3 {
     
     public func put(string: String, filePath: String, accessControl: AccessControlList = .privateAccess) throws {
         guard let bucketName = self.bucketName else {
-            throw S3Error.missingBucketName
+            throw Error.missingBucketName
         }
         try self.put(string: string, filePath: filePath, bucketName: bucketName, contentType: nil, accessControl: accessControl)
     }

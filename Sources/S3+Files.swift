@@ -20,7 +20,7 @@ public extension S3 {
     
     public func put(fileAtUrl url: URL, filePath: String, accessControl: AccessControlList = .privateAccess) throws {
         guard let bucketName = self.bucketName else {
-            throw S3Error.missingBucketName
+            throw Error.missingBucketName
         }
         try self.put(fileAtUrl: url, filePath: filePath, bucketName: bucketName, accessControl: accessControl)
     }

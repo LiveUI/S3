@@ -22,7 +22,7 @@ public enum AccessControlList: String {
     case bucketOwnerFullControl = "bucket-owner-full-control"
 }
 
-public enum S3Error: Swift.Error {
+public enum Error: Swift.Error {
     case missingCredentials(String)
     case invalidUrl
     case badResponse(Response)
@@ -46,11 +46,11 @@ public class S3 {
     
     public convenience init(droplet drop: Droplet) throws {
         guard let accessKey: String = drop.config["s3", "accessKey"]?.string else {
-            throw S3Error.missingCredentials("accessKey")
+            throw Error.missingCredentials("accessKey")
         }
         
         guard let secretKey: String = drop.config["s3", "secretKey"]?.string else {
-            throw S3Error.missingCredentials("secretKey")
+            throw Error.missingCredentials("secretKey")
         }
         
         self.init(droplet: drop, accessKey: accessKey, secretKey: secretKey)
@@ -71,7 +71,7 @@ public class S3 {
     public func put(data: Data, filePath: String, bucketName: String, headers: [String: String], accessControl: AccessControlList = .privateAccess) throws {
         let fileUrl: URL? = try self.buildUrl(bucketName: bucketName, fileName: filePath)
         guard let url = fileUrl else {
-            throw S3Error.invalidUrl
+            throw Error.invalidUrl
         }
         
         let bytes: Bytes = try data.makeBytes()
@@ -81,7 +81,7 @@ public class S3 {
         let result: Response = try self.drop.client.put(fileUrl!.absoluteString, headers: self.vaporHeaders(signingHeaders), query: [:], body: Body(bytes))
         
         guard result.status == .ok else {
-            throw S3Error.badResponse(result)
+            throw Error.badResponse(result)
         }
     }
     
@@ -91,7 +91,7 @@ public class S3 {
     
     public func put(data: Data, filePath: String, accessControl: AccessControlList = .privateAccess) throws {
         guard let bucketName = self.bucketName else {
-            throw S3Error.missingBucketName
+            throw Error.missingBucketName
         }
         try self.put(data: data, filePath: filePath, bucketName: bucketName, accessControl: accessControl)
     }
@@ -103,17 +103,17 @@ public class S3 {
     public func get(fileAtPath filePath: String, bucketName: String? = nil) throws -> Data {
         let fileUrl: URL? = try self.buildUrl(bucketName: bucketName, fileName: filePath)
         guard let url = fileUrl else {
-            throw S3Error.invalidUrl
+            throw Error.invalidUrl
         }
         
         let headers: [String: String] = try signer.authHeaderV4(httpMethod: .get, urlString: url.absoluteString, headers: [:], payload: .none)
         let result: Response = try self.drop.client.get(fileUrl!.absoluteString, headers: self.vaporHeaders(headers))
         guard result.status == .ok else {
-            throw S3Error.badResponse(result)
+            throw Error.badResponse(result)
         }
         
         guard let bytes: Bytes = result.body.bytes else {
-            throw S3Error.missingData
+            throw Error.missingData
         }
         let data: Data = Data.init(bytes: bytes)
         
@@ -123,7 +123,7 @@ public class S3 {
     public func delete(fileAtPath filePath: String, bucketName: String? = nil) throws {
         let fileUrl: URL? = try self.buildUrl(bucketName: bucketName, fileName: filePath)
         guard let url = fileUrl else {
-            throw S3Error.invalidUrl
+            throw Error.invalidUrl
         }
         
         let headers: [String: String] = try signer.authHeaderV4(httpMethod: .delete, urlString: url.absoluteString, headers: [:], payload: .none)
@@ -131,7 +131,7 @@ public class S3 {
         let result: Response = try self.drop.client.delete(fileUrl!.absoluteString, headers: self.vaporHeaders(headers), query: [:], body: Body(""))
         
         guard result.status == .noContent || result.status == .ok else {
-            throw S3Error.badResponse(result)
+            throw Error.badResponse(result)
         }
     }
     
@@ -167,7 +167,7 @@ internal extension S3 {
             bucket = self.bucketName
         }
         guard bucket != nil else {
-            throw S3Error.missingBucketName
+            throw Error.missingBucketName
         }
         
         var url: URL = URL(string: "https://s3.amazonaws.com")!
