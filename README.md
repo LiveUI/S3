@@ -42,3 +42,11 @@ try s3.delete(fileAtPath: "images/image.png", bucketName: "booststore")
 
 ##### I am getting a ```badResponse``` error and my credentials are correct
 * Check if you don't need to set your region, it's one of the optional methods on all put methods
+
+##### I do all by the book and that crap still doesn't work!!! 🐷 💩 
+* Go to Vapor slack channel and ask for @rafiki270, you can scream at him
+
+##### I got some other problems or improvements
+* Send a merge request, create an issue, Slack me on Vapor channel, @rafiki270
+
+Your [manGoweb.cz](http://www.mangoweb.cz/en) team
