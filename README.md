@@ -38,6 +38,16 @@ let s3: S3 = try S3(droplet: drop)
 try s3.delete(fileAtPath: "images/image.png", bucketName: "booststore")
 ```
 
+### Config
+
+Looks like this:
+```
+{
+   "accessKey": "{your-AWS-accees-key}",
+   "secretKey": "{your-AWS-secret-key}"
+}
+```
+
 ### Troubleshooting
 
 ##### I am getting a ```badResponse``` error and my credentials are correct
