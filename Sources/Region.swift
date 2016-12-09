@@ -22,7 +22,7 @@ public enum Region: String {
     case saEast1 = "sa-east-1"
     
     
-    var host: String {
+   public var host: String {
         switch self {
         case .usEast1_Virginia: return "s3.amazonaws.com"
         case .usEast2_Ohio: return "s3.us-east-2.amazonaws.com"
