@@ -90,7 +90,7 @@ public class S3 {
      - bucketName: Name of the global bucket to be used for calls where bucket is not specified (optional)
      - region: AWS Region, default is .usEast1_Virginia
      */
-    public init(droplet drop: Droplet, accessKey: String, secretKey: String, bucketName: String, region: Region = .usEast1_Virginia) {
+    public init(droplet drop: Droplet, accessKey: String, secretKey: String, bucketName: String?, region: Region = .usEast1_Virginia) {
         self.drop = drop
         self.bucketName = bucketName
         self.signer = S3SignerAWS(accessKey: accessKey, secretKey: secretKey, region: region)
