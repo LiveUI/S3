@@ -77,9 +77,9 @@ public class S3 {
             throw Error.missingCredentials("secretKey")
         }
         
-        self.bucketName = bucketName
-        
         self.init(droplet: drop, accessKey: accessKey, secretKey: secretKey)
+        
+        self.bucketName = bucketName
     }
     
     /**
