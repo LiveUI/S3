@@ -68,7 +68,7 @@ public class S3 {
      - Parameters:
      - droplet: Droplet variable from main.swift
      */
-    public convenience init(droplet drop: Droplet, bucketName: String = nil) throws {
+    public convenience init(droplet drop: Droplet, bucketName: String? = nil) throws {
         guard let accessKey: String = drop.config["s3", "accessKey"]?.string else {
             throw Error.missingCredentials("accessKey")
         }
