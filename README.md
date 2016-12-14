@@ -10,6 +10,7 @@ Basic S3 access library for Vapor written in Swift
 ```
 
 2) Run ```vapor clean```
+
 3) Do ```vapor xcode```
 
 ### Usage
@@ -40,7 +41,7 @@ try s3.delete(fileAtPath: "images/image.png", bucketName: "booststore")
 
 ### Config
 
-Looks like this:
+Looks like this ```Config/s3.json```:
 ```
 {
    "accessKey": "{your-AWS-accees-key}",
