@@ -47,7 +47,7 @@ public class S3 {
     /**
      If set, this bucket name value will be used globally unless overriden by a specific call
      */
-    public let bucketName: String?
+    public var bucketName: String?
     
     /**
      S3 Signer class (https://github.com/JustinM1/S3SignerAWS)
@@ -68,7 +68,7 @@ public class S3 {
      - Parameters:
      - droplet: Droplet variable from main.swift
      */
-    public convenience init(droplet drop: Droplet) throws {
+    public convenience init(droplet drop: Droplet, bucketName: String = nil) throws {
         guard let accessKey: String = drop.config["s3", "accessKey"]?.string else {
             throw Error.missingCredentials("accessKey")
         }
@@ -76,6 +76,8 @@ public class S3 {
         guard let secretKey: String = drop.config["s3", "secretKey"]?.string else {
             throw Error.missingCredentials("secretKey")
         }
+        
+        self.bucketName = bucketName
         
         self.init(droplet: drop, accessKey: accessKey, secretKey: secretKey)
     }
