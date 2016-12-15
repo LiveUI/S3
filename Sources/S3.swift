@@ -240,14 +240,10 @@ public class S3 {
 internal extension S3 {
     
     internal func mimeType(forFileAtUrl url: URL) -> String {
-        let pathExtension: String = url.pathExtension
-        
-        if let uti = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, pathExtension as NSString, nil)?.takeRetainedValue() {
-            if let mimetype = UTTypeCopyPreferredTagWithClass(uti, kUTTagClassMIMEType)?.takeRetainedValue() {
-                return mimetype as String
-            }
+        guard let mime: String = Mime.string(fileUrl: url) else {
+            return "application/octet-stream"
         }
-        return "application/octet-stream"
+        return mime.rawValue
     }
     
     internal func vaporHeaders(_ headers: [String: String]) -> [HeaderKey : String] {
