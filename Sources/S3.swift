@@ -10,6 +10,7 @@ import Foundation
 import Vapor
 import S3SignerAWS
 import HTTP
+import MimeLib
 
 /**
  Available access control list values for "x-amz-acl" header as specified in AWS documentation
@@ -240,10 +241,10 @@ public class S3 {
 internal extension S3 {
     
     internal func mimeType(forFileAtUrl url: URL) -> String {
-        guard let mime: String = Mime.string(fileUrl: url) else {
+        guard let mime: String = Mime.string(forUrl: url) else {
             return "application/octet-stream"
         }
-        return mime.rawValue
+        return mime
     }
     
     internal func vaporHeaders(_ headers: [String: String]) -> [HeaderKey : String] {
