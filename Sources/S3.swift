@@ -10,7 +10,9 @@ import Foundation
 import Vapor
 import S3SignerAWS
 import HTTP
+import Transport
 import MimeLib
+
 
 /**
  Available access control list values for "x-amz-acl" header as specified in AWS documentation
@@ -55,11 +57,6 @@ public class S3 {
      */
     let signer: S3SignerAWS
     
-    /**
-     Private copy of a droplet variable from main.swift, needs to be passed during initialization
-     */
-    private let drop: Droplet
-    
     
     // MARK: Initialization
     
@@ -68,6 +65,7 @@ public class S3 {
      
      - Parameters:
      - droplet: Droplet variable from main.swift
+     - bucketName: Name of the global bucket to be used for calls where bucket is not specified (optional)
      */
     public convenience init(droplet drop: Droplet, bucketName: String? = nil) throws {
         guard let accessKey: String = drop.config["s3", "accessKey"]?.string else {
@@ -78,7 +76,7 @@ public class S3 {
             throw Error.missingCredentials("secretKey")
         }
         
-        self.init(droplet: drop, accessKey: accessKey, secretKey: secretKey)
+        self.init(accessKey: accessKey, secretKey: secretKey)
         
         self.bucketName = bucketName
     }
@@ -87,14 +85,12 @@ public class S3 {
      Initialization method with custom connection and bucket config
      
      - Parameters:
-     - droplet: Droplet variable from main.swift
      - accessKey: AWS Access key
      - secretKey: AWS Secret key
      - bucketName: Name of the global bucket to be used for calls where bucket is not specified (optional)
      - region: AWS Region, default is .usEast1_Virginia
      */
-    public init(droplet drop: Droplet, accessKey: String, secretKey: String, bucketName: String?, region: Region = .usEast1_Virginia) {
-        self.drop = drop
+    public init(accessKey: String, secretKey: String, bucketName: String?, region: Region = .usEast1_Virginia) {
         self.bucketName = bucketName
         self.signer = S3SignerAWS(accessKey: accessKey, secretKey: secretKey, region: region)
     }
@@ -103,13 +99,12 @@ public class S3 {
      Initialization method with custom connection config
      
      - Parameters:
-     - droplet: Droplet variable from main.swift
      - accessKey: AWS Access key
      - secretKey: AWS Secret key
      - region: AWS Region, default is .usEast1_Virginia
      */
-    public convenience init(droplet drop: Droplet, accessKey: String, secretKey: String, region: Region = .usEast1_Virginia) {
-        self.init(droplet: drop, accessKey: accessKey, secretKey: secretKey, bucketName: nil, region: region)
+    public convenience init(accessKey: String, secretKey: String, region: Region = .usEast1_Virginia) {
+        self.init(accessKey: accessKey, secretKey: secretKey, bucketName: nil, region: region)
     }
     
     // MARK: Managing objects
@@ -134,7 +129,7 @@ public class S3 {
         var awsHeaders: [String: String] = headers
         awsHeaders["x-amz-acl"] = accessControl.rawValue
         let signingHeaders: [String: String] = try signer.authHeaderV4(httpMethod: .put, urlString: url.absoluteString, headers: awsHeaders, payload: .bytes(bytes))
-        let result: Response = try self.drop.client.put(fileUrl!.absoluteString, headers: self.vaporHeaders(signingHeaders), query: [:], body: Body(bytes))
+        let result: Response = try BasicClient.put(fileUrl!.absoluteString, headers: self.vaporHeaders(signingHeaders), query: [:], body: Body(bytes))
         
         guard result.status == .ok else {
             throw Error.badResponse(result)
@@ -199,7 +194,7 @@ public class S3 {
         }
         
         let headers: [String: String] = try signer.authHeaderV4(httpMethod: .get, urlString: url.absoluteString, headers: [:], payload: .none)
-        let result: Response = try self.drop.client.get(fileUrl!.absoluteString, headers: self.vaporHeaders(headers))
+        let result: Response = try BasicClient.get(fileUrl!.absoluteString, headers: self.vaporHeaders(headers))
         guard result.status == .ok else {
             throw Error.badResponse(result)
         }
@@ -227,7 +222,7 @@ public class S3 {
         
         let headers: [String: String] = try signer.authHeaderV4(httpMethod: .delete, urlString: url.absoluteString, headers: [:], payload: .none)
         
-        let result: Response = try self.drop.client.delete(fileUrl!.absoluteString, headers: self.vaporHeaders(headers), query: [:], body: Body(""))
+        let result: Response = try BasicClient.delete(fileUrl!.absoluteString, headers: self.vaporHeaders(headers), query: [:], body: Body(""))
         
         guard result.status == .noContent || result.status == .ok else {
             throw Error.badResponse(result)
