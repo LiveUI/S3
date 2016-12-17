@@ -6,7 +6,7 @@ Basic S3 access library for Vapor written in Swift
 
 1) Add following package to your ```Package.swift```:
 ``` Swift
-.Package(url: "https://github.com/manGoweb/S3.git", majorVersion: 1, minor: 0)
+.Package(url: "https://github.com/manGoweb/S3.git", majorVersion: 1)
 ```
 
 2) Run ```vapor clean```
@@ -21,7 +21,7 @@ Import the module ```import S3```
 
 ``` Swift
 let s3: S3 = try S3(droplet: drop)
-let fileData: Data = try s3.get(fileAtPath: "images/image.png", bucketName: "booststore")
+let fileData: Data = try s3.get(fileAtPath: "images/image.png")
 ```
 
 #### Upload data to S3
@@ -29,14 +29,14 @@ let fileData: Data = try s3.get(fileAtPath: "images/image.png", bucketName: "boo
 ``` Swift
 let s3: S3 = try S3(droplet: drop)
 let url = URL.init(fileURLWithPath: "/Users/pro/Dropbox/books/agile-android-software-development.pdf")
-try s3.put(fileAtUrl: url, filePath: "books/agile-android-software-development.pdf", bucketName: "booststore", accessControl: .publicRead)
+try s3.put(fileAtUrl: url, filePath: "books/agile-android-software-development.pdf", accessControl: .publicRead)
 ```
 
 #### Delete data from S3
 
 ``` Swift
 let s3: S3 = try S3(droplet: drop)
-try s3.delete(fileAtPath: "images/image.png", bucketName: "booststore")
+try s3.delete(fileAtPath: "images/image.png")
 ```
 
 ### Config
@@ -44,8 +44,16 @@ try s3.delete(fileAtPath: "images/image.png", bucketName: "booststore")
 Looks like this ```Config/s3.json```:
 ```
 {
-   "accessKey": "{your-AWS-accees-key}",
-   "secretKey": "{your-AWS-secret-key}"
+"accessKey": "{your-AWS-accees-key}",
+"secretKey": "{your-AWS-secret-key}",
+"bucket": "{bucket-name}"
+}
+```
+The bucket name is an optional value so you can skip it if you want:
+```
+{
+"accessKey": "{your-AWS-accees-key}",
+"secretKey": "{your-AWS-secret-key}"
 }
 ```
 

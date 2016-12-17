@@ -78,7 +78,12 @@ public class S3 {
         
         self.init(accessKey: accessKey, secretKey: secretKey)
         
-        self.bucketName = bucketName
+        if let bucket: String = drop.config["s3", "bucket"]?.string {
+            self.bucketName = bucket
+        }
+        else {
+            self.bucketName = bucketName
+        }
     }
     
     /**
