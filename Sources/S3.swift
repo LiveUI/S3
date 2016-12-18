@@ -37,6 +37,7 @@ public enum Error: Swift.Error {
     case missingBucketName
     case badStringData
     case missingData
+    case notFound
 }
 
 
@@ -194,12 +195,18 @@ public class S3 {
      */
     public func get(fileAtPath filePath: String, bucketName: String? = nil) throws -> Data {
         let fileUrl: URL? = try self.buildUrl(bucketName: bucketName, fileName: filePath)
+        
         guard let url = fileUrl else {
             throw Error.invalidUrl
         }
         
         let headers: [String: String] = try signer.authHeaderV4(httpMethod: .get, urlString: url.absoluteString, headers: [:], payload: .none)
         let result: Response = try BasicClient.get(fileUrl!.absoluteString, headers: self.vaporHeaders(headers))
+        
+        if result.status == .notFound {
+            throw Error.notFound
+        }
+        
         guard result.status == .ok else {
             throw Error.badResponse(result)
         }
@@ -207,6 +214,7 @@ public class S3 {
         guard let bytes: Bytes = result.body.bytes else {
             throw Error.missingData
         }
+        
         let data: Data = Data.init(bytes: bytes)
         
         return data
