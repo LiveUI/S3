@@ -77,7 +77,14 @@ public class S3 {
             throw Error.missingCredentials("secretKey")
         }
         
-        self.init(accessKey: accessKey, secretKey: secretKey)
+        if let regionString: String = drop.config["s3", "region"]?.string {
+            guard let region = Region(rawValue: regionString) else {
+                throw Error.missingCredentials("region")
+            }
+            self.init(accessKey: accessKey, secretKey: secretKey, region: region)
+        } else {
+            self.init(accessKey: accessKey, secretKey: secretKey)
+        }
         
         if let bucket: String = drop.config["s3", "bucket"]?.string {
             self.bucketName = bucket
@@ -273,8 +280,7 @@ internal extension S3 {
             throw Error.missingBucketName
         }
         
-        var url: URL = URL(string: "https://s3.amazonaws.com")!
-        url.appendPathComponent(bucket!)
+        var url: URL = URL(string: "https://\(bucket!).s3.amazonaws.com")!
         url.appendPathComponent(fileName)
         return url
     }
