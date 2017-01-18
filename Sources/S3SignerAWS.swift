@@ -60,12 +60,14 @@ public class S3SignerAWS  {
     
     public func presignedURLV4(httpMethod: HTTPMethod, urlString: String, expiration: TimeFromNow, headers: [String:String]) throws -> URLV4Returnable {
         let dates = getDates(date: Date())
+        var headersCopy = headers
+        headersCopy["Host"] = region.host
         guard let encodedScope = credentialScope(timeStampShort: dates.short).addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else { throw S3SignerError.unableToEncodeCredentialScope }
-        let signature = try getPresignedURLSig(httpMethod: httpMethod, urlString: urlString, headers: headers, dates: dates, encodedScope: encodedScope, expiration: expiration)
+        let signature = try getPresignedURLSig(httpMethod: httpMethod, urlString: urlString, headers: headersCopy, dates: dates, encodedScope: encodedScope, expiration: expiration)
         
         guard let hostEncodedScope = credentialScope(timeStampShort: dates.short).addingPercentEncoding(withAllowedCharacters: .urlHostAllowed) else { throw S3SignerError.unableToEncodeCredentialScope }
         
-        let presignedURL = "\(urlString)?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=\(accessKey)%2F\(hostEncodedScope)&X-Amz-Date=\(dates.long)&X-Amz-Expires=\(expiration.v4Expiration)&X-Amz-SignedHeaders=\(signedHeaders(headers: headers))&X-Amz-Signature=\(signature)"
+        let presignedURL = "\(urlString)?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=\(accessKey)%2F\(hostEncodedScope)&X-Amz-Date=\(dates.long)&X-Amz-Expires=\(expiration.v4Expiration)&X-Amz-SignedHeaders=\(signedHeaders(headers: headersCopy))&X-Amz-Signature=\(signature)"
   
         return URLV4Returnable(headers: headers, urlString: presignedURL)
     }
