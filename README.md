@@ -95,7 +95,7 @@ PUT
     do {
       let bytesObject = try someDataObject.makeBytes()
       let headers = try s3Signer.authHeadersV4(httpMethod: .put, urlString: "https://s3.amazonaws.com/bucketName/testUploadImage.png", headers: [:], payload: .bytes(bytesObject))
-      guard let url = URL(string: "https://s3.amazonaws.com/bucketName/testUploadImage.png") else { else throw someError }
+      guard let url = URL(string: "https://s3.amazonaws.com/bucketName/testUploadImage.png") else { throw someError }
       var request = URLRequest(url: url)
       request.httpMethod = HTTPMethod.put.rawValue
       request.httpBody = Data(bytes: bytesObject)
@@ -113,7 +113,7 @@ DELETE
 ```ruby
     do {
       let headers = try s3Signer.authHeadersV4(httpMethod: .delete, urlString: "https://s3.amazonaws.com/bucketName/testUploadImage.png", headers: [:], payload: .none)
-      guard let url = URL(string: "https://s3.amazonaws.com/bucketName/testUploadImage.png") else { else throw someError }
+      guard let url = URL(string: "https://s3.amazonaws.com/bucketName/testUploadImage.png") else { throw someError }
       var request = URLRequest(url: url)
       request.httpMethod = HTTPMethod.delete.rawValue
         for header in headers {
