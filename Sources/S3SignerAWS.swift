@@ -16,6 +16,13 @@ public class S3SignerAWS  {
         }
     }
 
+    /// Initializes a signer which works for either permanent credentials or temporary secrets
+    ///
+    /// - Parameters:
+    ///   - accessKey: Main token to identify the credential
+    ///   - secretKey: Password to validate access
+    ///   - region: Which AWS region to sign against
+    ///   - securityToken: Optional token used only with temporary credentials
     public init(accessKey: String, secretKey: String, region: Region, securityToken: String? = nil) {
         self.accessKey = accessKey
         self.secretKey = secretKey
