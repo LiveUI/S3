@@ -6,6 +6,7 @@ import Core
 public class S3SignerAWS  {
     private let accessKey: String
     private let secretKey: String
+    private let securityToken : String? // Used to validate temporary credentials, such as those from an EC2 Instance's IAM role
     private let _region: Region
     private let dateFormatter: DateFormatter
     
@@ -14,14 +15,15 @@ public class S3SignerAWS  {
            return self._region
         }
     }
-    
-    required public init(accessKey: String, secretKey: String, region: Region) {
+
+    public init(accessKey: String, secretKey: String, region: Region, securityToken: String? = nil) {
         self.accessKey = accessKey
         self.secretKey = secretKey
         self._region = region
+        self.securityToken = securityToken
         self.dateFormatter = DateFormatter()
     }
-    
+
     public func authHeaderV4(httpMethod: HTTPMethod, urlString: String, pathPercentEncoding: CharacterSet =  CharacterSet.urlPathAllowed, queryPercentEncoding: CharacterSet = CharacterSet.urlQueryAllowed, headers: [String: String], payload: Payload, mimeType: String? = nil) throws -> [String:String] {
         
         guard let url = URL(string: urlString) else { throw S3SignerError.badURL }
@@ -34,7 +36,7 @@ public class S3SignerAWS  {
         
         if httpMethod == .put {
             if payload.isBytes {
-            let MD5Digest = try Hash.make(.md5, payload.bytes).base64String
+            let MD5Digest = try Hash.make(.md5, payload.bytes).base64Encoded.string
             updatedHeaders["content-md5"] = MD5Digest
             }
         }
@@ -79,7 +81,7 @@ public class S3SignerAWS  {
         guard let stringToSign = ["GET", "", "", "\(expirationTime)", path(url: url)].joined(separator: "\n").data(using: String.Encoding.utf8) else { throw S3SignerError.unableToEncodeStringToSign }
         
         let stringToSignBytes = try stringToSign.makeBytes()
-        let signature = try HMAC.make(.sha1, stringToSignBytes, key: secretKey.bytes).base64String.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)
+        let signature = try HMAC.make(.sha1, stringToSignBytes, key: secretKey.bytes).base64Encoded.string.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)
         guard let sig = signature else { throw  S3SignerError.unableToEncodeSignature }
         
         let finalURLString = "\(urlString)?AWSAccessKeyId=\(accessKey)&Signature=\(sig)&Expires=\(expirationTime)"
@@ -112,6 +114,10 @@ public class S3SignerAWS  {
         headersCopy["host"] = url.host != nil ? url.host! : _region.host
         if bodyDigest != "UNSIGNED-PAYLOAD" {
             headersCopy["x-amz-content-sha256"] = bodyDigest
+        }
+        // According to http://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp_use-resources.html#RequestWithSTS
+        if let token = securityToken {
+            headersCopy["X-Amz-Security-Token"] = token
         }
         return headersCopy
     }
