@@ -7,8 +7,5 @@ let package = Package(
         .Package(url: "https://github.com/vapor/crypto.git",
                  majorVersion: 1),
         .Package(url: "https://github.com/vapor/core.git", majorVersion: 1)
-        
-        
-        ]
+    ]
 )
-

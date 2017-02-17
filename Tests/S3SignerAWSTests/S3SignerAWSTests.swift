@@ -21,7 +21,11 @@ class S3SignerAWSTests: XCTestCase {
     let accessKey = "AKIAIOSFODNN7EXAMPLE"
     let testSecretKey = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
     
-    var signer: S3SignerAWS = S3SignerAWS(accessKey: accessKey, secretKey: testSecretKey, region: Region.usStandard_usEast1)
+    var signer: S3SignerAWS {
+        get {
+            return S3SignerAWS(accessKey: accessKey, secretKey: testSecretKey, region: Region.usEast1_Virginia)
+        }
+    }
    
     let shortDate = "20130524"
     let longDate = "20130524T000000Z"
@@ -247,16 +251,21 @@ class S3SignerAWSTests: XCTestCase {
 //            }
 //        }
 //    }
-//
-// 
-//    
-//    
-//    func testPerformanceExample() {
-//        // This is an example of a performance test case.
-//        self.measure {
-//        }
-//    }
-//    
+
+    func testAuthHeaderV4ConfigCredentials() throws {
+        let configFileCredentials = try signer.authHeaderV4(httpMethod: .get, urlString: "http://fake-url.com", headers: [:], payload: .none)
+        XCTAssert(configFileCredentials["x-amz-content-sha256"] == "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")
+        XCTAssert(configFileCredentials["host"] == "fake-url.com")
+        XCTAssert(configFileCredentials["X-Amz-Security-Token"] == nil)
+    }
+
+    func testAuthHeaderV4IAMCredentials() throws {
+        let iamSigner = S3SignerAWS(accessKey: accessKey, secretKey: testSecretKey, region: Region.usEast1_Virginia, securityToken: "verySecure")
+        let iamBasedCredentials = try iamSigner.authHeaderV4(httpMethod: .get, urlString: "http://fake-url.com", headers: [:], payload: .none)
+        XCTAssert(iamBasedCredentials["x-amz-content-sha256"] == "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")
+        XCTAssert(iamBasedCredentials["host"] == "fake-url.com")
+        XCTAssert(iamBasedCredentials["X-Amz-Security-Token"] == "verySecure")
+    }
 }
 
 
