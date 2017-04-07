@@ -42,7 +42,7 @@ public class S3SignerAWS  {
         
         if httpMethod == .put {
             if payload.isBytes {
-            let MD5Digest = try Hash.make(.md5, payload.bytes).base64Encoded.string
+            let MD5Digest = try Hash.make(.md5, payload.bytes).base64Encoded.makeString()
             updatedHeaders["content-md5"] = MD5Digest
             }
         }
@@ -86,8 +86,8 @@ public class S3SignerAWS  {
         guard let url = URL(string: urlString) else { throw S3SignerError.badURL }
         guard let stringToSign = ["GET", "", "", "\(expirationTime)", path(url: url)].joined(separator: "\n").data(using: String.Encoding.utf8) else { throw S3SignerError.unableToEncodeStringToSign }
         
-        let stringToSignBytes = try stringToSign.makeBytes()
-        let signature = try HMAC.make(.sha1, stringToSignBytes, key: secretKey.bytes).base64Encoded.string.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)
+        let stringToSignBytes = stringToSign.makeBytes()
+        let signature = try HMAC.make(.sha1, stringToSignBytes, key: secretKey.bytes).base64Encoded.makeString().addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)
         guard let sig = signature else { throw  S3SignerError.unableToEncodeSignature }
         
         let finalURLString = "\(urlString)?AWSAccessKeyId=\(accessKey)&Signature=\(sig)&Expires=\(expirationTime)"
