@@ -1,6 +1,5 @@
 import Foundation
-import HMAC
-import Hash
+import Crypto
 import Core
 
 public class S3SignerAWS  {
