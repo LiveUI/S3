@@ -57,6 +57,8 @@ public class S3 {
      S3 Signer class (https://github.com/JustinM1/S3SignerAWS)
      */
     let signer: S3SignerAWS
+
+    let client: ClientFactoryProtocol
     
     
     // MARK: Initialization
@@ -81,9 +83,9 @@ public class S3 {
             guard let region = Region(rawValue: regionString) else {
                 throw Error.missingCredentials("region")
             }
-            self.init(accessKey: accessKey, secretKey: secretKey, region: region)
+            self.init(droplet: drop, accessKey: accessKey, secretKey: secretKey, region: region)
         } else {
-            self.init(accessKey: accessKey, secretKey: secretKey)
+            self.init(droplet: drop, accessKey: accessKey, secretKey: secretKey)
         }
         
         if let bucket: String = drop.config["s3", "bucket"]?.string {
@@ -103,7 +105,8 @@ public class S3 {
      - bucketName: Name of the global bucket to be used for calls where bucket is not specified (optional)
      - region: AWS Region, default is .usEast1_Virginia
      */
-    public init(accessKey: String, secretKey: String, bucketName: String?, region: Region = .usEast1_Virginia) {
+    public init(droplet drop: Droplet, accessKey: String, secretKey: String, bucketName: String?, region: Region = .usEast1_Virginia) {
+        self.client = drop.client
         self.bucketName = bucketName
         self.signer = S3SignerAWS(accessKey: accessKey, secretKey: secretKey, region: region)
     }
@@ -116,8 +119,8 @@ public class S3 {
      - secretKey: AWS Secret key
      - region: AWS Region, default is .usEast1_Virginia
      */
-    public convenience init(accessKey: String, secretKey: String, region: Region = .usEast1_Virginia) {
-        self.init(accessKey: accessKey, secretKey: secretKey, bucketName: nil, region: region)
+    public convenience init(droplet drop: Droplet, accessKey: String, secretKey: String, region: Region = .usEast1_Virginia) {
+        self.init(droplet: drop, accessKey: accessKey, secretKey: secretKey, bucketName: nil, region: region)
     }
     
     // MARK: Managing objects
@@ -138,12 +141,13 @@ public class S3 {
             throw Error.invalidUrl
         }
         
-        let bytes: Bytes = try data.makeBytes()
+        let bytes = data.makeBytes()
         var awsHeaders: [String: String] = headers
         awsHeaders["x-amz-acl"] = accessControl.rawValue
         let signingHeaders: [String: String] = try signer.authHeaderV4(httpMethod: .put, urlString: url.absoluteString, headers: awsHeaders, payload: .bytes(bytes))
-        let result: Response = try BasicClient.put(fileUrl!.absoluteString, headers: self.vaporHeaders(signingHeaders), query: [:], body: Body(bytes))
-        
+
+        let result = try client.put(url.absoluteString, query: [:], vaporHeaders(signingHeaders), Body(bytes), through: [])
+
         guard result.status == .ok else {
             throw Error.badResponse(result)
         }
@@ -208,7 +212,7 @@ public class S3 {
         }
         
         let headers: [String: String] = try signer.authHeaderV4(httpMethod: .get, urlString: url.absoluteString, headers: [:], payload: .none)
-        let result: Response = try BasicClient.get(fileUrl!.absoluteString, headers: self.vaporHeaders(headers))
+        let result: Response = try client.get(url.absoluteString, query: [:], vaporHeaders(headers))
         
         if result.status == .notFound {
             throw Error.notFound
@@ -217,7 +221,7 @@ public class S3 {
         guard result.status == .ok else {
             throw Error.badResponse(result)
         }
-        
+
         guard let bytes: Bytes = result.body.bytes else {
             throw Error.missingData
         }
@@ -242,7 +246,7 @@ public class S3 {
         
         let headers: [String: String] = try signer.authHeaderV4(httpMethod: .delete, urlString: url.absoluteString, headers: [:], payload: .none)
         
-        let result: Response = try BasicClient.delete(fileUrl!.absoluteString, headers: self.vaporHeaders(headers), query: [:], body: Body(""))
+        let result = try client.delete(url.absoluteString, query: [:], vaporHeaders(headers), Body(""))
         
         guard result.status == .noContent || result.status == .ok else {
             throw Error.badResponse(result)

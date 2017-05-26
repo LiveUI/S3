@@ -6,7 +6,7 @@ Basic S3 access library for Vapor written in Swift
 
 1) Add following package to your ```Package.swift```:
 ``` Swift
-.Package(url: "https://github.com/manGoweb/S3.git", majorVersion: 1)
+.Package(url: "https://github.com/manGoweb/S3.git", majorVersion: 2)
 ```
 
 2) Run ```vapor clean```
