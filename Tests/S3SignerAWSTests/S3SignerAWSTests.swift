@@ -6,13 +6,9 @@
 //
 //
 
+@testable import S3SignerAWS
 import XCTest
 import Foundation
-@testable import S3SignerAWS
-@testable import HMAC
-@testable import Hash
-@testable import Core
-@testable import Essentials
 
 class S3SignerAWSTests: XCTestCase {
     
