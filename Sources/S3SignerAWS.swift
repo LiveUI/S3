@@ -150,9 +150,9 @@ public class S3SignerAWS  {
 		-> String
 	{
 			let headerList = Array(headers.keys)
-				.sorted { $0.0.localizedCompare($0.1) == ComparisonResult.orderedAscending }
-				.filter { $0.lowercased() != "authorization" }
 				.map { "\($0.lowercased()):\(headers[$0]!)" }
+				.filter { $0 != "authorization" }
+				.sorted { $0.0.localizedCompare($0.1) == ComparisonResult.orderedAscending }
 				.joined(separator: "\n")
 				.appending("\n")
 			
@@ -294,7 +294,7 @@ public class S3SignerAWS  {
 		throws -> (String, URL)
 	{
 		let credScope = try credentialScope(timeStampShort: dates.short).percentEncode(allowing: Byte.awsQueryAllowed)
-		let signHeaders = signedHeaders(headers: headers)
+		let signHeaders = try signedHeaders(headers: headers).percentEncode(allowing: Byte.awsQueryAllowed)
 		let fullURL = "\(url.absoluteString)?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=\(accessKey)%2F\(credScope)&X-Amz-Date=\(dates.long)&X-Amz-Expires=\(expiration.expiration)&X-Amz-SignedHeaders=\(signHeaders)"
 		
 		guard let url = URL(string: fullURL) else {
