@@ -14,7 +14,7 @@ public enum TimeFromNow {
 	
 	
     /// V4 expiration.
-    var expiration: Seconds {
+    internal var expiration: Seconds {
         switch self {
         case .thirtyMinutes:
             return 60 * 30

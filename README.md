@@ -10,8 +10,6 @@ Generates V4 authorization headers and pre-signed URLs for authenticating AWS S3
 
 Check out [VaporS3Signer](https://github.com/JustinM1/VaporS3Signer.git) if your using `Vapor`.
 
-Recently updated to handle more use cases. Still _does not_ support chunked-uploads.
-
 ### Features
 - [x] Pure Swift
 - [x] All required headers generated automatically

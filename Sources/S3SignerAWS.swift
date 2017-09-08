@@ -352,7 +352,7 @@ public class S3SignerAWS  {
 	{
 			var updatedHeaders = headers
 			updatedHeaders["X-Amz-Date"] = longDate
-			updatedHeaders["Host"] = url.host ?? _region.host
+			updatedHeaders["Host"] = url.host ?? region.host
 			
 			if bodyDigest != "UNSIGNED-PAYLOAD" && service == "s3" {
 				updatedHeaders["x-amz-content-sha256"] = bodyDigest
