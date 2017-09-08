@@ -1,4 +1,4 @@
-import Foundation.NSDate
+import Foundation
 
 internal struct Dates {
 	
