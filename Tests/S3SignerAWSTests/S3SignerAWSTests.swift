@@ -3,10 +3,16 @@ import XCTest
 
 class S3SignerAWSTests: XCTestCase {
 
-    override func setUp() {
-        super.setUp()
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-    }
+	static var allTests = [
+		("test_TimeFromNow_Expiration", test_TimeFromNow_Expiration),
+		("test_Payload_bytes", test_Payload_bytes),
+		("test_Payload_none", test_Payload_none),
+		("test_Payload_unsigned", test_Payload_unsigned),
+		("test_Dates_formatting", test_Dates_formatting),
+		("test_Region_host", test_Region_host),
+		("test_S3Signer_get_dates", test_S3Signer_get_dates),
+		("test_S3Signer_service", test_S3Signer_service)
+	]
 	
 	func test_TimeFromNow_Expiration() {
 		let thiryMinutes = TimeFromNow.thirtyMinutes
@@ -46,7 +52,7 @@ class S3SignerAWSTests: XCTestCase {
 		XCTAssertEqual(unsigned, try! payloadUnsigned.hashed())
 	}
 	
-	func test_Dates_Formatting() {
+	func test_Dates_formatting() {
 		let date = Date()
 		let dates = Dates(date: date)
 		XCTAssertEqual(dates.short, date.timestampShort)
@@ -68,7 +74,7 @@ class S3SignerAWSTests: XCTestCase {
 		XCTAssertEqual(Region.saEast1.host, "s3-sa-east-1.amazonaws.com")
 	}
 	
-	func test_S3Signer_Get_dates() {
+	func test_S3Signer_get_dates() {
 		let signer = S3SignerAWS(accessKey: "ACCESSKEY", secretKey: "SECRETKEY", region: Region.usEast1_Virginia)
 		let date = Date()
 		let dates = signer.getDates(date: date)

@@ -3,5 +3,6 @@ import XCTest
 
 XCTMain([
   testCase(AWSTestSuite.allTests),
-  testCase(S3Tests.allTests)
+  testCase(S3Tests.allTests),
+  testCase(S3SignerAWSTests.allTests)
 ])
