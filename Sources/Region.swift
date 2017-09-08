@@ -1,11 +1,4 @@
-//
-//  Region.swift
-//  S3SignerAWS
-//
-//  Created by on 10/10/16.
-//
-//
-
+/// The region the bucket is located.
 public enum Region: String {
     
     case usEast1_Virginia = "us-east-1"
