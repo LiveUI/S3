@@ -3,6 +3,7 @@
 [![codecov](https://codecov.io/gh/JustinM1/S3SignerAWS/branch/master/graph/badge.svg)](https://codecov.io/gh/JustinM1/S3SignerAWS)
 [![Build Status](https://www.bitrise.io/app/cf5b884ca2181b4c/status.svg?token=QM_jU5_3BEQRmt0OmdVwJw&branch=master)](https://www.bitrise.io/app/cf5b884ca2181b4c)
 [![CircleCI](https://circleci.com/gh/JustinM1/S3SignerAWS.svg?style=svg)](https://circleci.com/gh/JustinM1/S3SignerAWS)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/2a752fec330b42299f4425448cfee76e)](https://www.codacy.com/app/JustinM1/S3SignerAWS?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=JustinM1/S3SignerAWS&amp;utm_campaign=Badge_Grade)
 <img src="http://img.shields.io/badge/Swift-3.1-blue.svg?style=plastic" alt="Swift 3.1"/>
 
 
