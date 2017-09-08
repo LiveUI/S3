@@ -7,3 +7,6 @@ comment:
   layout: "header"
   behavior: default
   require_changes: no
+
+ignore:
+- "Tests/.*"
