@@ -1,5 +1,3 @@
-import Foundation
-
 public typealias Seconds = Int
 
 /// How long until the V4 Pre-signed URL expires.

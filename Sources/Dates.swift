@@ -5,8 +5,7 @@ internal struct Dates {
 	/// The ISO8601 basic format timestamp of signature creation.  YYYYMMDD'T'HHMMSS'Z'.
 	internal let short: String
 	
-	
-    /// The short timestamp of signature creation. YYYYMMDD.
+	/// The short timestamp of signature creation. YYYYMMDD.
     internal let long: String
 }
 
