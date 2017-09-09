@@ -11,8 +11,25 @@ class S3SignerAWSTests: XCTestCase {
 		("test_Dates_formatting", test_Dates_formatting),
 		("test_Region_host", test_Region_host),
 		("test_S3Signer_get_dates", test_S3Signer_get_dates),
-		("test_S3Signer_service", test_S3Signer_service)
+		("test_S3Signer_service", test_S3Signer_service),
+		("test_Put_with_pathExtension_adds_content_length_And_content_type", test_Put_with_pathExtension_adds_content_length_And_content_type),
+		("test_Throws_on_bad_url", test_Throws_on_bad_url),
+		("test_UnsignedPayload_adds_proper_content_header", test_UnsignedPayload_adds_proper_content_header)
 	]
+	
+	var signer: S3SignerAWS!
+	
+	override func setUp() {
+		super.setUp()
+		signer = S3SignerAWS(accessKey: "SomeAccessKey", secretKey: "SomeSecretKey", region: .usEast1_Virginia)
+	}
+	
+	func test_Dates_formatting() {
+		let date = Date()
+		let dates = Dates(date: date)
+		XCTAssertEqual(dates.short, date.timestampShort)
+		XCTAssertEqual(dates.long, date.timestampLong)
+	}
 	
 	func test_TimeFromNow_Expiration() {
 		let thiryMinutes = TimeFromNow.thirtyMinutes
@@ -52,13 +69,6 @@ class S3SignerAWSTests: XCTestCase {
 		XCTAssertEqual(unsigned, try! payloadUnsigned.hashed())
 	}
 	
-	func test_Dates_formatting() {
-		let date = Date()
-		let dates = Dates(date: date)
-		XCTAssertEqual(dates.short, date.timestampShort)
-		XCTAssertEqual(dates.long, date.timestampLong)
-	}
-	
 	func test_Region_host() {
 		XCTAssertEqual(Region.usEast1_Virginia.host, "s3.amazonaws.com")
 		XCTAssertEqual(Region.usEast2_Ohio.host, "s3.us-east-2.amazonaws.com")
@@ -75,7 +85,6 @@ class S3SignerAWSTests: XCTestCase {
 	}
 	
 	func test_S3Signer_get_dates() {
-		let signer = S3SignerAWS(accessKey: "ACCESSKEY", secretKey: "SECRETKEY", region: Region.usEast1_Virginia)
 		let date = Date()
 		let dates = signer.getDates(date: date)
 		XCTAssertEqual(dates.short, date.timestampShort)
@@ -83,7 +92,32 @@ class S3SignerAWSTests: XCTestCase {
 	}
 	
 	func test_S3Signer_service() {
-		let signer = S3SignerAWS(accessKey: "ACCESSKEY", secretKey: "SECRETKEY", region: Region.usEast1_Virginia)
 		XCTAssertEqual(signer.service, "s3")
+	}
+	
+	func test_Put_with_pathExtension_adds_content_length_And_content_type() {
+		let randomBytesMessage = "Welcome to Amazon S3.".bytes
+		let headers = try! signer.authHeaderV4(
+			httpMethod: .put,
+			urlString: "https://www.someURL.com/someFile.txt",
+			payload: .bytes(randomBytesMessage))
+		
+		XCTAssertNotNil(headers["Content-Length"])
+		XCTAssertNotNil(headers["Content-Type"])
+		XCTAssertEqual(headers["Content-Length"], Payload.bytes(randomBytesMessage).size())
+		XCTAssertEqual(headers["Content-Type"], "txt")
+	}
+	
+	func test_Throws_on_bad_url() {
+		XCTAssertThrowsError(try signer.authHeaderV4(httpMethod: .get, urlString: "", payload: .none))
+		XCTAssertThrowsError(try signer.presignedURLV4(httpMethod: .get, urlString: "", expiration: .thirtyMinutes, headers: [:]))
+	}
+	
+	func test_UnsignedPayload_adds_proper_content_header() {
+		let headers = try! signer.authHeaderV4(
+			httpMethod: .get, urlString:
+			"https://www.someURL.com",
+			payload: .unsigned)
+		XCTAssertEqual(headers["x-amz-content-sha256"], "UNSIGNED-PAYLOAD")
 	}
 }

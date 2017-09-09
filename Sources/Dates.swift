@@ -3,10 +3,10 @@ import Foundation
 internal struct Dates {
 	
 	/// The ISO8601 basic format timestamp of signature creation.  YYYYMMDD'T'HHMMSS'Z'.
-	internal let short: String
+	internal let long: String
 	
 	/// The short timestamp of signature creation. YYYYMMDD.
-    internal let long: String
+	internal let short: String
 }
 
 extension Dates {

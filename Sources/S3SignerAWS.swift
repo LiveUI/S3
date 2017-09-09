@@ -8,14 +8,7 @@ public class S3SignerAWS  {
 	private let accessKey: String
 	
 	/// The region where S3 bucket is located.
-	private let _region: Region
-	
-	/// The region where S3 bucket is located.
-	public var region: Region {
-		get {
-			return self._region
-		}
-	}
+	public let region: Region
 	
 	/// AWS Secret Key
 	private let secretKey: String
@@ -42,20 +35,17 @@ public class S3SignerAWS  {
 	{
 		self.accessKey = accessKey
 		self.secretKey = secretKey
-		self._region = region
+		self.region = region
 		self.securityToken = securityToken
 	}
 	
 	/// Generate a V4 auth header for aws Requests.
 	///
 	/// - Parameters:
-	///   - httpMethod: HTTP Method (GET, PUT, POST, DELETE)
+	///   - httpMethod: HTTP Method (GET, HEAD, PUT, POST, DELETE)
 	///   - urlString: Full URL String. Left for ability to customize whether a virtual hosted-style request i.e. "https://exampleBucket.s3.amazonaws.com" vs path-style request i.e. "https://s3.amazonaws.com/exampleBucket". Make sure to include url scheme i.e. https:// or signature will not be calculated properly.
 	///   - headers: Any additional headers you want incuded in the signature. All the required headers are created automatically.
-	///   - payload: The payload being sent with request:
-	///			- Payload.bytes: The bytes of the request.
-	///			- Payload.none: No payload is in the request. i.e. GET request.
-	///			- Payload.unsigned: The size of payload will not go into signature calcuation. Useful if size is unknown at time of signature creation. Less secure as the payload can be changed and the signature won't be effected.
+	///   - payload: The payload being sent with request
 	/// - Returns: The required headers that need to be sent with request. Host, X-Amz-Date, Authorization
 	///			- If PUT request, Content-Length
 	///			- if PUT and pathExtension is available, Content-Type
@@ -114,7 +104,7 @@ public class S3SignerAWS  {
 	///   - httpMethod: The method of request.
 	///   - urlString: Full URL String. Left for ability to customize whether a virtual hosted-style request i.e. "https://exampleBucket.s3.amazonaws.com" vs path-style request i.e. "https://s3.amazonaws.com/exampleBucket". Make sure to include url scheme i.e. https:// or signature will not be calculated properly.
 	///   - expiration: How long the URL is valid.
-	///   - headers: Any additional headers to be including with signature calculation.
+	///   - headers: Any additional headers to be included with signature calculation.
 	/// - Returns: Pre-signed URL string.
 	/// - Throws: S3SignerError
 	public func presignedURLV4(
@@ -122,8 +112,8 @@ public class S3SignerAWS  {
 		urlString: String,
 		expiration: TimeFromNow,
 		headers: [String:String])
-		throws -> String {
-			
+		throws -> String
+	{
 			guard let url = URL(string: urlString) else {
 				throw S3SignerError.badURL
 			}
@@ -195,13 +185,12 @@ public class S3SignerAWS  {
 		let signature = try HMAC.make(.sha256, stringToSign.bytes, key: signingKey).hexString
 		return signature
 	}
-	
+
 	/// Create the String To Sign portion of signature.
 	///
 	/// - Parameters:
 	///   - canonicalRequest: The canonical request used.
-	///   - timeStampLong: The ISO8601 basic format timestamp of signature creation.  YYYYMMDD'T'HHMMSS'Z'.
-	///   - timeStampShort: The short timestamp of signature creation. YYYYMMDD.
+	///   - dates: The dates object containing short and long timestamps of request.
 	/// - Returns: String to sign.
 	/// - Throws: If hashing canonical request fails.
 	internal func createStringToSign(
@@ -297,6 +286,7 @@ public class S3SignerAWS  {
 		let signHeaders = try signedHeaders(headers: headers).percentEncode(allowing: Byte.awsQueryAllowed)
 		let fullURL = "\(url.absoluteString)?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=\(accessKey)%2F\(credScope)&X-Amz-Date=\(dates.long)&X-Amz-Expires=\(expiration.expiration)&X-Amz-SignedHeaders=\(signHeaders)"
 		
+		// This should never throw. 
 		guard let url = URL(string: fullURL) else {
 			throw S3SignerError.badURL
 		}
