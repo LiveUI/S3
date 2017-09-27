@@ -70,11 +70,13 @@ class S3SignerAWSTests: XCTestCase {
 	}
 	
 	func test_Region_host() {
+		XCTAssertEqual(Region.caCentral1.host, "s3.ca-central-1.amazonaws.com")
 		XCTAssertEqual(Region.usEast1_Virginia.host, "s3.amazonaws.com")
 		XCTAssertEqual(Region.usEast2_Ohio.host, "s3.us-east-2.amazonaws.com")
 		XCTAssertEqual(Region.usWest1.host, "s3-us-west-1.amazonaws.com")
 		XCTAssertEqual(Region.usWest2.host, "s3-us-west-2.amazonaws.com")
 		XCTAssertEqual(Region.euWest1.host, "s3-eu-west-1.amazonaws.com")
+		XCTAssertEqual(Region.euWest2.host, "s3.eu-west-2.amazonaws.com")
 		XCTAssertEqual(Region.euCentral1.host, "s3.eu-central-1.amazonaws.com")
 		XCTAssertEqual(Region.apSouth1.host, "s3.ap-south-1.amazonaws.com")
 		XCTAssertEqual(Region.apSoutheast1.host, "s3-ap-southeast-1.amazonaws.com")
