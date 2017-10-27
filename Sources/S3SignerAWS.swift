@@ -139,6 +139,18 @@ public class S3SignerAWS  {
 		headers: [String: String])
 		-> String
 	{
+		 #if swift(>=4)
+			let headerList = Array(headers.keys)
+			.map { "\($0.lowercased()):\(headers[$0]!)" }
+			.filter { $0 != "authorization" }
+			.sorted(by: { $0.localizedCompare($1) == ComparisonResult.orderedAscending })
+			//.sorted { $0.0.localizedCompare($0.1) == ComparisonResult.orderedAscending }
+			.joined(separator: "\n")
+			.appending("\n")
+			
+			return headerList
+			#else
+			
 			let headerList = Array(headers.keys)
 				.map { "\($0.lowercased()):\(headers[$0]!)" }
 				.filter { $0 != "authorization" }
@@ -147,6 +159,8 @@ public class S3SignerAWS  {
 				.appending("\n")
 			
 			return headerList
+			
+			#endif
 	}
 	
 	internal func createCanonicalRequest(

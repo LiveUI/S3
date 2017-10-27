@@ -19,7 +19,7 @@ class S3SignerTester: S3SignerAWS {
 
 extension Dates {
 	init(longDate: String) {
-		self.short = longDate.substring(to: longDate.index(longDate.startIndex, offsetBy: 8))
+		self.short = String(longDate[..<String.Index(encodedOffset: 8)])
 		self.long = longDate
 	}
 }
