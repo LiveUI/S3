@@ -15,4 +15,11 @@ extension Container {
         return try make()
     }
     
+    public func makeS3() throws -> S3 {
+        guard let s3 = try makeS3Client() as? S3 else {
+            throw S3.Error.s3NotRegistered
+        }
+        return s3
+    }
+    
 }

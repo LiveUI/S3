@@ -117,6 +117,7 @@ public class S3: S3Client {
         case missingData
         case notFound
         
+        case s3NotRegistered
         case uploadFailed(Response)
     }
     

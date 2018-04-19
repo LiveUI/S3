@@ -31,8 +31,10 @@ extension Payload {
     
     var isBytes: Bool {
         switch self {
-        case .bytes( _), .none: return true
-        default: return false
+        case .bytes( _), .none:
+            return true
+        default:
+            return false
         }
     }
     
@@ -53,4 +55,5 @@ extension Payload {
             return false
         }
     }
+    
 }
