@@ -8,8 +8,8 @@
 
 import Foundation
 import Vapor
-@_exported import S3Signer
 import HTTP
+@_exported import S3Signer
 
 
 /// Main S3 class
@@ -25,7 +25,6 @@ public class S3: S3Client {
         case bucketOwnerRead = "bucket-owner-read"
         case bucketOwnerFullControl = "bucket-owner-full-control"
     }
-    
     
     public struct File {
         
@@ -164,8 +163,6 @@ public class S3: S3Client {
         }
     }
     
-    
-    
     /// Retrieve file data from S3
     public func get(file: File.Location, headers: [String: String] = [:], on req: Request) throws -> Future<File.Response> {
         guard let url = try buildUrl(file: file, on: req) else {
@@ -191,7 +188,6 @@ public class S3: S3Client {
             return res
         }
     }
-    
     
     /// Delete file from S3
     public func delete(file: File.Location, headers: [String: String] = [:], on req: Request) throws -> Future<Void> {
