@@ -1,14 +1,16 @@
 import Foundation
 
-public typealias Seconds = Int
 
-/// Pre-Sign URL Expiration time
+/// Pre-sign URL expiration time
 public enum Expiration {
+    
+    public typealias Seconds = Int
+    
     /// 30 minutes
     case thirtyMinutes
     
     /// 60 minutes
-    case oneHour
+    case hour
     
     /// 180 minutes
     case threeHours
@@ -18,12 +20,13 @@ public enum Expiration {
 }
 
 extension Expiration {
+    
     /// Expiration Value
-    internal var value: Seconds {
+    var value: Seconds {
         switch self {
         case .thirtyMinutes:
             return 60 * 30
-        case .oneHour:
+        case .hour:
             return 60 * 60
         case .threeHours:
             return 60 * 60 * 3
@@ -31,4 +34,5 @@ extension Expiration {
             return exp
         }
     }
+    
 }

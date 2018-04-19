@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/vapor/core.git",
         "state": {
           "branch": null,
-          "revision": "ce64e70a48adf54835d040ba4c4dab431e2cd020",
-          "version": "3.1.1"
+          "revision": "c61a29ef08e7c8b3e836954269678c5a8fa31f3f",
+          "version": "3.1.2"
         }
       },
       {
@@ -42,8 +42,8 @@
         "repositoryURL": "https://github.com/vapor/engine.git",
         "state": {
           "branch": null,
-          "revision": "2419e37d689b78c9197b2f38cd8f2901cd7dcf9e",
-          "version": "3.0.0-rc.2.3.1"
+          "revision": "bcc330e964a0a294afb9c829b6e6b4626cdea427",
+          "version": "3.0.0-rc.2.4"
         }
       },
       {
@@ -119,6 +119,15 @@
         }
       },
       {
+        "package": "URLEncodedForm",
+        "repositoryURL": "https://github.com/vapor/url-encoded-form.git",
+        "state": {
+          "branch": null,
+          "revision": "aca8efc7176f3ea2352dcbcd32526f82af5647c3",
+          "version": "1.0.1"
+        }
+      },
+      {
         "package": "Validation",
         "repositoryURL": "https://github.com/vapor/validation.git",
         "state": {
@@ -132,8 +141,8 @@
         "repositoryURL": "https://github.com/vapor/vapor.git",
         "state": {
           "branch": null,
-          "revision": "26b5c4032f236cc78e6fd3a51ac6d8aceb5a3a4f",
-          "version": "3.0.0-rc.2.4.1"
+          "revision": "752e6a6c392f18e4986e2251c5db76fd7f79d4e9",
+          "version": "3.0.0-rc.2.5"
         }
       },
       {
@@ -141,7 +150,7 @@
         "repositoryURL": "https://github.com/LiveUI/VaporTestTools.git",
         "state": {
           "branch": "master",
-          "revision": "0791548a30e6a805bf9291b0ad6707c4085cc3ee",
+          "revision": "2b8aa260f6f7faf001d52cae1189d33274886498",
           "version": null
         }
       }

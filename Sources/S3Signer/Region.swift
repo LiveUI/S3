@@ -1,37 +1,62 @@
-/// The region the bucket is located.
+import Foundation
+
+/// AWS Region
 public enum Region: String {
-	
-	case apNortheast1 = "ap-northeast-1"
-	case apNortheast2 = "ap-northeast-2"
-	case apSouth1 = "ap-south-1"
-	case apSoutheast1 = "ap-southeast-1"
-	case apSoutheast2 = "ap-southeast-2"
-	case caCentral1 = "ca-central-1"
-	case euCentral1 = "eu-central-1"
-	case euWest1 = "eu-west-1"
-	case euWest2 = "eu-west-2"
-	case saEast1 = "sa-east-1"
-	case usEast1_Virginia = "us-east-1"
-	case usEast2_Ohio = "us-east-2"
-	case usWest1 = "us-west-1"
-	case usWest2 = "us-west-2"
-	
-	public var host: String {
-		switch self {
-		case .apNortheast1: return "s3-ap-northeast-1.amazonaws.com"
-		case .apNortheast2: return "s3.ap-northeast-2.amazonaws.com"
-		case .apSouth1: return "s3.ap-south-1.amazonaws.com"
-		case .apSoutheast1: return "s3-ap-southeast-1.amazonaws.com"
-		case .apSoutheast2: return "s3-ap-southeast-2.amazonaws.com"
-		case .caCentral1: return "s3.ca-central-1.amazonaws.com"
-		case .euCentral1: return "s3.eu-central-1.amazonaws.com"
-		case .euWest1: return "s3-eu-west-1.amazonaws.com"
-		case .euWest2: return "s3.eu-west-2.amazonaws.com"
-		case .saEast1: return "s3-sa-east-1.amazonaws.com"
-		case .usEast1_Virginia: return "s3.amazonaws.com"
-		case .usEast2_Ohio: return "s3.us-east-2.amazonaws.com"
-		case .usWest1: return "s3-us-west-1.amazonaws.com"
-		case .usWest2: return "s3-us-west-2.amazonaws.com"
-		}
-	}
+    /// US East (N. Virginia)
+    case usEast1 = "us-east-1"
+    
+    /// US East (Ohio)
+    case usEast2 = "us-east-2"
+    
+    /// US West (N. California)
+    case usWest1 = "us-west-1"
+    
+    /// US West (Oregon)
+    case usWest2 = "us-west-2"
+    
+    /// Canada (Central)
+    case caCentral1 = "ca-central-1"
+    
+    /// EU (Frankfurt)
+    case euCentral1 = "eu-central-1"
+    
+    /// EU (Ireland)
+    case euWest1 = "eu-west-1"
+    
+    /// EU (London)
+    case euWest2 = "eu-west-2"
+    
+    /// EU (Paris)
+    case euWest3 = "eu-west-3"
+    
+    /// Asia Pacific (Tokyo)
+    case apNortheast1 = "ap-northeast-1"
+    
+    /// Asia Pacific (Seoul)
+    case apNortheast2 = "ap-northeast-2"
+    
+    /// Asia Pacific (Osaka-Local)
+    case apNortheast3 = "ap-northeast-3"
+    
+    /// Asia Pacific (Singapore)
+    case apSoutheast1 = "ap-southeast-1"
+    
+    /// Asia Pacific (Sydney)
+    case apSoutheast2 = "ap-southeast-2"
+    
+    /// Asia Pacific (Mumbai)
+    case apSouth1 = "ap-south-1"
+    
+    /// South America (São Paulo)
+    case saEast1 = "sa-east-1"
+}
+
+
+extension Region {
+    
+    /// Generate base URL
+    public var host: String {
+        return "https://s3.\(self.rawValue).amazonaws.com".finished(with: "/")
+    }
+    
 }
