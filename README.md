@@ -3,7 +3,7 @@
 Register S3Client as a service in your configure method
 
 ```swift
-try services.register(s3 config: S3Signer.Config(...), defaultBucket: "my-bucket")
+try services.register(s3: S3Signer.Config(...), defaultBucket: "my-bucket")
 ```
 
 use S3Client
