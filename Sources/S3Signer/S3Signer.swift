@@ -52,19 +52,6 @@ public final class S3Signer: Service {
 
 extension S3Signer {
     
-    public func putFile(_ data: Data, to path: String, in bucket: String, on req: Request) throws -> Future<Response> {
-        let client = try req.make(Client.self)
-        let url = config.region.host + bucket.finished(with: "/") + path
-        let headers = try self.headers(for: .PUT, urlString: url, payload: Payload.bytes(data))
-        
-        let request = Request(using: req.privateContainer)
-        request.http.method = .PUT
-        request.http.headers = headers
-        request.http.body = HTTPBody(data: data)
-        request.http.url = URL(string: url)!
-        return try client.respond(to: request)
-    }
-    
     public func headers(for httpMethod: HTTPMethod, urlString: String, headers: [String: String] = [:], payload: Payload) throws -> HTTPHeaders {
         guard let url = URL(string: urlString) else { throw S3Signer.Error.badURL }
         let dates = getDates(Date())
