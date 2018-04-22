@@ -26,9 +26,7 @@ if you only want to use the signer
 import S3Signer
 
 let s3 = try req.makeS3Signer() // or req.make(S3Signer.self)
-s3.put(...)
-s3.get(...)
-s3.delete(...)
+s3.headers(...)
 ```
 
 ## Support
