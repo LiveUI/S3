@@ -18,6 +18,15 @@ let package = Package(
             "S3Signer"
             ]
         ),
+        .target(name: "S3DemoRun", dependencies: [
+            "S3DemoApp"
+            ]
+        ),
+        .target(name: "S3DemoApp", dependencies: [
+            "Vapor",
+            "S3"
+            ]
+        ),
         .target(name: "S3Signer", dependencies: [
             "Vapor"
             ]
