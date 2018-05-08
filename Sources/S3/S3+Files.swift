@@ -13,17 +13,30 @@ import Vapor
 // Helper S3 extension for uploading files by their URL/path
 public extension S3 {
     
+    /// Upload file by it's URL to S3
+    public func put(file url: URL, destination: String, access: AccessControlList = .privateAccess, on container: Container) throws -> Future<File.Response> {
+        let data: Data = try Data(contentsOf: url)
+        let file = File.Upload(data: data, bucket: nil, destination: destination, access: access, mime: mimeType(forFileAtUrl: url))
+        return try put(file: file, on: container)
+    }
+    
+    /// Upload file by it's path to S3
+    public func put(file path: String, destination: String, access: AccessControlList = .privateAccess, on container: Container) throws -> Future<File.Response> {
+        let url: URL = URL(fileURLWithPath: path)
+        return try put(file: url, destination: destination, bucket: nil, access: access, on: container)
+    }
+    
     /// Upload file by it's URL to S3, full set
-    public func put(file url: URL, destination: String, bucket: String? = nil, access: AccessControlList = .privateAccess, on req: Request) throws -> Future<File.Response> {
+    public func put(file url: URL, destination: String, bucket: String?, access: AccessControlList = .privateAccess, on container: Container) throws -> Future<File.Response> {
         let data: Data = try Data(contentsOf: url)
         let file = File.Upload(data: data, bucket: bucket, destination: destination, access: access, mime: mimeType(forFileAtUrl: url))
-        return try put(file: file, on: req)
+        return try put(file: file, on: container)
     }
     
     /// Upload file by it's path to S3, full set
-    public func put(file path: String, destination: String, bucket: String? = nil, access: AccessControlList = .privateAccess, on req: Request) throws -> Future<File.Response> {
+    public func put(file path: String, destination: String, bucket: String?, access: AccessControlList = .privateAccess, on container: Container) throws -> Future<File.Response> {
         let url: URL = URL(fileURLWithPath: path)
-        return try put(file: url, destination: destination, bucket: bucket, access: access, on: req)
+        return try put(file: url, destination: destination, bucket: bucket, access: access, on: container)
     }
     
 }

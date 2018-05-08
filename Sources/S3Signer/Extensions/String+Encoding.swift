@@ -2,17 +2,17 @@ import Foundation
 import Vapor
 
 
-struct AWSEncoding {
-    static let QueryAllowed = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-._~=&"
-    static let PathAllowed  = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-._~/"
+enum AWSEncoding: String {
+    case queryAllowed = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-._~=&"
+    case pathAllowed = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-._~/"
 }
 
 
 extension String {
     
-    func awsStringEncoding(_ type: String) -> String? {
+    func encode(type: AWSEncoding) -> String? {
         let allowed = NSMutableCharacterSet.alphanumeric()
-        allowed.addCharacters(in: type)
+        allowed.addCharacters(in: type.rawValue)
         return self.addingPercentEncoding(withAllowedCharacters: allowed as CharacterSet)
     }
     

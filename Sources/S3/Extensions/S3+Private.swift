@@ -12,16 +12,16 @@ import HTTP
 
 extension S3 {
     
-    func make(request url: URL, method: HTTPMethod, headers: HTTPHeaders, data: Data? = nil, on req: Request) throws -> Future<Response> {
-        let client = try req.make(Client.self)
-        let request = Request(using: req.privateContainer)
+    func make(request url: URL, method: HTTPMethod, headers: HTTPHeaders, data: Data? = nil, on container: Container) throws -> Future<Response> {
+        let client = try container.make(Client.self)
+        let request = Request(using: container)
         request.http.method = method
         request.http.headers = headers
         if let data = data {
             request.http.body = HTTPBody(data: data)
         }
         request.http.url = url
-        return try client.respond(to: request)
+        return client.send(request)
     }
     
 }

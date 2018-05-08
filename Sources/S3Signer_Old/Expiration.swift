@@ -19,7 +19,6 @@ public enum Expiration {
     case custom(Seconds)
 }
 
-
 extension Expiration {
     
     /// Expiration Value

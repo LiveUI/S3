@@ -10,12 +10,14 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/vapor/vapor.git", from: "3.0.0-rc.2"),
+        .package(url: "https://github.com/LiveUI/XMLCoding.git", .branch("master")),
         .package(url: "https://github.com/LiveUI/VaporTestTools.git", .branch("master"))
     ],
     targets: [
         .target(name: "S3", dependencies: [
             "Vapor",
-            "S3Signer"
+            "S3Signer",
+            "XMLCoding"
             ]
         ),
         .target(name: "S3DemoRun", dependencies: [
@@ -24,7 +26,8 @@ let package = Package(
         ),
         .target(name: "S3DemoApp", dependencies: [
             "Vapor",
-            "S3"
+            "S3",
+            "S3Signer"
             ]
         ),
         .target(name: "S3Signer", dependencies: [

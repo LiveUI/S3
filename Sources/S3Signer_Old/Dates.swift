@@ -8,7 +8,7 @@ struct Dates {
     
     /// The short timestamp of signature creation. YYYYMMDD.
     let short: String
-    
+
     init(_ date: Date) {
         self.short = date.timestampShort
         self.long = date.timestampLong

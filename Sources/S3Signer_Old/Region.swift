@@ -1,6 +1,5 @@
 import Foundation
 
-
 /// AWS Region
 public enum Region: String {
     /// US East (N. Virginia)
@@ -57,7 +56,7 @@ extension Region {
     
     /// Generate base URL
     public var host: String {
-        return "s3.\(rawValue).amazonaws.com".finished(with: "/")
+        return "https://s3.\(rawValue).amazonaws.com".finished(with: "/")
     }
     
 }

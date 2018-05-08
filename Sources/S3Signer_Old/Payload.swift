@@ -1,16 +1,9 @@
 import Vapor
 import Crypto
 
-
-/// Payload object
 public enum Payload {
-    /// Data payload
     case bytes(Data)
-    
-    /// No payload
     case none
-    
-    /// Unsigned payload
     case unsigned
 }
 
@@ -48,7 +41,7 @@ extension Payload {
     func size() -> String {
         switch self {
         case .bytes, .none:
-            return bytes.count.description
+            return self.bytes.count.description
         case .unsigned:
             return "UNSIGNED-PAYLOAD"
         }
