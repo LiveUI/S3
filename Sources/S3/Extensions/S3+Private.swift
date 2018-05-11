@@ -12,6 +12,7 @@ import HTTP
 
 extension S3 {
     
+    /// Make an S3 request
     func make(request url: URL, method: HTTPMethod, headers: HTTPHeaders, data: Data? = nil, on container: Container) throws -> Future<Response> {
         let client = try container.make(Client.self)
         let request = Request(using: container)

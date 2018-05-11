@@ -60,4 +60,9 @@ extension Region {
         return "s3.\(rawValue).amazonaws.com".finished(with: "/")
     }
     
+    /// Host URL including scheme
+    public var hostUrlString: String {
+        return "https://" + host
+    }
+    
 }

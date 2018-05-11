@@ -30,7 +30,7 @@ extension Payload {
         case .bytes(let bytes):
             return try SHA256.hash(bytes).hexEncodedString()
         case .none:
-            return try SHA256.hash("".convertToData()).hexEncodedString()
+            return try SHA256.hash(Data()).hexEncodedString()
         case .unsigned:
             return "UNSIGNED-PAYLOAD"
         }
@@ -38,7 +38,7 @@ extension Payload {
     
     var isBytes: Bool {
         switch self {
-        case .bytes( _), .none:
+        case .bytes(_), .none:
             return true
         default:
             return false
@@ -47,10 +47,10 @@ extension Payload {
     
     func size() -> String {
         switch self {
-        case .bytes, .none:
-            return bytes.count.description
         case .unsigned:
             return "UNSIGNED-PAYLOAD"
+        default:
+            return bytes.count.description
         }
     }
     

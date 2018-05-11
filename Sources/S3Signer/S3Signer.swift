@@ -68,20 +68,14 @@ extension S3Signer {
             updatedHeaders["Content-MD5"] = try MD5.hash(payload.bytes).base64EncodedString()
         }
         
-        updatedHeaders["Authorization"] = try generateAuthHeader(httpMethod, url: url, headers: updatedHeaders, bodyDigest: bodyDigest, dates: dates)
-        
         if httpMethod == .PUT || httpMethod == .DELETE {
             updatedHeaders["Content-Length"] = payload.size()
             if httpMethod == .PUT && url.pathExtension != "" {
                 updatedHeaders["Content-Type"] = url.pathExtension
-            } else if httpMethod == .DELETE {
-                updatedHeaders.removeValue(forKey: "X-Amz-Date")
             }
         }
         
-//        if payload.isUnsigned {
-//            updatedHeaders["X-Amz-Content-SHA256"] = bodyDigest
-//        }
+        updatedHeaders["Authorization"] = try generateAuthHeader(httpMethod, url: url, headers: updatedHeaders, bodyDigest: bodyDigest, dates: dates)
         
         var headers = HTTPHeaders()
         for (key, value) in updatedHeaders {

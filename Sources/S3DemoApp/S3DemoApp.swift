@@ -1,12 +1,25 @@
 import Foundation
 import Vapor
-import S3Storage
 @testable import S3
-import SimpleStorageSigner
 
 
 public func routes(_ router: Router) throws {
-    router.get("/") { req -> Future<String> in
+    // Get all available buckets
+    router.get("buckets")  { req -> Future<BucketsInfo> in
+        let s3 = try req.makeS3Client()
+        return try s3.buckets(on: req)
+    }
+    
+    // Create new bucket
+    router.put("bucket")  { req -> Future<String> in
+        let s3 = try req.makeS3Client()
+        return try s3.create(bucket: "api-created-bucket", on: req).map(to: String.self) {
+            return ":)"
+        }
+    }
+    
+    // Demonstrate work with files
+    router.get("files") { req -> Future<String> in
         let string = "Content of my example file"
         
         let fileName = "file-hu.txt"
@@ -23,8 +36,11 @@ public func routes(_ router: Router) throws {
                     return try s3.delete(file: fileName, on: req).map() { response in
                         print("DELETE response:")
                         print(response)
-                        return ":)"
-                    }
+                        return String(data: getResponse.data, encoding: .utf8) ?? "Unknown content!"
+                        }.catchMap({ error -> (String) in
+                            print(error)
+                            return ":("
+                        })
                 }
             }
         } catch {

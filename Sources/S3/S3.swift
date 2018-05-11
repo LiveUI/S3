@@ -163,95 +163,13 @@ public class S3: S3Client {
         self.defaultBucket = defaultBucket
     }
     
-    // MARK: Managing objects
-    
-    /// Upload file to S3
-    public func put(file: File.Upload, headers: [String: String] = [:], on container: Container) throws -> EventLoopFuture<File.Response> {
-        let signer = try container.makeS3Signer()
-        
-        let url = try buildUrl(file: file, on: container)
-        
-        var awsHeaders: [String: String] = headers
-//        awsHeaders["Content-Type"] = file.mime.description
-        awsHeaders["X-Amz-Acl"] = file.access.rawValue
-        
-        let headers = try signer.headers(for: .PUT, urlString: url.absoluteString, headers: awsHeaders, payload: Payload.bytes(file.data))
-        
-        let request = Request(using: container)
-        request.http.method = .PUT
-        request.http.headers = headers
-        request.http.body = HTTPBody(data: file.data)
-        request.http.url = url
-        let client = try container.make(Client.self)
-        return client.send(request).map(to: File.Response.self) { response in
-            if response.http.status == .ok {
-                let res = File.Response(data: file.data, bucket: file.s3bucket ?? self.defaultBucket, path: file.s3path, access: file.access, mime: file.mime)
-                return res
-            } else {
-                throw Error.uploadFailed(response)
-            }
-        }
-    }
-    
-    /// Retrieve file data from S3
-    public func get(file: LocationConvertible, headers: [String: String] = [:], on container: Container) throws -> Future<File.Response> {
-        let signer = try container.makeS3Signer()
-        
-        let url = try buildUrl(file: file, on: container)
-        
-        let headers = try signer.headers(for: .GET, urlString: url.absoluteString, headers: headers, payload: .none)
-        
-        return try make(request: url, method: .GET, headers: headers, on: container).map(to: File.Response.self) { response in
-            if response.http.status == .notFound {
-                throw Error.notFound
-            }
-            guard response.http.status == .ok else {
-                throw Error.badResponse(response)
-            }
-            guard let data = response.http.body.data else {
-                throw Error.missingData
-            }
-            
-            let res = File.Response(data: data, bucket: file.s3bucket ?? self.defaultBucket, path: file.s3path, access: nil, mime: self.mimeType(forFileAtUrl: url))
-            return res
-        }
-    }
-    
-    /// Retrieve file data from S3
-    public func get(file: LocationConvertible, on container: Container) throws -> EventLoopFuture<S3.File.Response> {
-        return try get(file: file, headers: [:], on: container)
-    }
-    
-    /// Delete file from S3
-    public func delete(file: LocationConvertible, headers: [String: String] = [:], on container: Container) throws -> Future<Void> {
-        let signer = try container.makeS3Signer()
-        
-        let url = try buildUrl(file: file, on: container)
-        
-        let headers = try signer.headers(for: .DELETE, urlString: url.absoluteString, headers: headers, payload: .none)
-        
-        return try make(request: url, method: .DELETE, headers: headers, on: container).map(to: Void.self) { response in
-            if response.http.status == .notFound {
-                throw Error.notFound
-            }
-            guard response.http.status == .ok || response.http.status == .noContent else {
-                throw Error.badResponse(response)
-            }
-            return Void()
-        }
-    }
-    
-    /// Delete file from S3
-    public func delete(file: LocationConvertible, on container: Container) throws -> Future<Void> {
-        return try delete(file: file, headers: [:], on: container)
-    }
-    
 }
 
 // MARK: - Helper methods
 
 extension S3 {
     
+    /// Get mime type for file
     static func mimeType(forFileAtUrl url: URL) -> MediaType {
         guard let mediaType = MediaType.fileExtension(url.pathExtension) else {
             return MediaType(type: "application", subType: "octet-stream")
@@ -259,14 +177,31 @@ extension S3 {
         return mediaType
     }
     
+    /// Get mime type for file
     func mimeType(forFileAtUrl url: URL) -> MediaType {
         return S3.mimeType(forFileAtUrl: url)
     }
     
-    func buildUrl(file: LocationConvertible, on container: Container) throws -> URL {
+    /// Generic bucket based host
+    public func host(bucket: String) -> String {
+        return "\(bucket).s3.amazonaws.com"
+    }
+    
+    /// Base URL for S3 region
+    func url(region: Region? = nil, bucket: String? = nil, on container: Container) throws -> URL {
+        let signer = try container.makeS3Signer()
+        let urlString = (region ?? signer.config.region).hostUrlString + (bucket?.finished(with: "/") ?? "")
+        guard let url = URL(string: urlString) else {
+            throw Error.invalidUrl
+        }
+        return url
+    }
+    
+    /// Base URL for a file in a bucket
+    func url(file: LocationConvertible, on container: Container) throws -> URL {
         let signer = try container.makeS3Signer()
         let bucket = file.s3bucket ?? defaultBucket
-        guard let url = URL(string: "https://" + signer.config.region.host + bucket.finished(with: "/") + file.s3path) else {
+        guard let url = URL(string: signer.config.region.hostUrlString + bucket.finished(with: "/") + file.s3path) else {
             throw Error.invalidUrl
         }
         return url

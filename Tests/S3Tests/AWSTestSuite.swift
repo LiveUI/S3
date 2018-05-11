@@ -1,4 +1,4 @@
-@testable import S3SignerAWS
+@testable import S3Signer
 import XCTest
 
 class AWSTestSuite: XCTestCase {

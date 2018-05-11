@@ -19,7 +19,15 @@ extension S3Signer {
     }
     
     func createCanonicalRequest(_ httpMethod: HTTPMethod, url: URL, headers: [String: String], bodyDigest: String) throws -> String {
-        return try [httpMethod.description, path(url), query(url), canonicalHeaders(headers), signed(headers: headers), bodyDigest].joined(separator: "\n")
+        let query = try self.query(url) ?? ""
+        return [
+            httpMethod.description,
+            path(url),
+            query,
+            canonicalHeaders(headers),
+            signed(headers: headers),
+            bodyDigest
+        ].joined(separator: "\n")
     }
     
     func createSignature(_ stringToSign: String, timeStampShort: String) throws -> String {
@@ -68,16 +76,27 @@ extension S3Signer {
             throw Error.badURL(fullURL)
         }
         
-        return try ([httpMethod.description, path(url), query(url), canonicalHeaders(headers), signed(headers: headers), "UNSIGNED-PAYLOAD"].joined(separator: "\n"), url)
+        let query = try self.query(url) ?? ""
+        return (
+            [
+                httpMethod.description,
+                path(url),
+                query,
+                canonicalHeaders(headers),
+                signed(headers: headers),
+                "UNSIGNED-PAYLOAD"
+                ].joined(separator: "\n"),
+            url
+        )
     }
     
-    func query(_ url: URL) throws -> String {
+    func query(_ url: URL) throws -> String? {
         if let queryItems = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems {
             let items = queryItems.map({ ($0.name.encode(type: .queryAllowed) ?? "", $0.value?.encode(type: .queryAllowed) ?? "") })
             let encodedItems = items.map({ "\($0.0)=\($0.1)" })
             return encodedItems.sorted().joined(separator: "&")
         }
-        return ""
+        return nil
     }
     
     func signed(headers: [String: String]) -> String {
@@ -87,8 +106,9 @@ extension S3Signer {
     func update(headers: [String: String], url: URL, longDate: String, bodyDigest: String) -> [String: String] {
         var updatedHeaders = headers
         updatedHeaders["X-Amz-Date"] = longDate
-        updatedHeaders["Host"] = url.host ?? config.region.host
-        
+        if (updatedHeaders["Host"] ?? updatedHeaders["host"]) == nil {
+            updatedHeaders["Host"] = url.host ?? config.region.host
+        }
         if bodyDigest != "UNSIGNED-PAYLOAD" && config.service == "s3" {
             updatedHeaders["X-Amz-Content-SHA256"] = bodyDigest
         }
