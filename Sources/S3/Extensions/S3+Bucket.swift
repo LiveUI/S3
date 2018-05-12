@@ -59,16 +59,7 @@ public extension S3 {
         let awsHeaders = try signer.headers(for: .DELETE, urlString: url.absoluteString, region: region, headers: headers, payload: .none)
         
         return try make(request: url, method: .DELETE, headers: awsHeaders, data: "".convertToData(), on: container).map(to: Void.self) { response in
-            if response.http.status == .notFound {
-                throw Error.notFound
-            }
-            guard response.http.status == .ok || response.http.status == .noContent else {
-                if let error = try? response.decode(to: ErrorMessage.self) {
-                    throw Error.errorResponse(response.http.status, error)
-                } else {
-                    throw Error.badResponse(response)
-                }
-            }
+            try self.check(response)
             return Void()
         }
     }
@@ -96,16 +87,7 @@ public extension S3 {
         let awsHeaders = try signer.headers(for: .PUT, urlString: url.absoluteString, region: region, headers: headers, payload: .bytes(data))
         
         return try make(request: url, method: .PUT, headers: awsHeaders, data: data, on: container).map(to: Void.self) { response in
-            if response.http.status == .notFound {
-                throw Error.notFound
-            }
-            guard response.http.status == .ok else {
-                if let error = try? response.decode(to: ErrorMessage.self) {
-                    throw Error.errorResponse(response.http.status, error)
-                } else {
-                    throw Error.badResponse(response)
-                }
-            }
+            try self.check(response)
             return Void()
         }
     }

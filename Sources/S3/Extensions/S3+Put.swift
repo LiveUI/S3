@@ -34,12 +34,10 @@ public extension S3 {
         request.http.url = url
         let client = try container.make(Client.self)
         return client.send(request).map(to: File.Response.self) { response in
-            if response.http.status == .ok {
-                let res = File.Response(data: file.data, bucket: file.s3bucket ?? self.defaultBucket, path: file.s3path, access: file.access, mime: file.mime)
-                return res
-            } else {
-                throw Error.uploadFailed(response)
-            }
+            try self.check(response)
+            
+            let res = File.Response(data: file.data, bucket: file.bucket ?? self.defaultBucket, path: file.path, access: file.access, mime: file.mime)
+            return res
         }
     }
     

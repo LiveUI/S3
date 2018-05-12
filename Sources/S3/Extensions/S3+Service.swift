@@ -24,12 +24,7 @@ public extension S3 {
         let headers = try signer.headers(for: .GET, urlString: url.absoluteString, payload: .none)
         
         return try make(request: url, method: .GET, headers: headers, data: "".convertToData(), on: container).map(to: BucketsInfo.self) { response in
-            if response.http.status == .notFound {
-                throw Error.notFound
-            }
-            guard response.http.status == .ok || response.http.status == .noContent else {
-                throw Error.badResponse(response)
-            }
+            try self.check(response)
             
             return try response.decode(to: BucketsInfo.self)
         }

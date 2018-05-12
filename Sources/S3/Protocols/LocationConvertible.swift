@@ -9,11 +9,16 @@ import Foundation
 
 
 public protocol LocationConvertible {
+    
     /// Override target bucket
-    var s3bucket: String? { get }
+    var bucket: String? { get }
     
     /// S3 file path
-    var s3path: String { get }
+    var path: String { get }
+    
+    /// Region
+    var region: Region? { get }
+    
 }
 
 
@@ -21,13 +26,18 @@ public protocol LocationConvertible {
 extension String: LocationConvertible {
     
     /// Bucket name on a path, will be nil on a string
-    public var s3bucket: String? {
+    public var bucket: String? {
         return nil
     }
     
     /// S3 file path
-    public var s3path: String {
+    public var path: String {
         return self
+    }
+    
+    /// Region
+    public var region: Region? {
+        return nil
     }
     
 }

@@ -17,7 +17,7 @@ public extension S3 {
         guard let data: Data = string.data(using: String.Encoding.utf8) else {
             throw Error.badStringData
         }
-        let file = File.Upload(data: data, bucket: bucket, destination: destination, access: access, mime: mime)
+        let file = File.Upload(data: data, bucket: bucket, destination: destination, access: access, mime: mime.description)
         return try put(file: file, on: container)
     }
     

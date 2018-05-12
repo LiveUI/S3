@@ -16,13 +16,8 @@ public func routes(_ router: Router) throws {
         return try s3.create(bucket: "api-created-bucket", region: .euCentral1, on: req).map(to: String.self) {
             return ":)"
             }.catchMap({ (error) -> (String) in
-                if let error = error as? S3.Error {
-                    switch error {
-                    case .errorResponse(_, let error):
-                        return error.message
-                    default:
-                        return "S3 :("
-                    }
+                if let error = error.s3ErroMessage() {
+                    return error.message
                 }
                 return ":("
             }
@@ -35,13 +30,8 @@ public func routes(_ router: Router) throws {
         return try s3.delete(bucket: "api-created-bucket", region: .euCentral1, on: req).map(to: String.self) {
             return ":)"
         }.catchMap({ (error) -> (String) in
-                if let error = error as? S3.Error {
-                    switch error {
-                    case .errorResponse(_, let error):
-                        return error.message
-                    default:
-                        return "S3 :("
-                    }
+                if let error = error.s3ErroMessage() {
+                    return error.message
                 }
                 return ":("
             }
@@ -87,9 +77,12 @@ public func routes(_ router: Router) throws {
                         print(response)
                         return String(data: getResponse.data, encoding: .utf8) ?? "Unknown content!"
                         }.catchMap({ error -> (String) in
-                            print(error)
+                            if let error = error.s3ErroMessage() {
+                                return error.message
+                            }
                             return ":("
-                        })
+                        }
+                    )
                 }
             }
         } catch {
@@ -114,6 +107,4 @@ public func configure(_ config: inout Config, _ env: inout Vapor.Environment, _ 
     let config = S3Signer.Config(accessKey: key, secretKey: secret, region: Region.euWest2)
     try S3(defaultBucket: "s3-liveui-test", config: config, services: &services)
     
-    
 }
-
