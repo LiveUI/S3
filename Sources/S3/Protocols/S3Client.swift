@@ -29,6 +29,9 @@ public protocol S3Client: Service {
     func put(string: String, mime: MediaType, destination: String, access: AccessControlList, on: Container) throws -> Future<File.Response>
     func put(string: String, mime: MediaType, destination: String, bucket: String?, access: AccessControlList, on: Container) throws -> Future<File.Response>
     
+    func get(fileInfo file: LocationConvertible, on container: Container) throws -> Future<File.Info>
+    func get(fileInfo file: LocationConvertible, headers: [String: String], on container: Container) throws -> Future<File.Info>
+    
     func get(file: LocationConvertible, on: Container) throws -> Future<File.Response>
     func get(file: LocationConvertible, headers: [String: String], on: Container) throws -> Future<File.Response>
     

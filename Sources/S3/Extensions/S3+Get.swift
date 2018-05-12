@@ -17,11 +17,8 @@ public extension S3 {
     /// Retrieve file data from S3
     public func get(file: LocationConvertible, headers: [String: String] = [:], on container: Container) throws -> Future<File.Response> {
         let signer = try container.makeS3Signer()
-        
         let url = try self.url(file: file, on: container)
-        
         let headers = try signer.headers(for: .GET, urlString: url.absoluteString, headers: headers, payload: .none)
-        
         return try make(request: url, method: .GET, headers: headers, on: container).map(to: File.Response.self) { response in
             try self.check(response)
             

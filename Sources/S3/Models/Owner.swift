@@ -13,9 +13,11 @@ import Vapor
 public struct Owner: Content {
     
     public let id: String
+    public let name: String?
     
     enum CodingKeys: String, CodingKey {
         case id = "ID"
+        case name = "DisplayName"
     }
     
 }

@@ -72,17 +72,22 @@ public func routes(_ router: Router) throws {
                     print("GET response:")
                     print(getResponse)
                     print(String(data: getResponse.data, encoding: .utf8) ?? "Unknown content!")
-                    return try s3.delete(file: fileName, on: req).map() { response in
-                        print("DELETE response:")
-                        print(response)
-                        return String(data: getResponse.data, encoding: .utf8) ?? "Unknown content!"
-                        }.catchMap({ error -> (String) in
-                            if let error = error.s3ErroMessage() {
-                                return error.message
+                    return try s3.get(fileInfo: fileName, on: req).flatMap(to: String.self) { infoResponse in
+                        print("HEAD/Info response:")
+                        print(infoResponse)
+                        return try s3.delete(file: fileName, on: req).map() { response in
+                            print("DELETE response:")
+                            print(response)
+                            let json = try JSONEncoder().encode(infoResponse)
+                            return String(data: json, encoding: .utf8) ?? "Unknown content!"
+                            }.catchMap({ error -> (String) in
+                                if let error = error.s3ErroMessage() {
+                                    return error.message
+                                }
+                                return ":("
                             }
-                            return ":("
-                        }
-                    )
+                        )
+                    }
                 }
             }
         } catch {

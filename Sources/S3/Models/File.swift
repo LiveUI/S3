@@ -84,14 +84,14 @@ public struct File {
         
     }
     
-    /// File response comming back from S3
+    /// File data response comming back from S3
     public struct Response: Content {
         
         /// Data
         public internal(set) var data: Data
         
         /// Override target bucket
-        public internal(set) var bucket: String?
+        public internal(set) var bucket: String
         
         /// S3 file path
         public internal(set) var path: String
@@ -101,6 +101,66 @@ public struct File {
         
         /// File type (mime)
         public internal(set) var mime: String
+        
+    }
+    
+    /// File info response comming back from S3
+    public struct Info: Content {
+        
+        /// Override target bucket
+        public internal(set) var bucket: String
+        
+        /// Override target bucket
+        public internal(set) var region: Region
+        
+        /// S3 file path
+        public internal(set) var path: String
+        
+        /// Access control for file
+        public internal(set) var access: AccessControlList
+        
+        /// File type (mime)
+        public internal(set) var mime: String?
+        
+        /// File size
+        public internal(set) var size: Int?
+        
+        /// Server
+        public internal(set) var server: String?
+        
+        /// ETag
+        public internal(set) var etag: String?
+        
+        /// Expiration
+        public internal(set) var expiration: Date?
+        
+        /// Date created
+        public internal(set) var created: Date?
+        
+        /// Last modified
+        public internal(set) var modified: Date?
+        
+        /// Version ID
+        public internal(set) var versionId: String?
+        
+        /// Storage class
+        public internal(set) var storageClass: String?
+        
+        enum CodingKeys: String, CodingKey {
+            case bucket = "Bucket"
+            case region = "Region"
+            case path = "Path"
+            case access = "Access"
+            case mime = "Content-Type"
+            case size = "Content-Length"
+            case server = "Server"
+            case etag = "ETag"
+            case expiration = "x-amz-expiration"
+            case created = "Date"
+            case modified = "Last-Modified"
+            case versionId = "x-amz-version-id"
+            case storageClass = "x-amz-storage-class"
+        }
         
     }
     

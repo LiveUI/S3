@@ -24,7 +24,6 @@ public extension S3 {
         var awsHeaders: [String: String] = headers
         awsHeaders["Content-Type"] = file.mime.description
         awsHeaders["X-Amz-Acl"] = file.access.rawValue
-        
         let headers = try signer.headers(for: .PUT, urlString: url.absoluteString, headers: awsHeaders, payload: Payload.bytes(file.data))
         
         let request = Request(using: container)
@@ -35,7 +34,6 @@ public extension S3 {
         let client = try container.make(Client.self)
         return client.send(request).map(to: File.Response.self) { response in
             try self.check(response)
-            
             let res = File.Response(data: file.data, bucket: file.bucket ?? self.defaultBucket, path: file.path, access: file.access, mime: file.mime)
             return res
         }

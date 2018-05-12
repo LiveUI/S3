@@ -15,19 +15,48 @@ public extension S3 {
     
     // MARK: Buckets
     
-    /// Get bucket location
-    public func get(fileInfo file: LocationConvertible, headers: [String: String] = [:], on container: Container) throws -> Future<File.Response> {
+    /// Get acl file information (ACL)
+    /// https://docs.aws.amazon.com/AmazonS3/latest/API/RESTObjectGETacl.html
+    public func get(acl file: LocationConvertible, headers: [String: String] = [:], on container: Container) throws -> Future<File.Info> {
+        fatalError("Not implemented")
+    }
+    
+    /// Get acl file information
+    /// https://docs.aws.amazon.com/AmazonS3/latest/API/RESTObjectGETacl.html
+    func get(acl file: LocationConvertible, on container: Container) throws -> Future<File.Info> {
+        return try get(fileInfo: file, headers: [:], on: container)
+    }
+    
+    /// Get file information (HEAD)
+    /// https://docs.aws.amazon.com/AmazonS3/latest/API/RESTObjectHEAD.html
+    public func get(fileInfo file: LocationConvertible, headers: [String: String] = [:], on container: Container) throws -> Future<File.Info> {
         let signer = try container.makeS3Signer()
-        
         let url = try self.url(file: file, on: container)
-        
         let headers = try signer.headers(for: .HEAD, urlString: url.absoluteString, headers: headers, payload: .none)
-        
-        return try make(request: url, method: .HEAD, headers: headers, data: "".convertToData(), on: container).map(to: File.Response.self) { response in
+        return try make(request: url, method: .HEAD, headers: headers, data: "".convertToData(), on: container).map(to: File.Info.self) { response in
             try self.check(response)
             
-            return try response.decode(to: File.Response.self)
+            let bucket = file.bucket ?? self.defaultBucket
+            let region = file.region ?? signer.config.region
+            let mime = response.http.headers.string(File.Info.CodingKeys.mime.rawValue)
+            let size = response.http.headers.int(File.Info.CodingKeys.size.rawValue)
+            let server = response.http.headers.string(File.Info.CodingKeys.server.rawValue)
+            let etag = response.http.headers.string(File.Info.CodingKeys.etag.rawValue)
+            let expiration = response.http.headers.date(File.Info.CodingKeys.expiration.rawValue)
+            let created = response.http.headers.date(File.Info.CodingKeys.created.rawValue)
+            let modified = response.http.headers.date(File.Info.CodingKeys.modified.rawValue)
+            let versionId = response.http.headers.string(File.Info.CodingKeys.versionId.rawValue)
+            let storageClass = response.http.headers.string(File.Info.CodingKeys.storageClass.rawValue)
+            
+            let info = File.Info(bucket: bucket, region: region, path: file.path, access: .authenticatedRead, mime: mime, size: size, server: server, etag: etag, expiration: expiration, created: created, modified: modified, versionId: versionId, storageClass: storageClass)
+            return info
         }
+    }
+    
+    /// Get file information (HEAD)
+    /// https://docs.aws.amazon.com/AmazonS3/latest/API/RESTObjectHEAD.html
+    func get(fileInfo file: LocationConvertible, on container: Container) throws -> Future<File.Info> {
+        return try get(fileInfo: file, headers: [:], on: container)
     }
     
 }

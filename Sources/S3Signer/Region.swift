@@ -2,7 +2,7 @@ import Foundation
 
 
 /// AWS Region
-public enum Region: String {
+public enum Region: String, Codable {
     
     /// US East (N. Virginia)
     case usEast1 = "us-east-1"
