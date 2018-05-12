@@ -1,5 +1,16 @@
 # S3 client for Vapor 3
 
+## Functionality
+
+- [x] Listing buckets
+- [x] Create bucket
+- [x] Delete bucket
+- [x] List objects
+- [x] Upload file
+- [x] Get file
+- [x] Delete file
+- [x] Object info (HEAD)
+- [ ] Object info (ACL)
 
 ## Usage
 
