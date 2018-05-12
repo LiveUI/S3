@@ -2,6 +2,7 @@
 
 ## Functionality
 
+- [x] Signing headers for any region
 - [x] Listing buckets
 - [x] Create bucket
 - [x] Delete bucket
