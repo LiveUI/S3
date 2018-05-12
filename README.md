@@ -177,16 +177,20 @@ public func routes(_ router: Router) throws {
         
         let s3 = try req.makeS3Client()
         do {
+            // Upload a file from string
             return try s3.put(string: string, destination: fileName, access: .publicRead, on: req).flatMap(to: String.self) { putResponse in
                 print("PUT response:")
                 print(putResponse)
+                // Get the content of the newly uploaded file
                 return try s3.get(file: fileName, on: req).flatMap(to: String.self) { getResponse in
                     print("GET response:")
                     print(getResponse)
                     print(String(data: getResponse.data, encoding: .utf8) ?? "Unknown content!")
+                    // Get info about the file (HEAD)
                     return try s3.get(fileInfo: fileName, on: req).flatMap(to: String.self) { infoResponse in
                         print("HEAD/Info response:")
                         print(infoResponse)
+                        // Delete the file
                         return try s3.delete(file: fileName, on: req).map() { response in
                             print("DELETE response:")
                             print(response)
