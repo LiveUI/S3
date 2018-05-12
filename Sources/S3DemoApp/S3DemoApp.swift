@@ -13,10 +13,59 @@ public func routes(_ router: Router) throws {
     // Create new bucket
     router.put("bucket")  { req -> Future<String> in
         let s3 = try req.makeS3Client()
-        return try s3.create(bucket: "api-created-bucket", on: req).map(to: String.self) {
+        return try s3.create(bucket: "api-created-bucket", region: .euCentral1, on: req).map(to: String.self) {
             return ":)"
-        }
+            }.catchMap({ (error) -> (String) in
+                if let error = error as? S3.Error {
+                    switch error {
+                    case .errorResponse(_, let error):
+                        return error.message
+                    default:
+                        return "S3 :("
+                    }
+                }
+                return ":("
+            }
+        )
     }
+    
+    // Delete bucket
+    router.delete("bucket")  { req -> Future<String> in
+        let s3 = try req.makeS3Client()
+        return try s3.delete(bucket: "api-created-bucket", region: .euCentral1, on: req).map(to: String.self) {
+            return ":)"
+        }.catchMap({ (error) -> (String) in
+                if let error = error as? S3.Error {
+                    switch error {
+                    case .errorResponse(_, let error):
+                        return error.message
+                    default:
+                        return "S3 :("
+                    }
+                }
+                return ":("
+            }
+        )
+    }
+    
+//    // Bucket location
+//    router.get("bucket/location")  { req -> Future<String> in
+//        let s3 = try req.makeS3Client()
+//        return try s3.location(bucket: "api-created-bucket", on: req).map(to: String.self) { location in
+//            return location.region
+//        }.catchMap({ (error) -> (String) in
+//                if let error = error as? S3.Error {
+//                    switch error {
+//                    case .errorResponse(_, let error):
+//                        return error.message
+//                    default:
+//                        return "S3 :("
+//                    }
+//                }
+//                return ":("
+//            }
+//        )
+//    }
     
     // Demonstrate work with files
     router.get("files") { req -> Future<String> in

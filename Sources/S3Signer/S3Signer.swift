@@ -55,14 +55,15 @@ public final class S3Signer: Service {
 extension S3Signer {
     
     /// Generates auth headers for Simple Storage Services
-    public func headers(for httpMethod: HTTPMethod, urlString: URLRepresentable, headers: [String: String] = [:], payload: Payload) throws -> HTTPHeaders {
+    public func headers(for httpMethod: HTTPMethod, urlString: URLRepresentable, region: Region? = nil, headers: [String: String] = [:], payload: Payload) throws -> HTTPHeaders {
         guard let url = urlString.convertToURL() else {
             throw Error.badURL("\(urlString)")
         }
         
         let dates = getDates(Date())
         let bodyDigest = try payload.hashed()
-        var updatedHeaders = update(headers: headers, url: url, longDate: dates.long, bodyDigest: bodyDigest)
+        let region = region ?? config.region
+        var updatedHeaders = update(headers: headers, url: url, longDate: dates.long, bodyDigest: bodyDigest, region: region)
         
         if httpMethod == .PUT && payload.isBytes {
             updatedHeaders["Content-MD5"] = try MD5.hash(payload.bytes).base64EncodedString()
@@ -75,7 +76,7 @@ extension S3Signer {
             }
         }
         
-        updatedHeaders["Authorization"] = try generateAuthHeader(httpMethod, url: url, headers: updatedHeaders, bodyDigest: bodyDigest, dates: dates)
+        updatedHeaders["Authorization"] = try generateAuthHeader(httpMethod, url: url, headers: updatedHeaders, bodyDigest: bodyDigest, dates: dates, region: region)
         
         var headers = HTTPHeaders()
         for (key, value) in updatedHeaders {
@@ -86,15 +87,18 @@ extension S3Signer {
     }
     
     /// Create a pre-signed URL for later use
-    public func presignedURLV4(httpMethod: HTTPMethod, url: URL, expiration: Expiration, headers: [String: String]) throws -> URL? {
+    public func presignedURLV4(httpMethod: HTTPMethod, url: URL, expiration: Expiration, region: Region? = nil, headers: [String: String]) throws -> URL? {
         let dates = Dates(Date())
         var updatedHeaders = headers
-        updatedHeaders["Host"] = url.host ?? config.region.host
         
-        let (canonRequest, fullURL) = try presignedURLCanonRequest(httpMethod, dates: dates, expiration: expiration, url: url, headers: updatedHeaders)
+        let region = region ?? config.region
         
-        let stringToSign = try createStringToSign(canonRequest, dates: dates)
-        let signature = try createSignature(stringToSign, timeStampShort: dates.short)
+        updatedHeaders["Host"] = url.host ?? region.host
+        
+        let (canonRequest, fullURL) = try presignedURLCanonRequest(httpMethod, dates: dates, expiration: expiration, url: url, region: region, headers: updatedHeaders)
+        
+        let stringToSign = try createStringToSign(canonRequest, dates: dates, region: region)
+        let signature = try createSignature(stringToSign, timeStampShort: dates.short, region: region)
         let presignedURL = URL(string: fullURL.absoluteString.appending("&X-Amz-Signature=\(signature)"))
         return presignedURL
     }

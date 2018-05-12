@@ -72,6 +72,18 @@ public struct Bucket: Content {
         
     }
     
+    /// Bucket location object
+    public struct Location: Content {
+        
+        /// Location of the bucket
+        public let region: String
+        
+        enum CodingKeys: String, CodingKey {
+            case region = "LocationConstraint"
+        }
+        
+    }
+    
     /// Name of a bucket
     public let name: String
 

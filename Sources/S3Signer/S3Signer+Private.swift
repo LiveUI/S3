@@ -30,29 +30,33 @@ extension S3Signer {
         ].joined(separator: "\n")
     }
     
-    func createSignature(_ stringToSign: String, timeStampShort: String) throws -> String {
+    func createSignature(_ stringToSign: String, timeStampShort: String, region: Region) throws -> String {
         let dateKey = try HMAC.SHA256.authenticate(timeStampShort.convertToData(), key: "AWS4\(config.secretKey)".convertToData())
-        let dateRegionKey = try HMAC.SHA256.authenticate(config.region.rawValue.convertToData(), key: dateKey)
+        let dateRegionKey = try HMAC.SHA256.authenticate(region.rawValue.convertToData(), key: dateKey)
         let dateRegionServiceKey = try HMAC.SHA256.authenticate(config.service.convertToData(), key: dateRegionKey)
         let signingKey = try HMAC.SHA256.authenticate("aws4_request".convertToData(), key: dateRegionServiceKey)
         let signature = try HMAC.SHA256.authenticate(stringToSign.convertToData(), key: signingKey)
         return signature.hexEncodedString()
     }
     
-    func createStringToSign(_ canonicalRequest: String, dates: Dates) throws -> String {
+    func createStringToSign(_ canonicalRequest: String, dates: Dates, region: Region) throws -> String {
         let canonRequestHash = try SHA256.hash(canonicalRequest.convertToData()).hexEncodedString()
-        return ["AWS4-HMAC-SHA256", dates.long, credentialScope(dates.short), canonRequestHash].joined(separator: "\n")
+        return ["AWS4-HMAC-SHA256", dates.long, credentialScope(dates.short, region: region), canonRequestHash].joined(separator: "\n")
     }
     
-    func credentialScope(_ timeStampShort: String) -> String {
-        return [timeStampShort, config.region.rawValue, config.service, "aws4_request"].joined(separator: "/")
+    func credentialScope(_ timeStampShort: String, region: Region) -> String {
+        var arr = [timeStampShort, region.rawValue, config.service, "aws4_request"]
+        if region == .none {
+            arr.remove(at: 1)
+        }
+        return arr.joined(separator: "/")
     }
     
-    func generateAuthHeader(_ httpMethod: HTTPMethod, url: URL, headers: [String: String], bodyDigest: String, dates: Dates) throws -> String {
+    func generateAuthHeader(_ httpMethod: HTTPMethod, url: URL, headers: [String: String], bodyDigest: String, dates: Dates, region: Region) throws -> String {
         let canonicalRequestHex = try createCanonicalRequest(httpMethod, url: url, headers: headers, bodyDigest: bodyDigest)
-        let stringToSign = try createStringToSign(canonicalRequestHex, dates: dates)
-        let signature = try createSignature(stringToSign, timeStampShort: dates.short)
-        let authHeader = "AWS4-HMAC-SHA256 Credential=\(config.accessKey)/\(credentialScope(dates.short)), SignedHeaders=\(signed(headers: headers)), Signature=\(signature)"
+        let stringToSign = try createStringToSign(canonicalRequestHex, dates: dates, region: region)
+        let signature = try createSignature(stringToSign, timeStampShort: dates.short, region: region)
+        let authHeader = "AWS4-HMAC-SHA256 Credential=\(config.accessKey)/\(credentialScope(dates.short, region: region)), SignedHeaders=\(signed(headers: headers)), Signature=\(signature)"
         return authHeader
     }
     
@@ -64,8 +68,8 @@ extension S3Signer {
         return !url.path.isEmpty ? url.path.encode(type: .pathAllowed) ?? "/" : "/"
     }
     
-    func presignedURLCanonRequest(_ httpMethod: HTTPMethod, dates: Dates, expiration: Expiration, url: URL, headers: [String: String]) throws -> (String, URL) {
-        guard let credScope = credentialScope(dates.short).encode(type: .queryAllowed),
+    func presignedURLCanonRequest(_ httpMethod: HTTPMethod, dates: Dates, expiration: Expiration, url: URL, region: Region, headers: [String: String]) throws -> (String, URL) {
+        guard let credScope = credentialScope(dates.short, region: region).encode(type: .queryAllowed),
             let signHeaders = signed(headers: headers).encode(type: .queryAllowed) else {
                 throw Error.invalidEncoding
         }
@@ -103,11 +107,11 @@ extension S3Signer {
         return Array(headers.keys).map { $0.lowercased() }.filter { $0 != "authorization" }.sorted().joined(separator: ";")
     }
     
-    func update(headers: [String: String], url: URL, longDate: String, bodyDigest: String) -> [String: String] {
+    func update(headers: [String: String], url: URL, longDate: String, bodyDigest: String, region: Region?) -> [String: String] {
         var updatedHeaders = headers
         updatedHeaders["X-Amz-Date"] = longDate
         if (updatedHeaders["Host"] ?? updatedHeaders["host"]) == nil {
-            updatedHeaders["Host"] = url.host ?? config.region.host
+            updatedHeaders["Host"] = url.host ?? (region ?? config.region).host
         }
         if bodyDigest != "UNSIGNED-PAYLOAD" && config.service == "s3" {
             updatedHeaders["X-Amz-Content-SHA256"] = bodyDigest

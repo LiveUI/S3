@@ -11,7 +11,9 @@ import Vapor
 
 public protocol S3Client: Service {
     func buckets(on: Container) throws -> Future<BucketsInfo>
-    func create(bucket: String, on container: Container) throws -> Future<Void>
+    func create(bucket: String, region: Region?, on container: Container) throws -> Future<Void>
+    func delete(bucket: String, region: Region?, on container: Container) throws -> Future<Void>
+//    func location(bucket: String, on container: Container) throws -> Future<Bucket.Location>
     
     func put(file: S3.File.Upload, headers: [String: String], on: Container) throws -> EventLoopFuture<S3.File.Response>
     

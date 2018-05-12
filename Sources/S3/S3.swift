@@ -136,6 +136,7 @@ public class S3: S3Client {
     /// Error messages
     public enum Error: Swift.Error {
         case invalidUrl
+        case errorResponse(HTTPResponseStatus, ErrorMessage)
         case badResponse(Response)
         case badStringData
         case missingData
@@ -180,11 +181,6 @@ extension S3 {
     /// Get mime type for file
     func mimeType(forFileAtUrl url: URL) -> MediaType {
         return S3.mimeType(forFileAtUrl: url)
-    }
-    
-    /// Generic bucket based host
-    public func host(bucket: String) -> String {
-        return "\(bucket).s3.amazonaws.com"
     }
     
     /// Base URL for S3 region

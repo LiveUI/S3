@@ -3,6 +3,7 @@ import Foundation
 
 /// AWS Region
 public enum Region: String {
+    
     /// US East (N. Virginia)
     case usEast1 = "us-east-1"
     
@@ -50,6 +51,7 @@ public enum Region: String {
     
     /// South America (São Paulo)
     case saEast1 = "sa-east-1"
+    
 }
 
 
