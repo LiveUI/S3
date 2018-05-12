@@ -17,8 +17,6 @@ public extension S3 {
     
 //    /// Get bucket location
 //    public func location(bucket: String, on container: Container) throws -> Future<Bucket.Location> {
-//        let signer = try container.makeS3Signer()
-//
 //        let region = region ?? signer.config.region
 //        guard let url = URL(string: "https://\(bucket).s3.amazonaws.com/?location"), let host = url.host else {
 //            throw Error.invalidUrl
@@ -45,8 +43,6 @@ public extension S3 {
     
     /// Delete bucket
     public func delete(bucket: String, region: Region? = nil, on container: Container) throws -> Future<Void> {
-        let signer = try container.makeS3Signer()
-        
         let region = region ?? signer.config.region
         guard let url = URL(string: "https://\(bucket).s3.\(region.rawValue).amazonaws.com/"), let host = url.host else {
             throw Error.invalidUrl
@@ -64,8 +60,6 @@ public extension S3 {
     
     /// Create a bucket
     public func create(bucket: String, region: Region? = nil, on container: Container) throws -> Future<Void> {
-        let signer = try container.makeS3Signer()
-        
         let region = region ?? signer.config.region
         guard let url = URL(string: "https://\(bucket).s3.\(region.rawValue).amazonaws.com/"), let host = url.host else {
             throw Error.invalidUrl

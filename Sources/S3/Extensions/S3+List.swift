@@ -13,7 +13,6 @@ extension S3 {
     
     /// Get list of objects
     public func list(bucket: String, region: Region? = nil, headers: [String: String], on container: Container) throws -> Future<BucketResults> {
-        let signer = try container.makeS3Signer()
         let region = region ?? signer.config.region
         guard let baseUrl = URL(string: "https://\(bucket).s3.\(region.rawValue).amazonaws.com/"), let host = baseUrl.host,
             var components = URLComponents(string: baseUrl.absoluteString) else {

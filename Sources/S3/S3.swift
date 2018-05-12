@@ -29,20 +29,24 @@ public class S3: S3Client {
     /// If set, this bucket name value will be used globally unless overriden by a specific call
     public internal(set) var defaultBucket: String
     
+    /// Signer instance
+    let signer: S3Signer
     
     // MARK: Initialization
     
     /// Basic initialization method, also registers S3Signer and self with services
     @discardableResult public convenience init(defaultBucket: String, config: S3Signer.Config, services: inout Services) throws {
-        try self.init(defaultBucket: defaultBucket)
+        let signer = try S3Signer(config)
+        try self.init(defaultBucket: defaultBucket, signer: signer)
         
-        try services.register(S3Signer(config))
+        services.register(signer)
         services.register(self, as: S3Client.self)
     }
     
     /// Basic initialization method
-    public init(defaultBucket: String) throws {
+    public init(defaultBucket: String, signer: S3Signer) throws {
         self.defaultBucket = defaultBucket
+        self.signer = signer
     }
     
 }
@@ -78,7 +82,6 @@ extension S3 {
     
     /// Base URL for S3 region
     func url(region: Region? = nil, bucket: String? = nil, on container: Container) throws -> URL {
-        let signer = try container.makeS3Signer()
         let urlString = (region ?? signer.config.region).hostUrlString + (bucket?.finished(with: "/") ?? "")
         guard let url = URL(string: urlString) else {
             throw Error.invalidUrl
@@ -88,7 +91,6 @@ extension S3 {
     
     /// Base URL for a file in a bucket
     func url(file: LocationConvertible, on container: Container) throws -> URL {
-        let signer = try container.makeS3Signer()
         let bucket = file.bucket ?? defaultBucket
         guard let url = URL(string: signer.config.region.hostUrlString + bucket.finished(with: "/") + file.path) else {
             throw Error.invalidUrl

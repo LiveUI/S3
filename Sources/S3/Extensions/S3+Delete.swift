@@ -16,7 +16,6 @@ public extension S3 {
     
     /// Delete file from S3
     public func delete(file: LocationConvertible, headers: [String: String] = [:], on container: Container) throws -> Future<Void> {
-        let signer = try container.makeS3Signer()
         let url = try self.url(file: file, on: container)
         let headers = try signer.headers(for: .DELETE, urlString: url.absoluteString, headers: headers, payload: .none)
         return try make(request: url, method: .DELETE, headers: headers, data: "".convertToData(), on: container).map(to: Void.self) { response in

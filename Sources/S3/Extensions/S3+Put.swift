@@ -17,12 +17,10 @@ public extension S3 {
     
     /// Upload file to S3
     public func put(file: File.Upload, headers: [String: String] = [:], on container: Container) throws -> EventLoopFuture<File.Response> {
-        let signer = try container.makeS3Signer()
-        
         let url = try self.url(file: file, on: container)
         
         var awsHeaders: [String: String] = headers
-        awsHeaders["content-Type"] = file.mime.description
+        awsHeaders["content-type"] = file.mime.description
         awsHeaders["x-amz-acl"] = file.access.rawValue
         let headers = try signer.headers(for: .PUT, urlString: url.absoluteString, headers: awsHeaders, payload: Payload.bytes(file.data))
         
