@@ -11,6 +11,7 @@
 - [x] Delete file
 - [x] Object info (HEAD)
 - [ ] Object info (ACL)
+- [x] Parsing error responses
 
 ## Usage
 
