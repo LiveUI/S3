@@ -29,13 +29,24 @@ public func routes(_ router: Router) throws {
         let s3 = try req.makeS3Client()
         return try s3.delete(bucket: "api-created-bucket", region: .euCentral1, on: req).map(to: String.self) {
             return ":)"
-        }.catchMap({ (error) -> (String) in
+            }.catchMap({ (error) -> (String) in
                 if let error = error.s3ErroMessage() {
                     return error.message
                 }
                 return ":("
-            }
+                }
         )
+    }
+    
+    // Delete bucket
+    router.get("files")  { req -> Future<BucketResults> in
+        let s3 = try req.makeS3Client()
+        return try s3.list(bucket: "booststore", region: .usEast1, headers: [:], on: req).catchMap({ (error) -> (BucketResults) in
+            if let error = error.s3ErroMessage() {
+                print(error.message)
+            }
+            throw error
+        })
     }
     
 //    // Bucket location
@@ -58,7 +69,7 @@ public func routes(_ router: Router) throws {
 //    }
     
     // Demonstrate work with files
-    router.get("files") { req -> Future<String> in
+    router.get("files/test") { req -> Future<String> in
         let string = "Content of my example file"
         
         let fileName = "file-hu.txt"
