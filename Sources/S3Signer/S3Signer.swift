@@ -66,17 +66,17 @@ extension S3Signer {
         var updatedHeaders = update(headers: headers, url: url, longDate: dates.long, bodyDigest: bodyDigest, region: region)
         
         if httpMethod == .PUT && payload.isBytes {
-            updatedHeaders["Content-MD5"] = try MD5.hash(payload.bytes).base64EncodedString()
+            updatedHeaders["content-md5"] = try MD5.hash(payload.bytes).base64EncodedString()
         }
         
         if httpMethod == .PUT || httpMethod == .DELETE {
-            updatedHeaders["Content-Length"] = payload.size()
+            updatedHeaders["content-length"] = payload.size()
             if httpMethod == .PUT && url.pathExtension != "" {
-                updatedHeaders["Content-Type"] = (MediaType.fileExtension(url.pathExtension) ?? .plainText).description
+                updatedHeaders["content-type"] = (MediaType.fileExtension(url.pathExtension) ?? .plainText).description
             }
         }
         
-        updatedHeaders["Authorization"] = try generateAuthHeader(httpMethod, url: url, headers: updatedHeaders, bodyDigest: bodyDigest, dates: dates, region: region)
+        updatedHeaders["authorization"] = try generateAuthHeader(httpMethod, url: url, headers: updatedHeaders, bodyDigest: bodyDigest, dates: dates, region: region)
         
         var headers = HTTPHeaders()
         for (key, value) in updatedHeaders {
@@ -93,13 +93,13 @@ extension S3Signer {
         
         let region = region ?? config.region
         
-        updatedHeaders["Host"] = url.host ?? region.host
+        updatedHeaders["host"] = url.host ?? region.host
         
         let (canonRequest, fullURL) = try presignedURLCanonRequest(httpMethod, dates: dates, expiration: expiration, url: url, region: region, headers: updatedHeaders)
         
         let stringToSign = try createStringToSign(canonRequest, dates: dates, region: region)
         let signature = try createSignature(stringToSign, timeStampShort: dates.short, region: region)
-        let presignedURL = URL(string: fullURL.absoluteString.appending("&X-Amz-Signature=\(signature)"))
+        let presignedURL = URL(string: fullURL.absoluteString.appending("&x-amz-signature=\(signature)"))
         return presignedURL
     }
     

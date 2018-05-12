@@ -25,7 +25,7 @@ public extension S3 {
 //        }
 //
 //        let headers = [
-//            "Host": host
+//            "host": host
 //        ]
 //        let awsHeaders = try signer.headers(for: .GET, urlString: url.absoluteString, region: region, headers: headers, payload: .none)
 //        return try make(request: url, method: .GET, headers: awsHeaders, data: "".convertToData(), on: container).map(to: Bucket.Location.self) { response in
@@ -53,7 +53,7 @@ public extension S3 {
         }
         
         let headers = [
-            "Host": host
+            "host": host
         ]
         let awsHeaders = try signer.headers(for: .DELETE, urlString: url.absoluteString, region: region, headers: headers, payload: .none)
         return try make(request: url, method: .DELETE, headers: awsHeaders, data: "".convertToData(), on: container).map(to: Void.self) { response in
@@ -80,7 +80,7 @@ public extension S3 {
         let data = content.convertToData()
         
         let headers = [
-            "Host": host
+            "host": host
         ]
         let awsHeaders = try signer.headers(for: .PUT, urlString: url.absoluteString, region: region, headers: headers, payload: .bytes(data))
         return try make(request: url, method: .PUT, headers: awsHeaders, data: data, on: container).map(to: Void.self) { response in

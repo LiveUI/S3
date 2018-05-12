@@ -22,8 +22,8 @@ public extension S3 {
         let url = try self.url(file: file, on: container)
         
         var awsHeaders: [String: String] = headers
-        awsHeaders["Content-Type"] = file.mime.description
-        awsHeaders["X-Amz-Acl"] = file.access.rawValue
+        awsHeaders["content-Type"] = file.mime.description
+        awsHeaders["x-amz-acl"] = file.access.rawValue
         let headers = try signer.headers(for: .PUT, urlString: url.absoluteString, headers: awsHeaders, payload: Payload.bytes(file.data))
         
         let request = Request(using: container)

@@ -26,7 +26,7 @@ extension S3 {
             throw S3.Error.invalidUrl
         }
         var headers = headers
-        headers["Host"] = host
+        headers["host"] = host
         let awsHeaders = try signer.headers(for: .GET, urlString: url.absoluteString, region: region, headers: headers, payload: .none)
         return try make(request: url, method: .GET, headers: awsHeaders, data: "".convertToData(), on: container).map(to: BucketResults.self) { response in
             try self.check(response)

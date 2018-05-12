@@ -4,6 +4,7 @@ import Vapor
 
 
 public func routes(_ router: Router) throws {
+    
     // Get all available buckets
     router.get("buckets")  { req -> Future<BucketsInfo> in
         let s3 = try req.makeS3Client()
