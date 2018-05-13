@@ -16,7 +16,7 @@ public extension S3 {
     // MARK: Upload
     
     /// Upload file to S3
-    public func put(file: File.Upload, headers: [String: String] = [:], on container: Container) throws -> EventLoopFuture<File.Response> {
+    public func put(file: File.Upload, headers: [String: String], on container: Container) throws -> EventLoopFuture<File.Response> {
         let url = try self.url(file: file, on: container)
         
         var awsHeaders: [String: String] = headers
@@ -35,6 +35,11 @@ public extension S3 {
             let res = File.Response(data: file.data, bucket: file.bucket ?? self.defaultBucket, path: file.path, access: file.access, mime: file.mime)
             return res
         }
+    }
+    
+    /// Upload file to S3
+    public func put(file: File.Upload, on container: Container) throws -> EventLoopFuture<File.Response> {
+        return try put(file: file, headers: [:], on: container)
     }
     
     /// Upload file by it's URL to S3

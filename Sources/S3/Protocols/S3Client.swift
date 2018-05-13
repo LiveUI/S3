@@ -34,6 +34,9 @@ public protocol S3Client: Service {
     func list(bucket: String, region: Region?, headers: [String: String], on container: Container) throws -> Future<BucketResults>
     
     /// Upload file to S3
+    func put(file: File.Upload, on container: Container) throws -> EventLoopFuture<File.Response>
+    
+    /// Upload file to S3
     func put(file: File.Upload, headers: [String: String], on: Container) throws -> EventLoopFuture<File.Response>
     
     /// Upload file to S3

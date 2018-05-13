@@ -17,7 +17,7 @@ public extension S3 {
     
     /// Get acl file information (ACL)
     /// https://docs.aws.amazon.com/AmazonS3/latest/API/RESTObjectGETacl.html
-    public func get(acl file: LocationConvertible, headers: [String: String] = [:], on container: Container) throws -> Future<File.Info> {
+    public func get(acl file: LocationConvertible, headers: [String: String], on container: Container) throws -> Future<File.Info> {
         fatalError("Not implemented")
     }
     
@@ -29,7 +29,7 @@ public extension S3 {
     
     /// Get file information (HEAD)
     /// https://docs.aws.amazon.com/AmazonS3/latest/API/RESTObjectHEAD.html
-    public func get(fileInfo file: LocationConvertible, headers: [String: String] = [:], on container: Container) throws -> Future<File.Info> {
+    public func get(fileInfo file: LocationConvertible, headers: [String: String], on container: Container) throws -> Future<File.Info> {
         let url = try self.url(file: file, on: container)
         let headers = try signer.headers(for: .HEAD, urlString: url.absoluteString, headers: headers, payload: .none)
         return try make(request: url, method: .HEAD, headers: headers, data: "".convertToData(), on: container).map(to: File.Info.self) { response in
