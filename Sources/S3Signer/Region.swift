@@ -57,14 +57,9 @@ public enum Region: String, Codable {
 
 extension Region {
     
-    /// Generate base URL
+    /// Base URL / Host
     public var host: String {
-        return "s3.\(rawValue).amazonaws.com".finished(with: "/")
-    }
-    
-    /// Host URL including scheme
-    public var hostUrlString: String {
-        return "https://" + host
+        return "s3.\(rawValue).amazonaws.com"
     }
     
 }

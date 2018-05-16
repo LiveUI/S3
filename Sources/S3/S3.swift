@@ -55,6 +55,12 @@ public class S3: S3Client {
 
 extension S3 {
     
+    // QUESTION: Can we replace this with just Data()?
+    /// Serve empty data
+    func emptyData() -> Data {
+        return "".convertToData()
+    }
+    
     /// Check response for error
     @discardableResult func check(_ response: Response) throws -> Response {
         guard response.http.status == .ok || response.http.status == .noContent else {
@@ -80,22 +86,9 @@ extension S3 {
         return S3.mimeType(forFileAtUrl: url)
     }
     
-    /// Base URL for S3 region
-    func url(region: Region? = nil, bucket: String? = nil, on container: Container) throws -> URL {
-        let urlString = (region ?? signer.config.region).hostUrlString + (bucket?.finished(with: "/") ?? "")
-        guard let url = URL(string: urlString) else {
-            throw Error.invalidUrl
-        }
-        return url
-    }
-    
-    /// Base URL for a file in a bucket
-    func url(file: LocationConvertible, on container: Container) throws -> URL {
-        let bucket = file.bucket ?? defaultBucket
-        guard let url = URL(string: signer.config.region.hostUrlString + bucket.finished(with: "/") + file.path) else {
-            throw Error.invalidUrl
-        }
-        return url
+    /// Create URL builder
+    func urlBuilder(for container: Container) -> URLBuilder {
+        return URLBuilder(container, defaultBucket: defaultBucket, config: signer.config)
     }
     
 }

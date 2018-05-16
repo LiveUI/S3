@@ -30,9 +30,11 @@ public extension S3 {
     /// Get file information (HEAD)
     /// https://docs.aws.amazon.com/AmazonS3/latest/API/RESTObjectHEAD.html
     public func get(fileInfo file: LocationConvertible, headers: [String: String], on container: Container) throws -> Future<File.Info> {
-        let url = try self.url(file: file, on: container)
+        let builder = urlBuilder(for: container)
+        let url = try builder.url(file: file)
+        
         let headers = try signer.headers(for: .HEAD, urlString: url.absoluteString, headers: headers, payload: .none)
-        return try make(request: url, method: .HEAD, headers: headers, data: "".convertToData(), on: container).map(to: File.Info.self) { response in
+        return try make(request: url, method: .HEAD, headers: headers, data: emptyData(), on: container).map(to: File.Info.self) { response in
             try self.check(response)
             
             let bucket = file.bucket ?? self.defaultBucket

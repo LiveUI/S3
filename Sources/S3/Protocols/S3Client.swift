@@ -25,7 +25,7 @@ public protocol S3Client: Service {
     func delete(bucket: String, region: Region?, on container: Container) throws -> Future<Void>
     
     /// Get bucket location
-//    func location(bucket: String, on container: Container) throws -> Future<Bucket.Location>
+    func location(bucket: String, on container: Container) throws -> Future<Region>
     
     /// Get list of objects
     func list(bucket: String, region: Region?, on container: Container) throws -> Future<BucketResults>

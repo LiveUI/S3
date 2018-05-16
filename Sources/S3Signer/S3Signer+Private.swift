@@ -110,7 +110,7 @@ extension S3Signer {
         var updatedHeaders = headers
         updatedHeaders["x-amz-date"] = longDate
         if (updatedHeaders["host"] ?? updatedHeaders["host"]) == nil {
-            updatedHeaders["host"] = url.host ?? (region ?? config.region).host
+            updatedHeaders["host"] = (url.host ?? (region ?? config.region).host)
         }
         if bodyDigest != "UNSIGNED-PAYLOAD" && config.service == "s3" {
             updatedHeaders["x-amz-content-sha256"] = bodyDigest

@@ -1,0 +1,105 @@
+{
+	"info": {
+		"_postman_id": "da87b927-b230-431d-91bf-57200936e59f",
+		"name": "Vapor S3",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Buckets list",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "{{SERVER}}buckets",
+					"host": [
+						"{{SERVER}}buckets"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Bucket (create)",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "{{SERVER}}bucket",
+					"host": [
+						"{{SERVER}}bucket"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Bucket (delete)",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "{{SERVER}}bucket",
+					"host": [
+						"{{SERVER}}bucket"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Bucket (location)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "{{SERVER}}bucket/location",
+					"host": [
+						"{{SERVER}}bucket"
+					],
+					"path": [
+						"location"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Files (list)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "{{SERVER}}files",
+					"host": [
+						"{{SERVER}}files"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Files (test)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "{{SERVER}}files/test",
+					"host": [
+						"{{SERVER}}files"
+					],
+					"path": [
+						"test"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

@@ -6,6 +6,7 @@
 - [x] Listing buckets
 - [x] Create bucket
 - [x] Delete bucket
+- [x] Locate bucket region
 - [x] List objects
 - [x] Upload file
 - [x] Get file
@@ -54,14 +55,11 @@ public protocol S3Client: Service {
     /// Create a bucket
     func create(bucket: String, region: Region?, on container: Container) throws -> Future<Void>
     
-    /// Delete a bucket wherever it is (WIP)
-//    func delete(bucket: String, on container: Container) throws -> Future<Void>
-    
     /// Delete a bucket
     func delete(bucket: String, region: Region?, on container: Container) throws -> Future<Void>
     
-    /// Get bucket location (WIP)
-//    func location(bucket: String, on container: Container) throws -> Future<Bucket.Location>
+    /// Get bucket location
+    func location(bucket: String, on container: Container) throws -> Future<Region>
     
     /// Get list of objects
     func list(bucket: String, region: Region?, on container: Container) throws -> Future<BucketResults>
@@ -144,6 +142,24 @@ public func routes(_ router: Router) throws {
         )
     }
     
+    // Locate bucket (get region)
+    router.get("bucket/location")  { req -> Future<String> in
+        let s3 = try req.makeS3Client()
+        return try s3.location(bucket: "bucket-name", on: req).map(to: String.self) { region in
+            return region.hostUrlString()
+        }.catchMap({ (error) -> (String) in
+                if let error = error as? S3.Error {
+                    switch error {
+                    case .errorResponse(_, let error):
+                        return error.message
+                    default:
+                        return "S3 :("
+                    }
+                }
+                return ":("
+            }
+        )
+    }
     // Delete bucket
     router.delete("bucket")  { req -> Future<String> in
         let s3 = try req.makeS3Client()

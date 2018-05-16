@@ -22,6 +22,9 @@ public struct ErrorMessage: Content {
     public let bucket: String?
     
     /// Header involved?
+    public let endpoint: String?
+    
+    /// Header involved?
     public let header: String?
     
     /// Request Id
@@ -34,6 +37,7 @@ public struct ErrorMessage: Content {
         case code = "Code"
         case message = "Message"
         case bucket = "BucketName"
+        case endpoint = "Endpoint"
         case header = "Header"
         case requestId = "RequestId"
         case hostId = "HostId"

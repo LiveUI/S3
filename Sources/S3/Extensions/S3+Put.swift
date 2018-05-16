@@ -17,7 +17,10 @@ public extension S3 {
     
     /// Upload file to S3
     public func put(file: File.Upload, headers: [String: String], on container: Container) throws -> EventLoopFuture<File.Response> {
-        let url = try self.url(file: file, on: container)
+        let builder = urlBuilder(for: container)
+        let url = try builder.url(file: file)
+        
+//        let url = URL(string: "https://s3.eu-west-2.amazonaws.com/s3-liveui-test/file-hu.txt")!
         
         var awsHeaders: [String: String] = headers
         awsHeaders["content-type"] = file.mime.description

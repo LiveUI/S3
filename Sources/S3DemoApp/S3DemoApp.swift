@@ -50,24 +50,24 @@ public func routes(_ router: Router) throws {
         })
     }
     
-//    // Bucket location
-//    router.get("bucket/location")  { req -> Future<String> in
-//        let s3 = try req.makeS3Client()
-//        return try s3.location(bucket: "api-created-bucket", on: req).map(to: String.self) { location in
-//            return location.region
-//        }.catchMap({ (error) -> (String) in
-//                if let error = error as? S3.Error {
-//                    switch error {
-//                    case .errorResponse(_, let error):
-//                        return error.message
-//                    default:
-//                        return "S3 :("
-//                    }
-//                }
-//                return ":("
-//            }
-//        )
-//    }
+    // Bucket location
+    router.get("bucket/location")  { req -> Future<String> in
+        let s3 = try req.makeS3Client()
+        return try s3.location(bucket: "adfasdfasdfasdf", on: req).map(to: String.self) { region in
+            return region.hostUrlString()
+        }.catchMap({ (error) -> (String) in
+                if let error = error as? S3.Error {
+                    switch error {
+                    case .errorResponse(_, let error):
+                        return error.message
+                    default:
+                        return "S3 :("
+                    }
+                }
+                return ":("
+            }
+        )   
+    }
     
     // Demonstrate work with files
     router.get("files/test") { req -> Future<String> in
@@ -101,7 +101,12 @@ public func routes(_ router: Router) throws {
                         )
                     }
                 }
-            }
+            }.catchMap({ error -> (String) in
+                if let error = error.s3ErroMessage() {
+                    return error.message
+                }
+                return ":("
+            })
         } catch {
             print(error)
             fatalError()
