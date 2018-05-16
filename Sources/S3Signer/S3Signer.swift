@@ -87,7 +87,7 @@ extension S3Signer {
     }
     
     /// Create a pre-signed URL for later use
-    public func presignedURLV4(httpMethod: HTTPMethod, url: URL, expiration: Expiration, region: Region? = nil, headers: [String: String]) throws -> URL? {
+    public func presignedURL(for httpMethod: HTTPMethod, url: URL, expiration: Expiration, region: Region? = nil, headers: [String: String] = [:]) throws -> URL? {
         let dates = Dates(Date())
         var updatedHeaders = headers
         
