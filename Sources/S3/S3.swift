@@ -32,6 +32,8 @@ public class S3: S3Client {
     /// Signer instance
     let signer: S3Signer
     
+    let urlBuilder: URLBuilder?
+    
     // MARK: Initialization
     
     /// Basic initialization method, also registers S3Signer and self with services
@@ -47,6 +49,14 @@ public class S3: S3Client {
     public init(defaultBucket: String, signer: S3Signer) throws {
         self.defaultBucket = defaultBucket
         self.signer = signer
+        self.urlBuilder = nil
+    }
+    
+    /// Basic initialization method
+    public init(urlBuilder: URLBuilder, defaultBucket: String, signer: S3Signer) throws {
+        self.defaultBucket = defaultBucket
+        self.signer = signer
+        self.urlBuilder = nil
     }
     
 }
@@ -88,7 +98,7 @@ extension S3 {
     
     /// Create URL builder
     func urlBuilder(for container: Container) -> URLBuilder {
-        return URLBuilder(container, defaultBucket: defaultBucket, config: signer.config)
+        return urlBuilder ?? S3URLBuilder(container, defaultBucket: defaultBucket, config: signer.config)
     }
     
 }

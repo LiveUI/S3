@@ -19,7 +19,7 @@ public extension S3 {
     public func location(bucket: String, on container: Container) throws -> Future<Region> {
         let builder = urlBuilder(for: container)
         let region = Region.euWest2
-        let url = try builder.url(region: region, bucket: bucket)
+        let url = try builder.url(region: region, bucket: bucket, path: nil)
         
         let awsHeaders = try signer.headers(for: .GET, urlString: url.absoluteString, region: region, payload: .none)
         return try make(request: url, method: .GET, headers: awsHeaders, data: emptyData(), on: container).map(to: Region.self) { response in
@@ -56,7 +56,7 @@ public extension S3 {
     /// Delete bucket
     public func delete(bucket: String, region: Region? = nil, on container: Container) throws -> Future<Void> {
         let builder = urlBuilder(for: container)
-        let url = try builder.url(region: region, bucket: bucket)
+        let url = try builder.url(region: region, bucket: bucket, path: nil)
         
         let awsHeaders = try signer.headers(for: .DELETE, urlString: url.absoluteString, region: region, payload: .none)
         return try make(request: url, method: .DELETE, headers: awsHeaders, data: emptyData(), on: container).map(to: Void.self) { response in
@@ -70,7 +70,7 @@ public extension S3 {
         let region = region ?? signer.config.region
         
         let builder = urlBuilder(for: container)
-        let url = try builder.url(region: region, bucket: bucket)
+        let url = try builder.url(region: region, bucket: bucket, path: nil)
         
         let content = """
             <CreateBucketConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
