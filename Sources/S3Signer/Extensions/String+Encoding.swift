@@ -11,9 +11,9 @@ enum AWSEncoding: String {
 extension String {
     
     func encode(type: AWSEncoding) -> String? {
-        let allowed = NSMutableCharacterSet.alphanumeric()
-        allowed.addCharacters(in: type.rawValue)
-        return self.addingPercentEncoding(withAllowedCharacters: allowed as CharacterSet)
+        var allowed = CharacterSet.alphanumerics
+        allowed.insert(charactersIn: type.rawValue)
+        return addingPercentEncoding(withAllowedCharacters: allowed)
     }
     
 }
