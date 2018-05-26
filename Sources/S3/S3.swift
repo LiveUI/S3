@@ -30,7 +30,7 @@ public class S3: S3Client {
     public internal(set) var defaultBucket: String
     
     /// Signer instance
-    let signer: S3Signer
+    public let signer: S3Signer
     
     let urlBuilder: URLBuilder?
     
