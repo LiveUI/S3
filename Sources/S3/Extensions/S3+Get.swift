@@ -12,6 +12,15 @@ import Vapor
 // Helper S3 extension for loading (getting) files by their URL/path
 public extension S3 {
     
+    // MARK: URL
+    
+    /// File URL
+    public func url(fileInfo file: LocationConvertible, on container: Container) throws -> URL {
+        let builder = urlBuilder(for: container)
+        let url = try builder.url(file: file)
+        return url
+    }
+    
     // MARK: Get
     
     /// Retrieve file data from S3

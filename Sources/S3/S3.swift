@@ -13,7 +13,7 @@ import HTTP
 
 
 /// Main S3 class
-public class S3: S3Client {    
+public class S3: S3Client {
     
     /// Error messages
     public enum Error: Swift.Error {

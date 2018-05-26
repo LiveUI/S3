@@ -66,6 +66,9 @@ public protocol S3Client: Service {
     /// Upload file to S3
     func put(string: String, mime: MediaType, destination: String, bucket: String?, access: AccessControlList, on: Container) throws -> Future<File.Response>
     
+    /// File URL
+    func url(fileInfo file: LocationConvertible, on container: Container) throws -> URL
+    
     /// Retrieve file data from S3
     func get(fileInfo file: LocationConvertible, on container: Container) throws -> Future<File.Info>
     
