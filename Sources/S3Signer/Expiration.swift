@@ -6,6 +6,9 @@ public enum Expiration {
     
     public typealias Seconds = Int
     
+    /// 15 minutes
+    case fifteenMinutes
+    
     /// 30 minutes
     case thirtyMinutes
     
@@ -25,6 +28,8 @@ extension Expiration {
     /// Expiration Value
     var value: Seconds {
         switch self {
+        case .fifteenMinutes:
+            return 60 * 15
         case .thirtyMinutes:
             return 60 * 30
         case .hour:
