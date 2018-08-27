@@ -13,12 +13,13 @@ import S3Signer
 extension Region {
     
     /// Host URL including scheme
-    public func hostUrlString(bucket: String? = nil) -> String {
+    public func hostUrlString(bucket: String? = nil, config: S3Signer.Config?) -> String {
         var bucket = bucket
         if let b = bucket {
             bucket = b + "."
         }
-        return "https://" + (bucket ?? "") + host.finished(with: "/")
+        let prefix = config?.useTLS == false ? "http://" : "https://"
+        return prefix + (bucket ?? "") + host(config).finished(with: "/")
     }
     
 }
