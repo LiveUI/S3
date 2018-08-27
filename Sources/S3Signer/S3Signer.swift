@@ -24,8 +24,6 @@ public final class S3Signer: Service {
         
         /// The region where S3 bucket is located.
         public let region: Region
-        public let host: String?
-        public let useTLS: Bool
         
         /// AWS Security Token. Used to validate temporary credentials, such as those from an EC2 Instance's IAM role
         let securityToken : String?
@@ -34,13 +32,11 @@ public final class S3Signer: Service {
         let service: String = "s3"
         
         /// Initalizer
-        public init(accessKey: String, secretKey: String, region: Region, host: String? = nil, securityToken: String? = nil, useTLS: Bool = true) {
+        public init(accessKey: String, secretKey: String, region: Region, securityToken: String? = nil) {
             self.accessKey = accessKey
             self.secretKey = secretKey
             self.region = region
             self.securityToken = securityToken
-            self.host = host
-            self.useTLS = useTLS
         }
         
     }
@@ -97,7 +93,7 @@ extension S3Signer {
         
         let region = region ?? config.region
         
-        updatedHeaders["host"] = url.host ?? region.host(config)
+        updatedHeaders["host"] = url.host ?? region.host
         
         let (canonRequest, fullURL) = try presignedURLCanonRequest(httpMethod, dates: dates, expiration: expiration, url: url, region: region, headers: updatedHeaders)
         

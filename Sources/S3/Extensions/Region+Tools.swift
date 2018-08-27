@@ -12,13 +12,13 @@ import Foundation
 extension Region {
     
     /// Get S3 URL string for bucket
-    public func urlString(bucket: String, config: S3Signer.Config?) -> String {
-        return host(config) + bucket
+    public func urlString(bucket: String) -> String {
+        return host + bucket
     }
     
     /// Get S3 URL for bucket
-    public func url(bucket: String, config: S3Signer.Config?) -> URL? {
-        return URL(string: urlString(bucket: bucket, config: config))
+    public func url(bucket: String) -> URL? {
+        return URL(string: urlString(bucket: bucket))
     }
     
 }

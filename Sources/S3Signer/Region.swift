@@ -58,10 +58,7 @@ public enum Region: String, Codable {
 extension Region {
     
     /// Base URL / Host
-    public func host(_ config: S3Signer.Config? = nil) -> String {
-        if let host = config?.host {
-            return host
-        }
+    public var host: String {
         return "s3.\(rawValue).amazonaws.com"
     }
     
