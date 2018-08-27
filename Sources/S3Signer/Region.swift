@@ -103,3 +103,24 @@ public extension Region {
     static var apSouth1: Region { return Region(name: RegionName.apSouth1) }
     static var saEast1: Region { return Region(name: RegionName.saEast1) }
 }
+
+extension Region: Codable {
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        
+        let name = try container.decode(String.self)
+        
+        guard let regionName = RegionName(rawValue: name) else {
+            throw DecodingError.typeMismatch(String.self, DecodingError.Context(codingPath: [],
+                                                                                debugDescription: "Could not find region for \(name)"))
+        }
+        
+        self.name = regionName
+        self.useTLS = true
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(self.name.rawValue)
+    }
+}
