@@ -4,9 +4,9 @@ import Foundation
 /// AWS Region
 public struct Region {
     
-    fileprivate(set) public var name: RegionName
-    fileprivate var hostName: String?
-    fileprivate(set) public var useTLS: Bool
+    public let name: RegionName
+    public let hostName: String?
+    public let useTLS: Bool
     
     public enum RegionName : String, Codable {
         /// US East (N. Virginia)
@@ -116,6 +116,7 @@ extension Region: Codable {
         }
         
         self.name = regionName
+        self.hostName = nil
         self.useTLS = true
     }
     
