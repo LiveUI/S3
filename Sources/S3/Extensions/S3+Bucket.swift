@@ -74,7 +74,7 @@ public extension S3 {
         
         let content = """
             <CreateBucketConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
-                <LocationConstraint>\(region.rawValue)</LocationConstraint>
+                <LocationConstraint>\(region.name.rawValue)</LocationConstraint>
             </CreateBucketConfiguration>
             """
         

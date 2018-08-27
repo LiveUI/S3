@@ -11,8 +11,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/vapor/vapor.git", from: "3.0.0"),
         .package(url: "https://github.com/LiveUI/XMLCoding.git", from: "0.1.0"),
-        .package(url: "https://github.com/LiveUI/VaporTestTools.git", from: "0.1.5"),
-        .package(url: "https://github.com/vapor/url-encoded-form.git", from: "1.0.4"),
+        .package(url: "https://github.com/LiveUI/VaporTestTools.git", from: "0.1.5")
     ],
     targets: [
         .target(name: "S3", dependencies: [

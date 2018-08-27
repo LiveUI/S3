@@ -18,7 +18,8 @@ extension Region {
         if let b = bucket {
             bucket = b + "."
         }
-        return "https://" + (bucket ?? "") + host.finished(with: "/")
+        let prefix = useTLS ? "https://" : "http://"
+        return prefix + (bucket ?? "") + host.finished(with: "/")
     }
     
 }
