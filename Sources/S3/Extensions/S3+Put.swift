@@ -35,7 +35,7 @@ public extension S3 {
         let client = try container.make(Client.self)
         return client.send(request).map(to: File.Response.self) { response in
             try self.check(response)
-            let res = File.Response(data: file.data, bucket: file.bucket ?? self.defaultBucket, path: file.path, access: file.access, mime: file.mime)
+            let res = File.Response(data: file.data, bucket: file.bucket ?? self.defaultBucket, path: file.path, access: file.access, mime: file.mime, headers: [:])
             return res
         }
     }
