@@ -101,9 +101,7 @@ public struct File {
         
         /// File type (mime)
         public internal(set) var mime: String
-
-        /// File headers (S3 metadata)
-        public internal(set) var headers: [String: String]
+        
     }
     
     /// File info response comming back from S3

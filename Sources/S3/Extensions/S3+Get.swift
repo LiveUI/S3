@@ -36,14 +36,7 @@ public extension S3 {
                 throw Error.missingData
             }
             
-            var headers = [String: String]()
-            response.http.headers.forEach { header in
-                if header.name.hasPrefix("X-Amz-Meta-") {
-                    headers[header.name] = header.value
-                }
-            }
-            
-            let res = File.Response(data: data, bucket: file.bucket ?? self.defaultBucket, path: file.path, access: nil, mime: self.mimeType(forFileAtUrl: url), headers: headers)
+            let res = File.Response(data: data, bucket: file.bucket ?? self.defaultBucket, path: file.path, access: nil, mime: self.mimeType(forFileAtUrl: url))
             return res
         }
     }
