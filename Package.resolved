@@ -123,8 +123,8 @@
         "repositoryURL": "https://github.com/vapor/url-encoded-form.git",
         "state": {
           "branch": null,
-          "revision": "57cf7fb9c1a1014c50bc05123684a9139ad44127",
-          "version": "1.0.3"
+          "revision": "cbfe7ef6301557d3f2d0807a98165232ae06e1c6",
+          "version": "1.0.4"
         }
       },
       {
@@ -149,9 +149,9 @@
         "package": "VaporTestTools",
         "repositoryURL": "https://github.com/LiveUI/VaporTestTools.git",
         "state": {
-          "branch": "master",
+          "branch": null,
           "revision": "e07ce263257463f2f2af9e640f81eb95a72760e4",
-          "version": null
+          "version": "0.1.5"
         }
       },
       {

@@ -14,13 +14,22 @@ extension Region {
     
     /// Host URL including scheme
     public func hostUrlString(bucket: String? = nil) -> String {
+        if hostName != nil {
+            return urlProtocol + host.finished(with: "/") + (bucket ?? "")
+        }
+        
         var bucket = bucket
-        if let b = bucket {
+        if let b = bucket, !b.isEmpty {
             bucket = b + "."
         }
-        return "https://" + (bucket ?? "") + host.finished(with: "/")
+        
+        return urlProtocol + (bucket ?? "") + host.finished(with: "/")
     }
     
+    private var urlProtocol: String {
+        return useTLS ? "https://" : "http://"
+    }
+
 }
 
 
