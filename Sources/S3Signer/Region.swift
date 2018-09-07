@@ -4,8 +4,13 @@ import Foundation
 /// AWS Region
 public struct Region {
     
+    /// name of the region, see RegionName
     public let name: RegionName
+
+    /// name of the custom host, can contain IP and/or port (e.g. 127.0.0.1:9000)
     public let hostName: String?
+
+    /// use TLS/https (defaults to true)
     public let useTLS: Bool
     
     public enum RegionName : String, Codable {
@@ -58,6 +63,8 @@ public struct Region {
         case saEast1 = "sa-east-1"
     }
 
+    /// initializer for a (custom) region. If you use a custom hostName, you
+    /// still need a region (e.g. use usEast1 for Minio)
     public init(name: RegionName, hostName: String? = nil, useTLS: Bool = true) {
         self.name = name
         self.hostName = hostName
@@ -77,8 +84,8 @@ extension Region {
     }
 }
 
-public extension Region {
-    init?(rawValue: String) {
+extension Region {
+    public init?(rawValue: String) {
         guard let name = RegionName(rawValue: rawValue) else {
             return nil
         }
@@ -86,25 +93,91 @@ public extension Region {
         self.init(name: name)
     }
     
-    static var usEast1: Region { return Region(name: RegionName.usEast1) }
-    static var usEast2: Region { return Region(name: RegionName.usEast2) }
-    static var usWest1: Region { return Region(name: RegionName.usWest1) }
-    static var usWest2: Region { return Region(name: RegionName.usWest2) }
-    static var caCentral1: Region { return Region(name: RegionName.caCentral1) }
-    static var euCentral1: Region { return Region(name: RegionName.euCentral1) }
-    static var euWest1: Region { return Region(name: RegionName.euWest1) }
-    static var euWest2: Region { return Region(name: RegionName.euWest2) }
-    static var euWest3: Region { return Region(name: RegionName.euWest3) }
-    static var apNortheast1: Region { return Region(name: RegionName.apNortheast1) }
-    static var apNortheast2: Region { return Region(name: RegionName.apNortheast2) }
-    static var apNortheast3: Region { return Region(name: RegionName.apNortheast3) }
-    static var apSoutheast1: Region { return Region(name: RegionName.apSoutheast1) }
-    static var apSoutheast2: Region { return Region(name: RegionName.apSoutheast2) }
-    static var apSouth1: Region { return Region(name: RegionName.apSouth1) }
-    static var saEast1: Region { return Region(name: RegionName.saEast1) }
+    /// convenience var for US East (N. Virginia)
+    public static var usEast1: Region {
+        return Region(name: RegionName.usEast1)
+    }
+
+    /// convenience var for US East (Ohio)
+    public static var usEast2: Region {
+        return Region(name: RegionName.usEast2)
+    }
+
+    /// convenience var for US West (N. California)
+    public static var usWest1: Region {
+        return Region(name: RegionName.usWest1)
+    }
+
+    /// convenience var for US West (Oregon)
+    public static var usWest2: Region {
+        return Region(name: RegionName.usWest2)
+    }
+
+    /// convenience var for Canada (Central)
+    public static var caCentral1: Region {
+        return Region(name: RegionName.caCentral1)
+    }
+
+    /// convenience var for EU (Frankfurt)
+    public static var euCentral1: Region {
+        return Region(name: RegionName.euCentral1)
+    }
+
+    /// convenience var for EU (Ireland)
+    public static var euWest1: Region {
+        return Region(name: RegionName.euWest1)
+    }
+
+    /// convenience var for EU (London)
+    public static var euWest2: Region {
+        return Region(name: RegionName.euWest2)
+    }
+
+    /// convenience var for EU (Paris)
+    public static var euWest3: Region {
+        return Region(name: RegionName.euWest3)
+    }
+
+    /// convenience var for Asia Pacific (Tokyo)
+    public static var apNortheast1: Region {
+        return Region(name: RegionName.apNortheast1)
+    }
+
+    /// convenience var for Asia Pacific (Seoul)
+    public static var apNortheast2: Region {
+        return Region(name: RegionName.apNortheast2)
+    }
+
+    /// convenience var for Asia Pacific (Osaka-Local)
+    public static var apNortheast3: Region {
+        return Region(name: RegionName.apNortheast3)
+    }
+
+    /// convenience var for Asia Pacific (Singapore)
+    public static var apSoutheast1: Region {
+        return Region(name: RegionName.apSoutheast1)
+    }
+
+    /// convenience var for Asia Pacific (Sydney)
+    public static var apSoutheast2: Region {
+        return Region(name: RegionName.apSoutheast2)
+    }
+
+    /// convenience var for Asia Pacific (Mumbai)
+    public static var apSouth1: Region {
+        return Region(name: RegionName.apSouth1)
+    }
+
+    /// convenience var for South America (São Paulo)
+    public static var saEast1: Region {
+        return Region(name: RegionName.saEast1)
+    }
 }
 
+/// Codable support for Region
 extension Region: Codable {
+
+    /// decodes a string (see RegionName) to a Region (does not support custom hosts)
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         
@@ -120,6 +193,7 @@ extension Region: Codable {
         self.useTLS = true
     }
     
+    /// encodes the name (see RegionName, does not support custom hosts)
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         try container.encode(self.name.rawValue)
