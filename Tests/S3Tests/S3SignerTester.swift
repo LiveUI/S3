@@ -1,25 +1,19 @@
 import Foundation
-@testable import S3SignerAWS
+@testable import S3Signer
 
-/// A way to inject specific required info for aws signing tests without introducing to S3SignerAWS.
-class S3SignerTester: S3SignerAWS {
-	
-	var overridenDate: Dates?
-	
-	var overrideService: String = "service"
-	
-	override var service: String {
-		return overrideService
-	}
-	
-	override func getDates(date: Date) -> Dates {
-		return overridenDate ?? Dates(date: date)
-	}
-}
+/// A way to inject specific required info for aws signing tests without introducing to S3Signer.
+//class S3SignerTester: S3Signer {
+//    
+//    var overridenDate: Dates?
+//
+//    func getDates(_ date: Date) -> Dates {
+//        return overridenDate ?? super.getDates(date)
+//    }
+//}
 
-extension Dates {
-	init(longDate: String) {
-		self.short = String(longDate[..<String.Index(encodedOffset: 8)])
-		self.long = longDate
-	}
-}
+//extension Dates {
+//    init(longDate: String) {
+//        self.short = String(longDate[..<String.Index(encodedOffset: 8)])
+//        self.long = longDate
+//    }
+//}

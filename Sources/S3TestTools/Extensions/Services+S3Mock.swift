@@ -14,7 +14,7 @@ import S3
 extension Services {
     
     public mutating func registerS3Mock() throws {
-        register(S3Mock(), as: S3Client.self)
+        register(try! S3Mock(), as: S3Client.self)
     }
     
 }

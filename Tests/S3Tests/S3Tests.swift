@@ -1,4 +1,4 @@
-@testable import S3SignerAWS
+@testable import S3Signer
 import XCTest
 
 class S3Tests: XCTestCase {
@@ -17,11 +17,11 @@ class S3Tests: XCTestCase {
 	let accessKey = "AKIAIOSFODNN7EXAMPLE"
 	let secretKey = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
 	
-	var signer: S3SignerTester!
+	var signer: S3Signer!
 	
 	override func setUp() {
 		super.setUp()
-		signer = S3SignerTester(accessKey: accessKey, secretKey: secretKey, region: Region.usEast1_Virginia)
+		signer = S3Signer(S3Signer.Config(accessKey: accessKey, secretKey: secretKey, region: Region.usEast1))
 		signer.overrideService = "s3"
 		signer.overridenDate = Dates(longDate: "20130524T000000Z")
 	}
@@ -189,7 +189,7 @@ class S3Tests: XCTestCase {
 			"UNSIGNED-PAYLOAD"
 			].joined(separator: "\n")
 		
-		let (canonRequest, _) = try! signer.presignedURLCanonRequest(httpMethod: .get, dates: signer.overridenDate!, expiration: TimeFromNow.custom(86400), url: requestURL, headers: ["Host": requestURL.host ?? Region.usEast1_Virginia.host])
+		let (canonRequest, _) = try! signer.presignedURLCanonRequest(httpMethod: .get, dates: signer.overridenDate!, expiration: TimeFromNow.custom(86400), url: requestURL, headers: ["Host": requestURL.host ?? Region.usEast1.host])
 		
 		XCTAssertEqual(expectedCanonRequest, canonRequest)
 		
