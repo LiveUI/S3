@@ -23,6 +23,16 @@ Register S3Client as a service in your configure method
 try services.register(s3: S3Signer.Config(...), defaultBucket: "my-bucket")
 ```
 
+to use a custom Minio server, use this Config/Region:
+
+```
+S3Signer.Config(accessKey: accessKey,
+                secretKey: secretKey,
+                region: Region(name: RegionName.usEast1,
+                               hostName: "127.0.0.1:9000",
+                               useTLS: false)
+```
+
 use S3Client
 
 ```swift
