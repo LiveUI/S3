@@ -23,7 +23,7 @@ Register S3Client as a service in your configure method
 try services.register(s3: S3Signer.Config(...), defaultBucket: "my-bucket")
 ```
 
-to use e.g. use a custom Minio server, you can use this Config/Region:
+to use a custom Minio server, use this Config/Region:
 
 ```
 S3Signer.Config(accessKey: accessKey,
