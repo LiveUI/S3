@@ -136,4 +136,34 @@ extension S3Signer {
         let presignedURL = URL(string: fullURL.absoluteString.appending("&x-amz-signature=\(signature)"))
         return presignedURL
     }
+
+    func headers(for httpMethod: HTTPMethod, urlString: URLRepresentable, region: Region? = nil, headers: [String: String] = [:], payload: Payload, dates: Dates) throws -> HTTPHeaders {
+        guard let url = urlString.convertToURL() else {
+            throw Error.badURL("\(urlString)")
+        }
+
+        let bodyDigest = try payload.hashed()
+        let region = region ?? config.region
+        var updatedHeaders = update(headers: headers, url: url, longDate: dates.long, bodyDigest: bodyDigest, region: region)
+
+        if httpMethod == .PUT && payload.isBytes {
+            updatedHeaders["content-md5"] = try MD5.hash(payload.bytes).base64EncodedString()
+        }
+
+        if httpMethod == .PUT || httpMethod == .DELETE {
+            updatedHeaders["content-length"] = payload.size()
+            if httpMethod == .PUT && url.pathExtension != "" {
+                updatedHeaders["content-type"] = (MediaType.fileExtension(url.pathExtension) ?? .plainText).description
+            }
+        }
+
+        updatedHeaders["authorization"] = try generateAuthHeader(httpMethod, url: url, headers: updatedHeaders, bodyDigest: bodyDigest, dates: dates, region: region)
+
+        var headers = HTTPHeaders()
+        for (key, value) in updatedHeaders {
+            headers.add(name: key, value: value)
+        }
+
+        return headers
+    }
 }

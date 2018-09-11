@@ -2,58 +2,44 @@
 @testable import S3
 import XCTest
 
-class AWSTestSuite: XCTestCase {
+class AWSTestSuite: BaseTestCase {
 	
 	static var allTests = [
 		("test_Get_Vanilla", test_Get_Vanilla),
 		("test_Get_Vanilla_with_added_headers", test_Get_Vanilla_with_added_headers),
 		("test_Post_With_Param_Vanilla", test_Post_With_Param_Vanilla)
 	]
-    
-    //Testing Data from AWS Test Suite
-	// https://docs.aws.amazon.com/general/latest/gr/signature-v4-test-suite.html
-    
-    let testSuiteAccessKey = "AKIDEXAMPLE"
-    let testSuiteSecretKey = "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY"
-	
-    var signer: S3Signer!
-    var overridenDate: Dates!
-    var region: Region!
 
-    override func setUp() {
-        super.setUp()
-        region = Region.usEast1
-        signer = try! S3Signer(S3Signer.Config(accessKey: testSuiteAccessKey, secretKey: testSuiteSecretKey, region: region))
-        overridenDate = Dates(Date(timeIntervalSince1970: (60*60*24) * 366 * 45))
-    }
-	
 	func test_Get_Vanilla() {
         let requestURLString = region.hostUrlString()
         let requestURL = URL(string: requestURLString)!
-        let updatedHeaders = try! signer.headers(for: .GET, urlString: requestURLString, region: region, headers: [:], payload: Payload.none)
+
+        let updatedHeaders = try! signer.update(headers: [:], url: requestURL, longDate: overridenDate.long, bodyDigest: Payload.none.hashed(), region: region)
+
 		let expectedCanonRequest = [
 			"GET",
 			"/",
 			"",
 			"host:\(region.host)",
-			"x-amz-date:20150830T123600Z",
+            "x-amz-content-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+			"x-amz-date:20130524T000000Z",
 			"",
-			"host;x-amz-date",
+            "host;x-amz-content-sha256;x-amz-date",
 			"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"]
 			.joined(separator: "\n")
 		
         let canonRequest = try! signer.createCanonicalRequest(.GET,
                                                               url: requestURL,
-                                                              headers: updatedHeaders.toDictionary(),
+                                                              headers: updatedHeaders,
                                                               bodyDigest: Payload.none.hashed())
 
 		XCTAssertEqual(expectedCanonRequest, canonRequest)
 		
 		let expectedStringToSign = [
 			"AWS4-HMAC-SHA256",
-			"20150830T123600Z",
-			"20150830/us-east-1/service/aws4_request",
-			"bb579772317eb040ac9ed261061d46c1f17a8133879d6129b6e1c25292927e63"
+			"20130524T000000Z",
+			"20130524/us-east-1/s3/aws4_request",
+			"64669d70b364645a9118ecbd15e6f62aee6db08e63d2f74a7f183eb685d871cd"
 			].joined(separator: "\n")
 		
         let stringToSign = try! signer.createStringToSign(canonRequest,
@@ -62,18 +48,18 @@ class AWSTestSuite: XCTestCase {
 
 		XCTAssertEqual(expectedStringToSign, stringToSign)
 		
-		let expectedSignature = "5fa00fa31553b73ebf1942676e86291e8372ff2a2260956d9b8aae1d763fbf31"
+		let expectedSignature = "8745d16e49fb5550634d56c2c4bb6841e42d7595f8529cf9ea14d05d51935b20"
         let signature = try! signer.createSignature(stringToSign,
                                                     timeStampShort: overridenDate.short,
                                                     region: region)
 		
 		XCTAssertEqual(expectedSignature, signature)
 		
-		let expectedAuthHeader = "AWS4-HMAC-SHA256 Credential=AKIDEXAMPLE/20150830/us-east-1/service/aws4_request, SignedHeaders=host;x-amz-date, Signature=5fa00fa31553b73ebf1942676e86291e8372ff2a2260956d9b8aae1d763fbf31"
+		let expectedAuthHeader = "AWS4-HMAC-SHA256 Credential=AKIAIOSFODNN7EXAMPLE/20130524/us-east-1/s3/aws4_request, SignedHeaders=host;x-amz-content-sha256;x-amz-date, Signature=8745d16e49fb5550634d56c2c4bb6841e42d7595f8529cf9ea14d05d51935b20"
 		
         let authHeader = try! signer.generateAuthHeader(.GET,
                                                         url: requestURL,
-                                                        headers: updatedHeaders.toDictionary(),
+                                                        headers: updatedHeaders,
                                                         bodyDigest: Payload.none.hashed(),
                                                         dates: overridenDate,
                                                         region: region)
@@ -81,59 +67,52 @@ class AWSTestSuite: XCTestCase {
 		XCTAssertEqual(expectedAuthHeader, authHeader)
 		
 		let allExpectedHeadersForRequest = [
-			"Host": "example.amazonaws.com",
-			"X-Amz-Date": "20150830T123600Z",
-			"Authorization": "AWS4-HMAC-SHA256 Credential=AKIDEXAMPLE/20150830/us-east-1/service/aws4_request, SignedHeaders=host;x-amz-date, Signature=5fa00fa31553b73ebf1942676e86291e8372ff2a2260956d9b8aae1d763fbf31"
+			"host": "s3.us-east-1.amazonaws.com",
+            "x-amz-content-sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+			"x-amz-date": "20130524T000000Z",
+			"authorization": "AWS4-HMAC-SHA256 Credential=AKIAIOSFODNN7EXAMPLE/20130524/us-east-1/s3/aws4_request, SignedHeaders=host;x-amz-content-sha256;x-amz-date, Signature=8745d16e49fb5550634d56c2c4bb6841e42d7595f8529cf9ea14d05d51935b20"
 		]
 
-        let allHeadersForRequest = try! signer.update(headers: [:],
-                                                      url: requestURL,
-                                                      longDate: overridenDate.long,
-                                                      bodyDigest: Payload.none.hashed(),
-                                                      region: region)
-//        let allHeadersForRequest = try! signer.authHeaderV4(httpMethod: .get, urlString: requestURL.absoluteString, payload: .none)
+        let allHeadersForRequest = try! signer.headers(for: .GET, urlString: requestURLString, payload: .none, dates: overridenDate)
 
-		XCTAssertEqual(allExpectedHeadersForRequest, allHeadersForRequest)
+		XCTAssertEqual(allExpectedHeadersForRequest, allHeadersForRequest.dictionaryRepresentation())
 	}
 	
 	func test_Get_Vanilla_with_added_headers() {
         let requestURLString = region.hostUrlString()
         let requestURL = URL(string: requestURLString)!
 
-        let updatedHeaders = try! signer.headers(for: .GET,
-                                                 urlString: requestURLString,
-                                                 region: region,
-                                                 headers: ["My-Header1": "value4,value1,value3,value2"],
-                                                 payload: Payload.none)
-
-//        let updatedHeaders = try! signer.updateHeaders(headers: [
-//                "My-Header1": "value4,value1,value3,value2"
-//            ], url: requestURL, longDate: overridenDate.long, bodyDigest: Payload.none.hashed())
+        let updatedHeaders = try! signer.update(headers: ["My-Header1": "value4,value1,value3,value2"],
+                                                url: requestURL,
+                                                longDate: overridenDate.long,
+                                                bodyDigest: Payload.none.hashed(),
+                                                region: region)
 
 		let expectedCanonRequest = [
 			"GET",
 			"/",
 			"",
-			"host:example.amazonaws.com",
+			"host:s3.us-east-1.amazonaws.com",
 			"my-header1:value4,value1,value3,value2",
-			"x-amz-date:20150830T123600Z",
+            "x-amz-content-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+			"x-amz-date:20130524T000000Z",
 			"",
-			"host;my-header1;x-amz-date",
+			"host;my-header1;x-amz-content-sha256;x-amz-date",
 			"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
 		].joined(separator: "\n")
 		
         let canonRequest = try! signer.createCanonicalRequest(.GET,
                                                               url: requestURL,
-                                                              headers: updatedHeaders.toDictionary(),
+                                                              headers: updatedHeaders,
                                                               bodyDigest: Payload.none.hashed())
 
 		XCTAssertEqual(expectedCanonRequest, canonRequest)
 		
 		let expectedStringToSign = [
 			"AWS4-HMAC-SHA256",
-			"20150830T123600Z",
-			"20150830/us-east-1/service/aws4_request",
-			"31ce73cd3f3d9f66977ad3dd957dc47af14df92fcd8509f59b349e9137c58b86"
+			"20130524T000000Z",
+			"20130524/us-east-1/s3/aws4_request",
+			"349cbfc1c3b792a0a1c113db82e905774d59a3a783b8a4c1635cf46e77b0fd4a"
 		].joined(separator: "\n")
 		
 		let stringToSign = try! signer.createStringToSign(canonRequest,
@@ -142,7 +121,7 @@ class AWSTestSuite: XCTestCase {
 		
 		XCTAssertEqual(expectedStringToSign, stringToSign)
 		
-		let expectedSignature = "08c7e5a9acfcfeb3ab6b2185e75ce8b1deb5e634ec47601a50643f830c755c01"
+		let expectedSignature = "b6d537c39971b5174582a0191500f5815737863d2efec1d73fe0b7dd60433006"
 		
 		let signature = try! signer.createSignature(stringToSign,
                                                     timeStampShort: overridenDate.short,
@@ -150,10 +129,10 @@ class AWSTestSuite: XCTestCase {
 		
 		XCTAssertEqual(expectedSignature, signature)
 		
-		let expectedAuthHeader = "AWS4-HMAC-SHA256 Credential=AKIDEXAMPLE/20150830/us-east-1/service/aws4_request, SignedHeaders=host;my-header1;x-amz-date, Signature=08c7e5a9acfcfeb3ab6b2185e75ce8b1deb5e634ec47601a50643f830c755c01"
+		let expectedAuthHeader = "AWS4-HMAC-SHA256 Credential=AKIAIOSFODNN7EXAMPLE/20130524/us-east-1/s3/aws4_request, SignedHeaders=host;my-header1;x-amz-content-sha256;x-amz-date, Signature=b6d537c39971b5174582a0191500f5815737863d2efec1d73fe0b7dd60433006"
 		
         let authHeader = try! signer.generateAuthHeader(.GET, url: requestURL,
-                                                        headers: updatedHeaders.toDictionary(),
+                                                        headers: updatedHeaders,
                                                         bodyDigest: Payload.none.hashed(),
                                                         dates: overridenDate,
                                                         region: region)
@@ -166,52 +145,53 @@ class AWSTestSuite: XCTestCase {
         let requestURLString = region.hostUrlString() + "?Param1=value1"
         let requestURL = URL(string: requestURLString)!
 
-        let updatedHeaders = try! signer.headers(for: .GET,
-                                                 urlString: requestURLString,
-                                                 region: region,
-                                                 headers: [:],
-                                                 payload: Payload.none)
-//        let updatedHeaders = try! signer.updateHeaders(headers: [:], url: requestURL, longDate: overridenDate.long, bodyDigest: Payload.none.hashed())
+        let updatedHeaders = try! signer.update(headers: [:],
+                                                url: requestURL,
+                                                longDate: overridenDate.long,
+                                                bodyDigest: Payload.none.hashed(),
+                                                region: region)
+
 		let expectedCanonRequest = [
 			"POST",
 			"/",
 			"Param1=value1",
-			"host:example.amazonaws.com",
-			"x-amz-date:20150830T123600Z",
+			"host:s3.us-east-1.amazonaws.com",
+            "x-amz-content-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+			"x-amz-date:20130524T000000Z",
 			"",
-			"host;x-amz-date",
+			"host;x-amz-content-sha256;x-amz-date",
 			"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
 		].joined(separator: "\n")
 		
 		let canonRequest = try! signer.createCanonicalRequest(.POST,
                                                               url: requestURL,
-                                                              headers: updatedHeaders.toDictionary(),
+                                                              headers: updatedHeaders,
                                                               bodyDigest: Payload.none.hashed())
 
 		XCTAssertEqual(expectedCanonRequest, canonRequest)
 		
 		let expectedStringToSign = [
 			"AWS4-HMAC-SHA256",
-			"20150830T123600Z",
-			"20150830/us-east-1/service/aws4_request",
-			"9d659678c1756bb3113e2ce898845a0a79dbbc57b740555917687f1b3340fbbd"
+			"20130524T000000Z",
+			"20130524/us-east-1/s3/aws4_request",
+			"9a8ec1a42be3e36ebd0880ea21ff11dac3c3519c3ab00a23ddb1b1ac4d4163b7"
 		].joined(separator: "\n")
 		
         let stringToSign = try! signer.createStringToSign(canonRequest, dates: overridenDate, region: region)
 		
 		XCTAssertEqual(expectedStringToSign, stringToSign)
 		
-		let expectedSignature = "28038455d6de14eafc1f9222cf5aa6f1a96197d7deb8263271d420d138af7f11"
+		let expectedSignature = "ea870aa535725edbb806253d7eaac9b0c38cdb256efc42c18739a2e8c14bc2ee"
 		
 		let signature = try! signer.createSignature(stringToSign, timeStampShort: overridenDate.short, region: region)
 		
 		XCTAssertEqual(expectedSignature, signature)
 		
-		let expectedAuthHeader = "AWS4-HMAC-SHA256 Credential=AKIDEXAMPLE/20150830/us-east-1/service/aws4_request, SignedHeaders=host;x-amz-date, Signature=28038455d6de14eafc1f9222cf5aa6f1a96197d7deb8263271d420d138af7f11"
+		let expectedAuthHeader = "AWS4-HMAC-SHA256 Credential=AKIAIOSFODNN7EXAMPLE/20130524/us-east-1/s3/aws4_request, SignedHeaders=host;x-amz-content-sha256;x-amz-date, Signature=ea870aa535725edbb806253d7eaac9b0c38cdb256efc42c18739a2e8c14bc2ee"
 		
 		let authHeader = try! signer.generateAuthHeader(.POST,
                                                         url: requestURL,
-                                                        headers: updatedHeaders.toDictionary(),
+                                                        headers: updatedHeaders,
                                                         bodyDigest: Payload.none.hashed(),
                                                         dates: overridenDate,
                                                         region: region)
@@ -219,25 +199,20 @@ class AWSTestSuite: XCTestCase {
 		XCTAssertEqual(expectedAuthHeader, authHeader)
 		
 		let allExpectedHeadersForRequest = [
-			"Host": "example.amazonaws.com",
-			"X-Amz-Date": "20150830T123600Z",
-			"Authorization": "AWS4-HMAC-SHA256 Credential=AKIDEXAMPLE/20150830/us-east-1/service/aws4_request, SignedHeaders=host;x-amz-date, Signature=28038455d6de14eafc1f9222cf5aa6f1a96197d7deb8263271d420d138af7f11"
+			"host": "s3.us-east-1.amazonaws.com",
+            "x-amz-date": "20130524T000000Z",
+            "x-amz-content-sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+			"authorization": "AWS4-HMAC-SHA256 Credential=AKIAIOSFODNN7EXAMPLE/20130524/us-east-1/s3/aws4_request, SignedHeaders=host;x-amz-content-sha256;x-amz-date, Signature=ea870aa535725edbb806253d7eaac9b0c38cdb256efc42c18739a2e8c14bc2ee"
 		]
 
-        let allHeadersForRequest = try! signer.update(headers: [:],
-                                                      url: requestURL,
-                                                      longDate: overridenDate.long,
-                                                      bodyDigest: Payload.none.hashed(),
-                                                      region: region)
+        let allHeadersForRequest = try! signer.headers(for: .POST, urlString: requestURLString, payload: .none, dates: overridenDate)
 
-//        let allHeadersForRequest = try! signer.authHeaderV4(httpMethod: .post, urlString: requestURL.absoluteString, payload: .none)
-
-		XCTAssertEqual(allExpectedHeadersForRequest, allHeadersForRequest)
+		XCTAssertEqual(allExpectedHeadersForRequest, allHeadersForRequest.dictionaryRepresentation())
 	}
 }
 
 extension HTTPHeaders {
-    func toDictionary() -> [String: String] {
+    func dictionaryRepresentation() -> [String: String] {
         var result = [String: String]()
         self.forEach { (header) in
             result[header.name] = header.value

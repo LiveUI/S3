@@ -5,7 +5,6 @@ class BaseTestCase: XCTestCase {
 
     let accessKey = "AKIAIOSFODNN7EXAMPLE"
     let secretKey = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
-    let overrideService = "s3"
 
     var overridenDate: Dates!
     var signer: S3Signer!
