@@ -121,5 +121,19 @@ extension S3Signer {
         }
         return updatedHeaders
     }
-    
+
+    func presignedURL(for httpMethod: HTTPMethod, url: URL, expiration: Expiration, region: Region? = nil, headers: [String: String] = [:], dates: Dates) throws -> URL? {
+        var updatedHeaders = headers
+
+        let region = region ?? config.region
+
+        updatedHeaders["host"] = url.host ?? region.host
+
+        let (canonRequest, fullURL) = try presignedURLCanonRequest(httpMethod, dates: dates, expiration: expiration, url: url, region: region, headers: updatedHeaders)
+
+        let stringToSign = try createStringToSign(canonRequest, dates: dates, region: region)
+        let signature = try createSignature(stringToSign, timeStampShort: dates.short, region: region)
+        let presignedURL = URL(string: fullURL.absoluteString.appending("&x-amz-signature=\(signature)"))
+        return presignedURL
+    }
 }
