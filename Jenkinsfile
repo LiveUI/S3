@@ -8,14 +8,7 @@ pipeline {
     stage('Builds') {
         parallel {
             stage('Build Linux') {
-              agent {
-                label 'master'
-              }
-              when {
-                anyOf {
-                  branch 'master'
-                }
-              }
+              agent any
               steps {
                 script {
                   sh './scripts/docker-shortcuts/test.sh'
