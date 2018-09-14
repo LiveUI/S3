@@ -7,11 +7,11 @@ pipeline {
   stages {
     stage('Builds') {
         parallel {
-            stage('Build Linux') {
+            stage('Test Mac OS') {
               agent any
               steps {
                 script {
-                  sh './scripts/docker-shortcuts/test.sh'
+                  sh './scripts/test.sh'
                 }
               }
             }
