@@ -13,7 +13,7 @@ import Vapor
 public struct Object: Content {
     
     /// The object's key / file name
-    let fileName: String
+    public let fileName: String
     
     /// STANDARD | STANDARD_IA | ONEZONE_IA | REDUCED_REDUNDANCY | GLACIER
     public let storageClass: String?
