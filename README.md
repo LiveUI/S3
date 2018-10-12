@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/lluuaapp/S3.svg?branch=tests)](https://travis-ci.com/lluuaapp/S3)
+
 # S3 client for Vapor 3
 
 ## Functionality
