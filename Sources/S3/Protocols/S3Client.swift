@@ -86,4 +86,16 @@ public protocol S3Client: Service {
     
     /// Delete file from S3
     func delete(file: LocationConvertible, headers: [String: String], on: Container) throws -> Future<Void>
+    
+    /// Copy file on S3
+    func copy(file: LocationConvertible, to: LocationConvertible, headers: [String: String], on: Container) throws -> Future<File.CopyResponse>
+}
+
+extension S3Client {
+    
+    /// Copy file on S3
+    public func copy(file: LocationConvertible, to: LocationConvertible, on container: Container) throws -> Future<File.CopyResponse> {
+        return try self.copy(file: file, to: to, headers: [:], on: container)
+    }
+    
 }
