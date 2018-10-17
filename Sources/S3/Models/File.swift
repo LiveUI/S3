@@ -107,10 +107,10 @@ public struct File {
     public struct CopyResponse: Content {
         
         /// ETag
-        public internal(set) var etag: String
+        public let etag: String
         
         /// Last modified
-        public internal(set) var modified: Date
+        public let modified: Date
         
         enum CodingKeys: String, CodingKey {
             case etag = "ETag"
