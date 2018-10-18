@@ -104,6 +104,7 @@ public struct File {
         
     }
     
+    /// Copy file response comming back from S3
     public struct CopyResponse: Content {
         
         /// ETag
