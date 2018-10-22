@@ -1,28 +1,55 @@
-//
-//  S3+Private.swift
-//  S3
-//
-//  Created by Ondrej Rafaj on 19/04/2018.
-//
-
 import Foundation
 import Vapor
 import HTTP
 
-
 extension S3 {
     
     /// Make an S3 request
-    func make(request url: URL, method: HTTPMethod, headers: HTTPHeaders, data: Data? = nil, on container: Container) throws -> Future<Response> {
-        let client = try container.make(Client.self)
-        let request = Request(using: container)
-        request.http.method = method
-        request.http.headers = headers
-        if let data = data {
-            request.http.body = HTTPBody(data: data)
+    func make(request url: URL, method: HTTPMethod, headers: HTTPHeaders, data: Data? = nil, cachePolicy: URLRequest.CachePolicy = .useProtocolCachePolicy, on container: Container) throws -> Future<Response> {
+        var request = URLRequest(url: url, cachePolicy: cachePolicy)
+        request.httpMethod = method.string
+        request.httpBody = data ?? Data()
+        headers.forEach { key, val in
+            request.addValue(val, forHTTPHeaderField: key.description)
         }
-        request.http.url = url
-        return client.send(request)
+        
+        return execute(request, on: container)
+    }
+    
+    /// Execute given request with URLSession.shared
+    func execute(_ request: URLRequest, on container: Container) -> Future<Response> {
+        let promise = container.eventLoop.newPromise(Response.self)
+        
+        URLSession.shared.dataTask(with: request, completionHandler: { (data, urlResponse, error) in
+            if let error = error {
+                promise.fail(error: error)
+                return
+            }
+            
+            guard let httpResponse = urlResponse as? HTTPURLResponse else {
+                let error = VaporError(identifier: "httpURLResponse", reason: "URLResponse was not a HTTPURLResponse.")
+                promise.fail(error: error)
+                return
+            }
+            
+            let response = S3.convertFromFoundationResponse(httpResponse, data: data, on: container)
+            
+            promise.succeed(result: Response(http: response, using: container))
+        }).resume()
+        
+        return promise.futureResult
+    }
+    
+    /// Convert given response and data to HTTPResponse from Vapors HTTP package
+    static func convertFromFoundationResponse(_ httpResponse: HTTPURLResponse, data: Data?, on worker: Worker) -> HTTPResponse {
+        var res = HTTPResponse(status: .init(statusCode: httpResponse.statusCode))
+        if let data = data {
+            res.body = HTTPBody(data: data)
+        }
+        for (key, value) in httpResponse.allHeaderFields {
+            res.headers.replaceOrAdd(name: "\(key)", value: "\(value)")
+        }
+        return res
     }
     
 }
