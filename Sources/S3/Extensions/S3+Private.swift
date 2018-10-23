@@ -1,3 +1,10 @@
+//
+//  S3+Private.swift
+//  S3
+//
+//  Created by Ondrej Rafaj on 19/04/2018.
+//
+
 import Foundation
 import Vapor
 import HTTP
