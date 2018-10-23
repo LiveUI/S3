@@ -8,10 +8,13 @@
 import Foundation
 import Vapor
 
+
 extension S3 {
     
+    // MARK: Copy
+    
     /// Copy file on S3
-    public func copy(file: LocationConvertible, to: LocationConvertible, headers: [String: String], on container: Container) throws -> EventLoopFuture<File.CopyResponse> {
+    public func copy(file: LocationConvertible, to: LocationConvertible, headers: [String: String], on container: Container) throws -> Future<File.CopyResponse> {
         let builder = urlBuilder(for: container)
         let originPath = "\(file.bucket ?? defaultBucket)/\(file.path)"
         let destinationUrl = try builder.url(file: to)
@@ -32,11 +35,10 @@ extension S3 {
         request.http.url = destinationUrl
         
         let client = try container.make(Client.self)
-        return client.send(request)
-            .map {
-                try self.check($0)
-                return try $0.decode(to: File.CopyResponse.self)
-            }
+        return client.send(request).map {
+            try self.check($0)
+            return try $0.decode(to: File.CopyResponse.self)
+        }
     }
     
 }
