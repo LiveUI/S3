@@ -104,6 +104,22 @@ public struct File {
         
     }
     
+    /// Copy file response comming back from S3
+    public struct CopyResponse: Content {
+        
+        /// ETag
+        public let etag: String
+        
+        /// Last modified
+        public let modified: Date
+        
+        enum CodingKeys: String, CodingKey {
+            case etag = "ETag"
+            case modified = "LastModified"
+        }
+        
+    }
+    
     /// File info response comming back from S3
     public struct Info: Content {
         
