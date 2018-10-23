@@ -47,7 +47,7 @@ extension S3 {
             res.body = HTTPBody(data: data)
         }
         for (key, value) in httpResponse.allHeaderFields {
-            res.headers.replaceOrAdd(name: "\(key)", value: "\(value)")
+            res.headers.replaceOrAdd(name: String(key), value: String(value))
         }
         return res
     }
