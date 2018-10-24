@@ -13,6 +13,8 @@
 - [x] Upload file
 - [x] Get file
 - [x] Delete file
+- [x] Copy file
+- [x] Move file (copy then delete old one)
 - [x] Object info (HEAD)
 - [ ] Object info (ACL)
 - [x] Parsing error responses
