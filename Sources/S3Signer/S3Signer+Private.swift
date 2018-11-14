@@ -18,11 +18,10 @@ extension S3Signer {
     }
     
     func createCanonicalRequest(_ httpMethod: HTTPMethod, url: URL, headers: [String: String], bodyDigest: String) throws -> String {
-        let query = try self.query(url) ?? ""
         return [
-            httpMethod.description,
-            path(url),
-            query,
+            httpMethod.string,
+            formattedPath(url.path),
+            formattedQueryString(url),
             canonicalHeaders(headers),
             signed(headers: headers),
             bodyDigest
@@ -62,44 +61,22 @@ extension S3Signer {
     func getDates(_ date: Date) -> Dates {
         return Dates(date)
     }
-    
-    func path(_ url: URL) -> String {
-        return !url.path.isEmpty ? url.path.encode(type: .pathAllowed) ?? "/" : "/"
-    }
-    
-    func presignedURLCanonRequest(_ httpMethod: HTTPMethod, dates: Dates, expiration: Expiration, url: URL, region: Region, headers: [String: String]) throws -> (String, URL) {
-        guard let credScope = credentialScope(dates.short, region: region).encode(type: .queryAllowed),
-            let signHeaders = signed(headers: headers).encode(type: .queryAllowed) else {
-                throw Error.invalidEncoding
-        }
-        let fullURL = "\(url.absoluteString)?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=\(config.accessKey)%2F\(credScope)&X-Amz-Date=\(dates.long)&X-Amz-Expires=\(expiration.value)&X-Amz-SignedHeaders=\(signHeaders)"
 
-        // This should never throw.
-        guard let url = URL(string: fullURL) else {
-            throw Error.badURL(fullURL)
-        }
-        
-        let query = try self.query(url) ?? ""
-        return (
-            [
-                httpMethod.description,
-                path(url),
-                query,
-                canonicalHeaders(headers),
-                signed(headers: headers),
-                "UNSIGNED-PAYLOAD"
-                ].joined(separator: "\n"),
-            url
-        )
+    func formattedPath(_ path: String) -> String {
+        return !path.isEmpty ? path.encode(type: .pathAllowed) ?? "/" : "/"
     }
-    
-    func query(_ url: URL) throws -> String? {
+
+    func formattedQueryString(_ url: URL) -> String {
         if let queryItems = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems {
-            let items = queryItems.map({ ($0.name.encode(type: .queryAllowed) ?? "", $0.value?.encode(type: .queryAllowed) ?? "") })
-            let encodedItems = items.map({ "\($0.0)=\($0.1)" })
-            return encodedItems.sorted().joined(separator: "&")
+            return formattedQueryItems(queryItems)
         }
-        return nil
+        return ""
+    }
+
+    func formattedQueryItems(_ queryItems: [URLQueryItem]) -> String {
+        let items = queryItems.map({ ($0.name.encode(type: .queryAllowed) ?? "", $0.value?.encode(type: .queryAllowed) ?? "") })
+        let encodedItems = items.map({ "\($0.0)=\($0.1)" })
+        return encodedItems.sorted().joined(separator: "&")
     }
     
     func signed(headers: [String: String]) -> String {
@@ -120,21 +97,6 @@ extension S3Signer {
             updatedHeaders["x-amz-security-token"] = token
         }
         return updatedHeaders
-    }
-
-    func presignedURL(for httpMethod: HTTPMethod, url: URL, expiration: Expiration, region: Region? = nil, headers: [String: String] = [:], dates: Dates) throws -> URL? {
-        var updatedHeaders = headers
-
-        let region = region ?? config.region
-
-        updatedHeaders["host"] = url.host ?? region.host
-
-        let (canonRequest, fullURL) = try presignedURLCanonRequest(httpMethod, dates: dates, expiration: expiration, url: url, region: region, headers: updatedHeaders)
-
-        let stringToSign = try createStringToSign(canonRequest, dates: dates, region: region)
-        let signature = try createSignature(stringToSign, timeStampShort: dates.short, region: region)
-        let presignedURL = URL(string: fullURL.absoluteString.appending("&X-Amz-Signature=\(signature)"))
-        return presignedURL
     }
 
     func headers(for httpMethod: HTTPMethod, urlString: URLRepresentable, region: Region? = nil, headers: [String: String] = [:], payload: Payload, dates: Dates) throws -> HTTPHeaders {
