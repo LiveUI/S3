@@ -127,7 +127,18 @@ extension S3Signer {
 
         let region = region ?? config.region
 
-        updatedHeaders["host"] = url.host ?? region.host
+        var hostname: String
+        
+        if let host = url.host {
+            hostname = host
+            if let port = url.port {
+                hostname = hostname + ":\(port)"
+            }
+        } else {
+            hostname = region.host
+        }
+        
+        updatedHeaders["host"] = hostname
 
         let (canonRequest, fullURL) = try presignedURLCanonRequest(httpMethod, dates: dates, expiration: expiration, url: url, region: region, headers: updatedHeaders)
 
