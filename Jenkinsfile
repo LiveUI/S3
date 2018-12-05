@@ -1,5 +1,5 @@
 pipeline {
-  agent none
+  agent any
   options {
     timeout(time: 15, unit: 'MINUTES')
   }
@@ -7,8 +7,7 @@ pipeline {
   stages {
     stage('Builds') {
         parallel {
-            stage('Test Mac OS') {
-              agent any
+            stage('Test') {
               steps {
                 script {
                   sh './scripts/test.sh'
