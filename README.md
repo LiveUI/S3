@@ -21,7 +21,7 @@
 
 ## Usage
 
-Update package.swift dependencies and targets
+Update dependencies and targets in Package.swift
 
 ```swift
 dependencies: [
