@@ -21,6 +21,20 @@
 
 ## Usage
 
+Update package.swift dependencies and targets
+
+```swift
+dependencies: [
+...
+.package(url: "https://github.com/LiveUI/S3.git", from: "3.0.0-RC3.2")],
+targets: [
+        .target(name: "App", dependencies: ["S3","Vapor"]),
+        ...
+        ]
+```
+
+Run ```bash vapor update```
+
 Register S3Client as a service in your configure method
 
 ```swift
