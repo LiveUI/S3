@@ -29,7 +29,7 @@ dependencies: [
     .package(url: "https://github.com/LiveUI/S3.git", from: "3.0.0-RC3.2"),
 ],
 targets: [
-        .target(name: "App", dependencies: ["S3","Vapor"]),
+        .target(name: "App", dependencies: ["Vapor", "S3"]),
         ...
 ]
 ```
