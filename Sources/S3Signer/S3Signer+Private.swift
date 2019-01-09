@@ -31,7 +31,7 @@ extension S3Signer {
     
     func createSignature(_ stringToSign: String, timeStampShort: String, region: Region) throws -> String {
         let dateKey = try HMAC.SHA256.authenticate(timeStampShort.convertToData(), key: "AWS4\(config.secretKey)".convertToData())
-        let dateRegionKey = try HMAC.SHA256.authenticate(region.name.value.convertToData(), key: dateKey)
+        let dateRegionKey = try HMAC.SHA256.authenticate(region.name.description.convertToData(), key: dateKey)
         let dateRegionServiceKey = try HMAC.SHA256.authenticate(config.service.convertToData(), key: dateRegionKey)
         let signingKey = try HMAC.SHA256.authenticate("aws4_request".convertToData(), key: dateRegionServiceKey)
         let signature = try HMAC.SHA256.authenticate(stringToSign.convertToData(), key: signingKey)
@@ -44,7 +44,7 @@ extension S3Signer {
     }
     
     func credentialScope(_ timeStampShort: String, region: Region) -> String {
-        let arr = [timeStampShort, region.name.value, config.service, "aws4_request"]
+        let arr = [timeStampShort, region.name.description, config.service, "aws4_request"]
         return arr.joined(separator: "/")
     }
     

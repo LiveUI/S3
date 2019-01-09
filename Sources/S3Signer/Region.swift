@@ -10,7 +10,7 @@ public struct Region {
     /// use TLS/https (defaults to true)
     public let useTLS: Bool
     
-    public struct Name: ExpressibleByStringLiteral, CustomStringConvertible {
+    public struct Name: ExpressibleByStringLiteral, LosslessStringConvertible {
         
         /// US East (N. Virginia)
         public static let usEast1: Name = "us-east-1"
@@ -60,14 +60,10 @@ public struct Region {
         /// South America (São Paulo)
         public static let saEast1: Name = "sa-east-1"
         
-        public let value: String
-        
-        public var description: String {
-            return value
-        }
+        public let description: String
         
         public init(_ value: String) {
-            self.value = value
+            self.description = value
         }
         
         public init(stringLiteral value: String) {
@@ -154,6 +150,6 @@ extension Region: Codable {
     
     /// encodes the name (see Name, does not support custom hosts)
     public func encode(to encoder: Encoder) throws {
-        try name.value.encode(to: encoder)
+        try name.description.encode(to: encoder)
     }
 }
