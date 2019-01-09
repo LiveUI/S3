@@ -39,7 +39,7 @@ public extension S3 {
                         guard let regionString = endpoint.split(separator: ".").dropLast(2).last?.lowercased() else {
                             throw Error.badResponse(response)
                         }
-                        return Region(name: regionString)
+                        return Region(name: .init(regionString))
                     }
                 } else {
                     throw Error.badResponse(response)
