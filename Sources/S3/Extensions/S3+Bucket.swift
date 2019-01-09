@@ -34,17 +34,12 @@ public extension S3 {
                         return Region.usEast1
                     } else {
                         // Split bucket.s3.region.amazonaws.com into parts
-                        var parts = endpoint.split(separator: ".")
-                        // Remove .com
-                        parts.removeLast()
-                        // Remove .amazonaws
-                        parts.removeLast()
-                        // Get region (lat part)
-                        let regionString = String(parts.removeLast()).lowercased()
-                        guard let region = Region(rawValue: regionString) else {
+                        // Drop .com and .amazonaws
+                        // Get region (last part)
+                        guard let regionString = endpoint.split(separator: ".").dropLast(2).last?.lowercased() else {
                             throw Error.badResponse(response)
                         }
-                        return region
+                        return Region(name: .init(regionString))
                     }
                 } else {
                     throw Error.badResponse(response)
@@ -74,7 +69,7 @@ public extension S3 {
         
         let content = """
             <CreateBucketConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
-                <LocationConstraint>\(region.name.rawValue)</LocationConstraint>
+                <LocationConstraint>\(region.name)</LocationConstraint>
             </CreateBucketConfiguration>
             """
         
