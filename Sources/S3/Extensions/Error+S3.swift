@@ -20,7 +20,7 @@ extension Error {
     }
     
     /// Return S3 ErrorMessage if possible
-    public func s3ErroMessage() -> ErrorMessage? {
+    public func s3ErrorMessage() -> ErrorMessage? {
         guard let error = self as? S3.Error else {
             return nil
         }
@@ -33,7 +33,7 @@ extension Error {
     }
     
     /// Return S3 error status code if possible
-    public func s3ErroCode() -> HTTPResponseStatus? {
+    public func s3ErrorCode() -> HTTPResponseStatus? {
         guard let error = self as? S3.Error else {
             return nil
         }
