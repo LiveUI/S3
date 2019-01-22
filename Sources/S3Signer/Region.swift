@@ -78,6 +78,14 @@ public struct Region {
         self.hostName = hostName
         self.useTLS = useTLS
     }
+    
+    @available(*, deprecated, renamed: "init(name:)", message: "This initializer has been deprecated, please use init(name:hostName:useTLS:) instead")
+    public init?(rawValue value: String) {
+        self.name = Name(value)
+        self.hostName = nil
+        self.useTLS = true
+    }
+    
 }
 
 
