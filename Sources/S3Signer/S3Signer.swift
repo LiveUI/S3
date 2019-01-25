@@ -11,11 +11,20 @@ public final class S3Signer: Service {
     public enum Error: Swift.Error {
         case badURL(String)
         case invalidEncoding
+        case featureNotAvailableWithV2Signing
+    }
+
+    /// S3 authentication support version
+    public enum Version {
+        case v2
+        case v4
     }
     
     /// S3 Configuration
     public struct Config: Service {
-        
+        /// AWS authentication version
+        let authVersion: Version
+
         /// AWS Access Key
         let accessKey: String
         
@@ -32,11 +41,12 @@ public final class S3Signer: Service {
         let service: String = "s3"
         
         /// Initalizer
-        public init(accessKey: String, secretKey: String, region: Region, securityToken: String? = nil) {
+        public init(accessKey: String, secretKey: String, region: Region, version: Version = .v4, securityToken: String? = nil) {
             self.accessKey = accessKey
             self.secretKey = secretKey
             self.region = region
             self.securityToken = securityToken
+            self.authVersion = version
         }
         
     }
@@ -55,8 +65,8 @@ public final class S3Signer: Service {
 extension S3Signer {
     
     /// Generates auth headers for Simple Storage Services
-    public func headers(for httpMethod: HTTPMethod, urlString: URLRepresentable, region: Region? = nil, headers: [String: String] = [:], payload: Payload) throws -> HTTPHeaders {
-        return try self.headers(for: httpMethod, urlString: urlString, region: region, headers: headers, payload: payload, dates: Dates(Date()))
+    public func headers(for httpMethod: HTTPMethod, urlString: URLRepresentable, region: Region? = nil, bucket: String? = nil, headers: [String: String] = [:], payload: Payload) throws -> HTTPHeaders {
+        return try self.headers(for: httpMethod, urlString: urlString, region: region, bucket: bucket, headers: headers, payload: payload, dates: Dates(Date()))
     }
     
     /// Create a pre-signed URL for later use

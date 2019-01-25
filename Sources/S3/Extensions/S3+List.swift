@@ -26,7 +26,7 @@ extension S3 {
         }
         var headers = headers
         headers["host"] = host
-        let awsHeaders = try signer.headers(for: .GET, urlString: url.absoluteString, region: region, headers: headers, payload: .none)
+        let awsHeaders = try signer.headers(for: .GET, urlString: url.absoluteString, region: region, bucket: bucket, headers: headers, payload: .none)
         return try make(request: url, method: .GET, headers: awsHeaders, data: emptyData(), on: container).map(to: BucketResults.self) { response in
             try self.check(response)
             return try response.decode(to: BucketResults.self)
