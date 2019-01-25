@@ -12,15 +12,20 @@ import Foundation
 extension S3 {
     
     /// Get list of objects
-    public func list(bucket: String, region: Region? = nil, headers: [String: String], on container: Container) throws -> Future<BucketResults> {
+    public func list(bucket: String, region: Region? = nil, headers: [String: String], prefix: String?, delimiter: String?, on container: Container) throws -> Future<BucketResults> {
         let region = region ?? signer.config.region
         guard let baseUrl = URL(string: region.hostUrlString(bucket: bucket)), let host = baseUrl.host,
             var components = URLComponents(string: baseUrl.absoluteString) else {
             throw S3.Error.invalidUrl
         }
-        components.queryItems = [
-            URLQueryItem(name: "list-type", value: "2")
-        ]
+        var queryItems = [ URLQueryItem(name: "list-type", value: "2") ]
+        if let prefix = prefix, !prefix.isEmpty {
+            queryItems.append(URLQueryItem(name: "prefix", value: prefix))
+        }
+        if let delimiter = delimiter, !delimiter.isEmpty {
+            queryItems.append(URLQueryItem(name: "delimiter", value: delimiter))
+        }
+        components.queryItems = queryItems
         guard let url = components.url else {
             throw S3.Error.invalidUrl
         }
@@ -34,8 +39,13 @@ extension S3 {
     }
     
     /// Get list of objects
+    public func list(bucket: String, region: Region? = nil, prefix: String?, delimiter: String?, on container: Container) throws -> Future<BucketResults> {
+        return try list(bucket: bucket, region: region, headers: [:], prefix: prefix, delimiter: delimiter, on: container)
+    }
+    
+    /// Get list of objects
     public func list(bucket: String, region: Region? = nil, on container: Container) throws -> Future<BucketResults> {
-        return try list(bucket: bucket, region: region, headers: [:], on: container)
+        return try list(bucket: bucket, region: region, headers: [:], prefix: nil, delimiter: nil, on: container)
     }
     
 }
