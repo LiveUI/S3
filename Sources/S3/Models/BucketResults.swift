@@ -49,7 +49,7 @@ public struct BucketResults: Content {
     public let isTruncated: Bool
     
     /// Objects
-    public let objects: [Object]
+    public let objects: [Object]?
     
     enum CodingKeys: String, CodingKey {
         case name = "Name"
