@@ -10,7 +10,7 @@ import Vapor
 
 
 // Helper S3 extension for loading (getting) files by their URL/path
-public extension S3 {
+extension S3 {
     
     // MARK: URL
     

@@ -11,7 +11,7 @@ import XMLCoding
 
 
 // Helper S3 extension for working with services
-public extension S3 {
+extension S3 {
     
     // MARK: Buckets
     

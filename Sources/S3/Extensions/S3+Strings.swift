@@ -10,7 +10,7 @@ import Foundation
 import Vapor
 
 
-public extension S3 {
+extension S3 {
     
     /// Upload file content to S3, full set
     public func put(string: String, mime: MediaType, destination: String, bucket: String?, access: AccessControlList, on container: Container) throws -> Future<File.Response> {
