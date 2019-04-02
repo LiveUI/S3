@@ -10,7 +10,7 @@ import Vapor
 
 
 // Helper S3 extension for deleting files by their URL/path
-public extension S3 {
+extension S3 {
     
     // MARK: Delete
     

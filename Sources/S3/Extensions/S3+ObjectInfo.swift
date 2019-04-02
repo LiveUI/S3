@@ -11,7 +11,7 @@ import S3Signer
 
 
 // Helper S3 extension for working with buckets
-public extension S3 {
+extension S3 {
     
     // MARK: Buckets
     
@@ -56,7 +56,7 @@ public extension S3 {
     
     /// Get file information (HEAD)
     /// https://docs.aws.amazon.com/AmazonS3/latest/API/RESTObjectHEAD.html
-    func get(fileInfo file: LocationConvertible, on container: Container) throws -> Future<File.Info> {
+    public func get(fileInfo file: LocationConvertible, on container: Container) throws -> Future<File.Info> {
         return try get(fileInfo: file, headers: [:], on: container)
     }
     

@@ -11,7 +11,7 @@ import Vapor
 
 
 // Helper S3 extension for uploading files by their URL/path
-public extension S3 {
+extension S3 {
     
     // MARK: Upload
     
