@@ -28,7 +28,7 @@ public struct BucketResults: Content {
     public let commonPrefixes: [CommonPrefix]?
     
     /// Returns the number of keys included in the response. The value is always less than or equal to the MaxKeys value
-    public let keyCount: Int
+    public let keyCount: Int?
     
     /// The maximum number of keys returned in the response body
     public let maxKeys: Int
