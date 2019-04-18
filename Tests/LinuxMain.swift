@@ -1,5 +1,5 @@
 import XCTest
-@testable import S3SignerAWSTests
+@testable import S3Tests
 
 XCTMain([
   testCase(AWSTestSuite.allTests),
