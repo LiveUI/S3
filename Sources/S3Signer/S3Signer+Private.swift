@@ -7,6 +7,26 @@ import Crypto
 /// Private interface
 extension S3Signer {
     
+	func canonicalHeadersV2(_ headers: [String: String]) -> String {
+		let unfoldedHeaders = headers
+			.filter { $0.key.lowercased().hasPrefix("x-amz") }
+			.mapValues {
+				// unfold values as per RFC 2616 section 4.2
+				$0.split(separator: "\n")
+					.map { $0.trimmingCharacters(in: .whitespaces) }
+					.joined(separator: " ")
+			}
+		let groupedHeaders = Dictionary<String, String>(unfoldedHeaders.map { ($0.key.lowercased(), $0.value) },
+														uniquingKeysWith: { "\($0),\($1)" })
+		return Array(groupedHeaders.keys)
+			.sorted(by: { $0.localizedCompare($1) == ComparisonResult.orderedAscending })
+			.map {
+				let trimmedHeader = $0.trimmingCharacters(in: .whitespaces)
+				return "\(trimmedHeader):\(groupedHeaders[$0]!)"
+			}
+			.joined(separator: "\n")
+	}
+
     func canonicalHeaders(_ headers: [String: String]) -> String {
         let headerList = Array(headers.keys)
             .map { "\($0.lowercased()):\(headers[$0]!)" }
@@ -48,6 +68,65 @@ extension S3Signer {
         return arr.joined(separator: "/")
     }
     
+	static fileprivate let canonicalSubresources = ["acl", "lifecycle", "location", "logging", "notification",
+													"partNumber", "policy", "requestPayment", "torrent",
+													"uploadId", "uploads", "versionId", "versioning", "versions", "website"]
+	static fileprivate let canonicalOverridingQueryItems = ["response-content-type", "response-content-language", "response-expires",
+															"response-cache-control", "response-content-disposition", "response-content-encoding"]
+
+	fileprivate func canonicalResourceV2(url: URL, region: Region, bucket: String?) -> String {
+		// unless there is a custom hostname, S3URLBuilder uses virtual hosting (bucket name is in host name part)
+		var canonical = ""
+		let bucketString = bucket ?? ""
+		if region.hostName == nil, !bucketString.isEmpty {
+			canonical = "/\(bucketString)"
+		}
+		let path = url.path
+		canonical += path.isEmpty ? "/" : path
+
+		if let bucket = bucket, !bucket.isEmpty, url.path.isEmpty || url.path == "/" {
+			return "/\(bucket)".finished(with: "/")
+		}
+		if url.path.isEmpty {
+			return "/"
+		}
+		if let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+		   let queryItems = components.queryItems {
+			let relevantItems: [String] = queryItems
+				.filter {
+					let name = $0.name.lowercased()
+					return S3Signer.canonicalSubresources.contains(name) || S3Signer.canonicalOverridingQueryItems.contains(name)
+				}
+				.sorted {
+					let result = $0.name.caseInsensitiveCompare($1.name)
+					return result == .orderedAscending
+				}
+				.map {
+					if let value = $0.value {
+						return "\($0.name)=\(value)"
+					}
+					return $0.name
+				}
+			if !relevantItems.isEmpty {
+				canonical += relevantItems.joined(separator: "&")
+			}
+		}
+		return url.path.encode(type: .pathAllowed) ?? "/"
+	}
+
+	func generateAuthHeaderV2(_ httpMethod: HTTPMethod, url: URL, headers: [String: String], dates: Dates, region: Region, bucket: String?) throws -> String {
+		let method = httpMethod.description
+		let contentMD5 = headers["content-MD5"] ?? ""
+		let contentType = headers["content-type"] ?? ""
+		let date = headers["Date"] ?? headers["Date"] ?? ""
+		let canonicalizedAmzHeaders = canonicalHeadersV2(headers)
+		let canonicalizedResource = canonicalResourceV2(url: url, region: region, bucket: bucket)
+		let stringToSign = "\(method)\n\(contentMD5)\n\(contentType)\n\(date)\n\(canonicalizedAmzHeaders)\n\(canonicalizedResource)"
+		let signature = try HMAC.SHA1.authenticate(stringToSign.convertToData(), key: config.secretKey.convertToData()).base64EncodedString()
+		let authHeader = "AWS \(config.accessKey):\(signature)"
+		return authHeader
+	}
+
     func generateAuthHeader(_ httpMethod: HTTPMethod, url: URL, headers: [String: String], bodyDigest: String, dates: Dates, region: Region) throws -> String {
         let canonicalRequestHex = try createCanonicalRequest(httpMethod, url: url, headers: headers, bodyDigest: bodyDigest)
         let stringToSign = try createStringToSign(canonicalRequestHex, dates: dates, region: region)
@@ -56,8 +135,8 @@ extension S3Signer {
         return authHeader
     }
     
-    func getDates(_ date: Date) -> Dates {
-        return Dates(date)
+	func getDates(_ date: Date) -> Dates {
+		return Dates(date)
     }
     
     func path(_ url: URL) -> String {
@@ -109,7 +188,7 @@ extension S3Signer {
         if (updatedHeaders["host"] ?? updatedHeaders["host"]) == nil {
             updatedHeaders["host"] = (url.host ?? (region ?? config.region).host)
         }
-        if bodyDigest != "UNSIGNED-PAYLOAD" && config.service == "s3" {
+		if config.authVersion == .v4 && bodyDigest != "UNSIGNED-PAYLOAD" && config.service == "s3" {
             updatedHeaders["x-amz-content-sha256"] = bodyDigest
         }
         // According to http://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp_use-resources.html#RequestWithSTS
@@ -120,7 +199,11 @@ extension S3Signer {
     }
 
     func presignedURL(for httpMethod: HTTPMethod, url: URL, expiration: Expiration, region: Region? = nil, headers: [String: String] = [:], dates: Dates) throws -> URL? {
-        var updatedHeaders = headers
+		guard config.authVersion == .v4 else {
+			throw Error.featureNotAvailableWithV2Signing
+		}
+
+		var updatedHeaders = headers
 
         let region = region ?? config.region
 
@@ -134,12 +217,12 @@ extension S3Signer {
         return presignedURL
     }
 
-    func headers(for httpMethod: HTTPMethod, urlString: URLRepresentable, region: Region? = nil, headers: [String: String] = [:], payload: Payload, dates: Dates) throws -> HTTPHeaders {
+    func headers(for httpMethod: HTTPMethod, urlString: URLRepresentable, region: Region? = nil, bucket: String? = nil, headers: [String: String] = [:], payload: Payload, dates: Dates) throws -> HTTPHeaders {
         guard let url = urlString.convertToURL() else {
             throw Error.badURL("\(urlString)")
         }
 
-        let bodyDigest = try payload.hashed()
+		let bodyDigest = (config.authVersion == .v4) ? try payload.hashed() : ""
         let region = region ?? config.region
         var updatedHeaders = update(headers: headers, url: url, longDate: dates.long, bodyDigest: bodyDigest, region: region)
 
@@ -154,7 +237,12 @@ extension S3Signer {
             }
         }
 
-        updatedHeaders["authorization"] = try generateAuthHeader(httpMethod, url: url, headers: updatedHeaders, bodyDigest: bodyDigest, dates: dates, region: region)
+		switch config.authVersion {
+			case .v2:
+				updatedHeaders["authorization"] = try generateAuthHeaderV2(httpMethod, url: url, headers: updatedHeaders, dates: dates, region: region, bucket: bucket)
+			case .v4:
+				updatedHeaders["authorization"] = try generateAuthHeader(httpMethod, url: url, headers: updatedHeaders, bodyDigest: bodyDigest, dates: dates, region: region)
+		}
 
         var headers = HTTPHeaders()
         for (key, value) in updatedHeaders {

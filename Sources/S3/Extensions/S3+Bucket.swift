@@ -21,7 +21,7 @@ extension S3 {
         let region = Region.euWest2
         let url = try builder.url(region: region, bucket: bucket, path: nil)
         
-        let awsHeaders = try signer.headers(for: .GET, urlString: url.absoluteString, region: region, payload: .none)
+        let awsHeaders = try signer.headers(for: .GET, urlString: url.absoluteString, region: region, bucket: bucket, payload: .none)
         return try make(request: url, method: .GET, headers: awsHeaders, data: emptyData(), on: container).map(to: Region.self) { response in
             if response.http.status == .notFound {
                 throw Error.notFound
@@ -53,7 +53,7 @@ extension S3 {
         let builder = urlBuilder(for: container)
         let url = try builder.url(region: region, bucket: bucket, path: nil)
         
-        let awsHeaders = try signer.headers(for: .DELETE, urlString: url.absoluteString, region: region, payload: .none)
+        let awsHeaders = try signer.headers(for: .DELETE, urlString: url.absoluteString, region: region, bucket: bucket, payload: .none)
         return try make(request: url, method: .DELETE, headers: awsHeaders, data: emptyData(), on: container).map(to: Void.self) { response in
             try self.check(response)
             return Void()
@@ -74,7 +74,7 @@ extension S3 {
             """
         
         let data = content.convertToData()
-        let awsHeaders = try signer.headers(for: .PUT, urlString: url.absoluteString, region: region, payload: .bytes(data))
+        let awsHeaders = try signer.headers(for: .PUT, urlString: url.absoluteString, region: region, bucket: bucket, payload: .bytes(data))
         return try make(request: url, method: .PUT, headers: awsHeaders, data: data, on: container).map(to: Void.self) { response in
             try self.check(response)
             return Void()
