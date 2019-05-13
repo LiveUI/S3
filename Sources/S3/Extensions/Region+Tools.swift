@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Core
 @_exported import S3Signer
 
 
@@ -13,7 +14,7 @@ extension Region {
     
     /// Get S3 URL string for bucket
     public func urlString(bucket: String) -> String {
-        return host + bucket
+        return host.finished(with: "/") + bucket
     }
     
     /// Get S3 URL for bucket
