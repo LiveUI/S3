@@ -29,9 +29,12 @@ public protocol S3Client: Service {
     
     /// Get list of objects
     func list(bucket: String, region: Region?, on container: Container) throws -> Future<BucketResults>
-    
+
     /// Get list of objects
-    func list(bucket: String, region: Region?, headers: [String: String], on container: Container) throws -> Future<BucketResults>
+    func list(bucket: String, region: Region?, prefix: String?, delimiter: String?, on container: Container) throws -> Future<BucketResults>
+
+    /// Get list of objects
+    func list(bucket: String, region: Region?, headers: [String: String], prefix: String?, delimiter: String?, on container: Container) throws -> Future<BucketResults>
     
     /// Upload file to S3
     func put(file: File.Upload, on container: Container) throws -> EventLoopFuture<File.Response>
