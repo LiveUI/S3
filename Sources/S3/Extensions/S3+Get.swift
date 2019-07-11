@@ -15,8 +15,8 @@ extension S3 {
     // MARK: URL
     
     /// File URL
-    public func url(fileInfo file: LocationConvertible, on container: Container) throws -> URL {
-        let builder = urlBuilder(for: container)
+    public func url(fileInfo file: LocationConvertible) throws -> URL {
+        let builder = makeURLBuilder()
         let url = try builder.url(file: file)
         return url
     }
@@ -24,15 +24,21 @@ extension S3 {
     // MARK: Get
     
     /// Retrieve file data from S3
-    public func get(file: LocationConvertible, headers: [String: String], on container: Container) throws -> Future<File.Response> {
-        let builder = urlBuilder(for: container)
-        let url = try builder.url(file: file)
-        
-        let headers = try signer.headers(for: .GET, urlString: url.absoluteString, headers: headers, payload: .none)
-        return try make(request: url, method: .GET, headers: headers, on: container).map(to: File.Response.self) { response in
+    public func get(file: LocationConvertible, headers strHeaders: [String: String], on eventLoop: EventLoop) -> EventLoopFuture<File.Response> {
+        let url: URL
+        let headers: HTTPHeaders
+
+        do {
+            url = try makeURLBuilder().url(file: file)
+            headers = try signer.headers(for: .GET, urlString: url.absoluteString, headers: strHeaders, payload: .none)
+        } catch let error {
+            return eventLoop.future(error: error)
+        }
+
+        return make(request: url, method: .GET, headers: headers, on: eventLoop).flatMapThrowing { response in
             try self.check(response)
             
-            guard let data = response.http.body.data else {
+            guard let data = response.body.data else {
                 throw Error.missingData
             }
             
@@ -42,8 +48,8 @@ extension S3 {
     }
     
     /// Retrieve file data from S3
-    public func get(file: LocationConvertible, on container: Container) throws -> EventLoopFuture<File.Response> {
-        return try get(file: file, headers: [:], on: container)
+    public func get(file: LocationConvertible, on eventLoop: EventLoop) -> EventLoopFuture<File.Response> {
+        return get(file: file, headers: [:], on: eventLoop)
     }
     
 }

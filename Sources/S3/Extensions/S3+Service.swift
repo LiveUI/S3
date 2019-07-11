@@ -16,11 +16,18 @@ extension S3 {
     // MARK: Buckets
     
     /// Get list of buckets
-    public func buckets(on container: Container) throws -> Future<BucketsInfo> {
-        let builder = urlBuilder(for: container)
-        let url = try builder.plain(region: nil)
-        let headers = try signer.headers(for: .GET, urlString: url.absoluteString, payload: .none)
-        return try make(request: url, method: .GET, headers: headers, data: emptyData(), on: container).map(to: BucketsInfo.self) { response in
+    public func buckets(on eventLoop: EventLoop) -> EventLoopFuture<BucketsInfo> {
+        let headers: HTTPHeaders
+        let url: URL
+
+        do {
+            url = try makeURLBuilder().plain(region: nil)
+            headers = try signer.headers(for: .GET, urlString: url.absoluteString, payload: .none)
+        } catch let error {
+            return eventLoop.future(error: error)
+        }
+
+        return make(request: url, method: .GET, headers: headers, data: emptyData(), on: eventLoop).flatMapThrowing { response in
             try self.check(response)
             return try response.decode(to: BucketsInfo.self)
         }

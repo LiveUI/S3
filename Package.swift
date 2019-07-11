@@ -9,9 +9,8 @@ let package = Package(
         .library(name: "S3TestTools", targets: ["S3TestTools"])
     ],
     dependencies: [
-        .package(url: "https://github.com/vapor/vapor.git", from: "3.0.0"),
-        .package(url: "https://github.com/LiveUI/XMLCoding.git", from: "0.1.0"),
-        .package(url: "https://github.com/LiveUI/VaporTestTools.git", from: "0.1.5")
+        .package(url: "https://github.com/vapor/vapor.git", from: "4.0.0-alpha"),
+        .package(url: "https://github.com/LiveUI/XMLCoding.git", from: "0.1.0")
     ],
     targets: [
         .target(name: "S3", dependencies: [
@@ -36,7 +35,6 @@ let package = Package(
         ),
         .target(name: "S3TestTools", dependencies: [
             "Vapor",
-            "VaporTestTools",
             "S3"
             ]
         ),

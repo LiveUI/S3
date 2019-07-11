@@ -36,7 +36,7 @@ public struct File {
         // MARK: Initialization
         
         /// File data to be uploaded
-        public init(data: Data, bucket: String? = nil, destination: String, access: AccessControlList = .privateAccess, mime: String = MediaType.plainText.description) {
+        public init(data: Data, bucket: String? = nil, destination: String, access: AccessControlList = .privateAccess, mime: String = HTTPMediaType.plainText.description) {
             self.data = data
             self.bucket = bucket
             self.path = destination

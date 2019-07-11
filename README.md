@@ -79,70 +79,70 @@ s3.headers(...)
 public protocol S3Client: Service {
     
     /// Get list of objects
-    func buckets(on: Container) throws -> Future<BucketsInfo>
+    func buckets(on: Container) -> EventLoopFuture<BucketsInfo>
     
     /// Create a bucket
-    func create(bucket: String, region: Region?, on container: Container) throws -> Future<Void>
+    func create(bucket: String, region: Region?, on container: Container) -> EventLoopFuture<Void>
     
     /// Delete a bucket
-    func delete(bucket: String, region: Region?, on container: Container) throws -> Future<Void>
+    func delete(bucket: String, region: Region?, on container: Container) -> EventLoopFuture<Void>
     
     /// Get bucket location
-    func location(bucket: String, on container: Container) throws -> Future<Region>
+    func location(bucket: String, on container: Container) -> EventLoopFuture<Region>
     
     /// Get list of objects
-    func list(bucket: String, region: Region?, on container: Container) throws -> Future<BucketResults>
+    func list(bucket: String, region: Region?, on container: Container) -> EventLoopFuture<BucketResults>
     
     /// Get list of objects
-    func list(bucket: String, region: Region?, headers: [String: String], on container: Container) throws -> Future<BucketResults>
+    func list(bucket: String, region: Region?, headers: [String: String], on container: Container) -> EventLoopFuture<BucketResults>
     
     /// Upload file to S3
-    func put(file: File.Upload, headers: [String: String], on: Container) throws -> EventLoopFuture<File.Response>
+    func put(file: File.Upload, headers: [String: String], on: Container) throws -> EventLoopEventLoopFuture<File.Response>
     
     /// Upload file to S3
-    func put(file url: URL, destination: String, access: AccessControlList, on: Container) throws -> Future<File.Response>
+    func put(file url: URL, destination: String, access: AccessControlList, on: Container) -> EventLoopFuture<File.Response>
     
     /// Upload file to S3
-    func put(file url: URL, destination: String, bucket: String?, access: AccessControlList, on: Container) throws -> Future<File.Response>
+    func put(file url: URL, destination: String, bucket: String?, access: AccessControlList, on: Container) -> EventLoopFuture<File.Response>
     
     /// Upload file to S3
-    func put(file path: String, destination: String, access: AccessControlList, on: Container) throws -> Future<File.Response>
+    func put(file path: String, destination: String, access: AccessControlList, on: Container) -> EventLoopFuture<File.Response>
     
     /// Upload file to S3
-    func put(file path: String, destination: String, bucket: String?, access: AccessControlList, on: Container) throws -> Future<File.Response>
+    func put(file path: String, destination: String, bucket: String?, access: AccessControlList, on: Container) -> EventLoopFuture<File.Response>
     
     /// Upload file to S3
-    func put(string: String, destination: String, on: Container) throws -> Future<File.Response>
+    func put(string: String, destination: String, on: Container) -> EventLoopFuture<File.Response>
     
     /// Upload file to S3
-    func put(string: String, destination: String, access: AccessControlList, on: Container) throws -> Future<File.Response>
+    func put(string: String, destination: String, access: AccessControlList, on: Container) -> EventLoopFuture<File.Response>
     
     /// Upload file to S3
-    func put(string: String, mime: MediaType, destination: String, on: Container) throws -> Future<File.Response>
+    func put(string: String, mime: MediaType, destination: String, on: Container) -> EventLoopFuture<File.Response>
     
     /// Upload file to S3
-    func put(string: String, mime: MediaType, destination: String, access: AccessControlList, on: Container) throws -> Future<File.Response>
+    func put(string: String, mime: MediaType, destination: String, access: AccessControlList, on: Container) -> EventLoopFuture<File.Response>
     
     /// Upload file to S3
-    func put(string: String, mime: MediaType, destination: String, bucket: String?, access: AccessControlList, on: Container) throws -> Future<File.Response>
+    func put(string: String, mime: MediaType, destination: String, bucket: String?, access: AccessControlList, on: Container) -> EventLoopFuture<File.Response>
     
     /// Retrieve file data from S3
-    func get(fileInfo file: LocationConvertible, on container: Container) throws -> Future<File.Info>
+    func get(fileInfo file: LocationConvertible, on container: Container) -> EventLoopFuture<File.Info>
     
     /// Retrieve file data from S3
-    func get(fileInfo file: LocationConvertible, headers: [String: String], on container: Container) throws -> Future<File.Info>
+    func get(fileInfo file: LocationConvertible, headers: [String: String], on container: Container) -> EventLoopFuture<File.Info>
     
     /// Retrieve file data from S3
-    func get(file: LocationConvertible, on: Container) throws -> Future<File.Response>
+    func get(file: LocationConvertible, on: Container) -> EventLoopFuture<File.Response>
     
     /// Retrieve file data from S3
-    func get(file: LocationConvertible, headers: [String: String], on: Container) throws -> Future<File.Response>
+    func get(file: LocationConvertible, headers: [String: String], on: Container) -> EventLoopFuture<File.Response>
     
     /// Delete file from S3
-    func delete(file: LocationConvertible, on: Container) throws -> Future<Void>
+    func delete(file: LocationConvertible, on: Container) -> EventLoopFuture<Void>
     
     /// Delete file from S3
-    func delete(file: LocationConvertible, headers: [String: String], on: Container) throws -> Future<Void>
+    func delete(file: LocationConvertible, headers: [String: String], on: Container) -> EventLoopFuture<Void>
 }
 ```
 
@@ -152,13 +152,13 @@ public protocol S3Client: Service {
 public func routes(_ router: Router) throws {
     
     // Get all available buckets
-    router.get("buckets")  { req -> Future<BucketsInfo> in
+    router.get("buckets")  { req -> EventLoopFuture<BucketsInfo> in
         let s3 = try req.makeS3Client()
         return try s3.buckets(on: req)
     }
     
     // Create new bucket
-    router.put("bucket")  { req -> Future<String> in
+    router.put("bucket")  { req -> EventLoopFuture<String> in
         let s3 = try req.makeS3Client()
         return try s3.create(bucket: "api-created-bucket", region: .euCentral1, on: req).map(to: String.self) {
             return ":)"
@@ -172,7 +172,7 @@ public func routes(_ router: Router) throws {
     }
     
     // Locate bucket (get region)
-    router.get("bucket/location")  { req -> Future<String> in
+    router.get("bucket/location")  { req -> EventLoopFuture<String> in
         let s3 = try req.makeS3Client()
         return try s3.location(bucket: "bucket-name", on: req).map(to: String.self) { region in
             return region.hostUrlString()
@@ -190,7 +190,7 @@ public func routes(_ router: Router) throws {
         )
     }
     // Delete bucket
-    router.delete("bucket")  { req -> Future<String> in
+    router.delete("bucket")  { req -> EventLoopFuture<String> in
         let s3 = try req.makeS3Client()
         return try s3.delete(bucket: "api-created-bucket", region: .euCentral1, on: req).map(to: String.self) {
             return ":)"
@@ -204,7 +204,7 @@ public func routes(_ router: Router) throws {
     }
     
     // Get list of objects
-    router.get("files")  { req -> Future<BucketResults> in
+    router.get("files")  { req -> EventLoopFuture<BucketResults> in
         let s3 = try req.makeS3Client()
         return try s3.list(bucket: "booststore", region: .usEast1, headers: [:], on: req).catchMap({ (error) -> (BucketResults) in
             if let error = error.s3ErrorMessage() {
@@ -215,7 +215,7 @@ public func routes(_ router: Router) throws {
     }
     
     // Demonstrate work with files
-    router.get("files/test") { req -> Future<String> in
+    router.get("files/test") { req -> EventLoopFuture<String> in
         let string = "Content of my example file"
         
         let fileName = "file-hu.txt"

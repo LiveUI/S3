@@ -31,7 +31,7 @@ extension Region {
 public protocol URLBuilder {
     
     /// Initializer
-    init(_ container: Container, defaultBucket: String, config: S3Signer.Config)
+    init(defaultBucket: String, config: S3Signer.Config)
     
     /// Plain Base URL with no bucket specified
     ///     *Format: https://s3.eu-west-2.amazonaws.com/

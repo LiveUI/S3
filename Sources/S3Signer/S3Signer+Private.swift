@@ -1,7 +1,6 @@
 import Foundation
-import HTTP
-import Crypto
-
+import CryptoKit
+import Vapor
 
 
 /// Private interface
@@ -50,16 +49,16 @@ extension S3Signer {
     }
     
     func createSignature(_ stringToSign: String, timeStampShort: String, region: Region) throws -> String {
-        let dateKey = try HMAC.SHA256.authenticate(timeStampShort.convertToData(), key: "AWS4\(config.secretKey)".convertToData())
-        let dateRegionKey = try HMAC.SHA256.authenticate(region.name.description.convertToData(), key: dateKey)
-        let dateRegionServiceKey = try HMAC.SHA256.authenticate(config.service.convertToData(), key: dateRegionKey)
-        let signingKey = try HMAC.SHA256.authenticate("aws4_request".convertToData(), key: dateRegionServiceKey)
-        let signature = try HMAC.SHA256.authenticate(stringToSign.convertToData(), key: signingKey)
+        let dateKey = try HMAC.SHA256.authenticate(.string(timeStampShort), key: .string("AWS4\(config.secretKey)"))
+        let dateRegionKey = try HMAC.SHA256.authenticate(.string(region.name.description), key: dateKey)
+        let dateRegionServiceKey = try HMAC.SHA256.authenticate(.string(config.service), key: dateRegionKey)
+        let signingKey = try HMAC.SHA256.authenticate(.string("aws4_request"), key: dateRegionServiceKey)
+        let signature = try HMAC.SHA256.authenticate(.string(stringToSign), key: signingKey)
         return signature.hexEncodedString()
     }
     
     func createStringToSign(_ canonicalRequest: String, dates: Dates, region: Region) throws -> String {
-        let canonRequestHash = try SHA256.hash(canonicalRequest.convertToData()).hexEncodedString()
+        let canonRequestHash = try SHA256.hash(.string(canonicalRequest)).hexEncodedString()
         return ["AWS4-HMAC-SHA256", dates.long, credentialScope(dates.short, region: region), canonRequestHash].joined(separator: "\n")
     }
     
@@ -122,7 +121,7 @@ extension S3Signer {
 		let canonicalizedAmzHeaders = canonicalHeadersV2(headers)
 		let canonicalizedResource = canonicalResourceV2(url: url, region: region, bucket: bucket)
 		let stringToSign = "\(method)\n\(contentMD5)\n\(contentType)\n\(date)\n\(canonicalizedAmzHeaders)\n\(canonicalizedResource)"
-		let signature = try HMAC.SHA1.authenticate(stringToSign.convertToData(), key: config.secretKey.convertToData()).base64EncodedString()
+		let signature = try Data(HMAC.SHA1.authenticate(.string(stringToSign), key: .string(config.secretKey)).bytes()).base64EncodedString()
 		let authHeader = "AWS \(config.accessKey):\(signature)"
 		return authHeader
 	}
@@ -217,8 +216,8 @@ extension S3Signer {
         return presignedURL
     }
 
-    func headers(for httpMethod: HTTPMethod, urlString: URLRepresentable, region: Region? = nil, bucket: String? = nil, headers: [String: String] = [:], payload: Payload, dates: Dates) throws -> HTTPHeaders {
-        guard let url = urlString.convertToURL() else {
+    func headers(for httpMethod: HTTPMethod, urlString: String, region: Region? = nil, bucket: String? = nil, headers: [String: String] = [:], payload: Payload, dates: Dates) throws -> HTTPHeaders {
+        guard let url = URL(string: urlString) else {
             throw Error.badURL("\(urlString)")
         }
 
@@ -227,13 +226,13 @@ extension S3Signer {
         var updatedHeaders = update(headers: headers, url: url, longDate: dates.long, bodyDigest: bodyDigest, region: region)
 
         if httpMethod == .PUT && payload.isBytes {
-            updatedHeaders["content-md5"] = try MD5.hash(payload.bytes).base64EncodedString()
+            updatedHeaders["content-md5"] = try Data(MD5.hash(.data(payload.bytes)).bytes()).base64EncodedString()
         }
-
+        
         if httpMethod == .PUT || httpMethod == .DELETE {
             updatedHeaders["content-length"] = payload.size()
             if httpMethod == .PUT && url.pathExtension != "" {
-                updatedHeaders["content-type"] = (MediaType.fileExtension(url.pathExtension) ?? .plainText).description
+                updatedHeaders["content-type"] = (HTTPMediaType.fileExtension(url.pathExtension) ?? .plainText).description
             }
         }
 

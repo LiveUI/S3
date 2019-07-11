@@ -16,24 +16,31 @@ extension S3 {
     // MARK: Upload
     
     /// Upload file to S3
-    public func put(file: File.Upload, headers: [String: String], on container: Container) throws -> EventLoopFuture<File.Response> {
-        let builder = urlBuilder(for: container)
-        let url = try builder.url(file: file)
-        
-//        let url = URL(string: "https://s3.eu-west-2.amazonaws.com/s3-liveui-test/file-hu.txt")!
-        
-        var awsHeaders: [String: String] = headers
-        awsHeaders["content-type"] = file.mime.description
-        awsHeaders["x-amz-acl"] = file.access.rawValue
-        let headers = try signer.headers(for: .PUT, urlString: url.absoluteString, headers: awsHeaders, payload: Payload.bytes(file.data))
-        
-        let request = Request(using: container)
-        request.http.method = .PUT
-        request.http.headers = headers
-        request.http.body = HTTPBody(data: file.data)
-        request.http.url = url
-        let client = try container.make(Client.self)
-        return client.send(request).map(to: File.Response.self) { response in
+    public func put(file: File.Upload, headers strHeaders: [String: String], on eventLoop: EventLoop) -> EventLoopFuture<File.Response> {
+        let headers: HTTPHeaders
+        let url: URL
+
+        do {
+            url = try makeURLBuilder().url(file: file)
+
+            var awsHeaders: [String: String] = strHeaders
+            awsHeaders["content-type"] = file.mime.description
+            awsHeaders["x-amz-acl"] = file.access.rawValue
+            headers = try signer.headers(for: .PUT, urlString: url.absoluteString, headers: awsHeaders, payload: .bytes(file.data))
+        } catch let error {
+            return eventLoop.future(error: error)
+        }
+
+        var buffer = ByteBufferAllocator().buffer(capacity: file.data.count)
+        buffer.writeBytes(file.data)
+
+        var request = ClientRequest()
+        request.method = .PUT
+        request.headers = headers
+        request.body = buffer
+        request.url = URI(string: url.description)
+
+        return self.execute(request, on: eventLoop).flatMapThrowing { response in
             try self.check(response)
             let res = File.Response(data: file.data, bucket: file.bucket ?? self.defaultBucket, path: file.path, access: file.access, mime: file.mime)
             return res
@@ -41,34 +48,46 @@ extension S3 {
     }
     
     /// Upload file to S3
-    public func put(file: File.Upload, on container: Container) throws -> EventLoopFuture<File.Response> {
-        return try put(file: file, headers: [:], on: container)
+    public func put(file: File.Upload, on eventLoop: EventLoop) -> EventLoopFuture<File.Response> {
+        return put(file: file, headers: [:], on: eventLoop)
     }
     
     /// Upload file by it's URL to S3
-    public func put(file url: URL, destination: String, access: AccessControlList = .privateAccess, on container: Container) throws -> Future<File.Response> {
-        let data: Data = try Data(contentsOf: url)
+    public func put(file url: URL, destination: String, access: AccessControlList = .privateAccess, on eventLoop: EventLoop) -> EventLoopFuture<File.Response> {
+        let data: Data
+        do {
+            data = try Data(contentsOf: url)
+        } catch let error {
+            return eventLoop.future(error: error)
+        }
+
         let file = File.Upload(data: data, bucket: nil, destination: destination, access: access, mime: mimeType(forFileAtUrl: url))
-        return try put(file: file, on: container)
+        return put(file: file, on: eventLoop)
     }
     
     /// Upload file by it's path to S3
-    public func put(file path: String, destination: String, access: AccessControlList = .privateAccess, on container: Container) throws -> Future<File.Response> {
+    public func put(file path: String, destination: String, access: AccessControlList = .privateAccess, on eventLoop: EventLoop) -> EventLoopFuture<File.Response> {
         let url: URL = URL(fileURLWithPath: path)
-        return try put(file: url, destination: destination, bucket: nil, access: access, on: container)
+        return put(file: url, destination: destination, bucket: nil, access: access, on: eventLoop)
     }
     
     /// Upload file by it's URL to S3, full set
-    public func put(file url: URL, destination: String, bucket: String?, access: AccessControlList = .privateAccess, on container: Container) throws -> Future<File.Response> {
-        let data: Data = try Data(contentsOf: url)
+    public func put(file url: URL, destination: String, bucket: String?, access: AccessControlList = .privateAccess, on eventLoop: EventLoop) -> EventLoopFuture<File.Response> {
+        let data: Data
+        do {
+            data = try Data(contentsOf: url)
+        } catch let error {
+            return eventLoop.future(error: error)
+        }
+        
         let file = File.Upload(data: data, bucket: bucket, destination: destination, access: access, mime: mimeType(forFileAtUrl: url))
-        return try put(file: file, on: container)
+        return put(file: file, on: eventLoop)
     }
     
     /// Upload file by it's path to S3, full set
-    public func put(file path: String, destination: String, bucket: String?, access: AccessControlList = .privateAccess, on container: Container) throws -> Future<File.Response> {
+    public func put(file path: String, destination: String, bucket: String?, access: AccessControlList = .privateAccess, on eventLoop: EventLoop) -> EventLoopFuture<File.Response> {
         let url: URL = URL(fileURLWithPath: path)
-        return try put(file: url, destination: destination, bucket: bucket, access: access, on: container)
+        return put(file: url, destination: destination, bucket: bucket, access: access, on: eventLoop)
     }
     
 }

@@ -5,9 +5,8 @@
 //  Created by Ondrej Rafaj on 19/04/2018.
 //
 
-import Foundation
-import Core
 @_exported import S3Signer
+import Foundation
 
 
 extension Region {

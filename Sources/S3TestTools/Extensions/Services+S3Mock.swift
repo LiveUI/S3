@@ -6,15 +6,14 @@
 //
 
 import Foundation
-import Service
+import Vapor
 import S3Signer
 import S3
 
 
-extension Services {
-    
+extension Vapor.Services {
     public mutating func registerS3Mock() throws {
-        register(try! S3Mock(), as: S3Client.self)
+        try self.instance(S3Client.self, S3Mock())
     }
     
 }

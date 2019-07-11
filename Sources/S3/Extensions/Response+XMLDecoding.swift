@@ -31,7 +31,7 @@ extension Response {
     }()
     
     func decode<T>(to: T.Type) throws -> T where T: Decodable {
-        guard let data = http.body.data else {
+        guard let data = self.body.data else {
             throw S3.Error.badResponse(self)
         }
         

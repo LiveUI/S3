@@ -6,11 +6,9 @@
 //  Copyright © 2016 manGoweb UK Ltd. All rights reserved.
 //
 
+@_exported import S3Signer
 import Foundation
 import Vapor
-import HTTP
-@_exported import S3Signer
-
 
 /// Main S3 class
 public class S3: S3Client {    
@@ -19,6 +17,7 @@ public class S3: S3Client {
     public enum Error: Swift.Error {
         case invalidUrl
         case errorResponse(HTTPResponseStatus, ErrorMessage)
+        case badClientResponse(ClientResponse)
         case badResponse(Response)
         case badStringData
         case missingData
@@ -40,9 +39,9 @@ public class S3: S3Client {
     @discardableResult public convenience init(defaultBucket: String, config: S3Signer.Config, services: inout Services) throws {
         let signer = try S3Signer(config)
         try self.init(defaultBucket: defaultBucket, signer: signer)
-        
-        services.register(signer)
-        services.register(self, as: S3Client.self)
+
+        services.instance(signer)
+        services.instance(S3Client.self, self)
     }
     
     /// Basic initialization method
@@ -68,16 +67,28 @@ extension S3 {
     // QUESTION: Can we replace this with just Data()?
     /// Serve empty data
     func emptyData() -> Data {
-        return "".convertToData()
+        return Data("".utf8)
     }
     
     /// Check response for error
     @discardableResult func check(_ response: Response) throws -> Response {
-        guard response.http.status == .ok || response.http.status == .noContent else {
+        guard response.status == .ok || response.status == .noContent else {
             if let error = try? response.decode(to: ErrorMessage.self) {
-                throw Error.errorResponse(response.http.status, error)
+                throw Error.errorResponse(response.status, error)
             } else {
                 throw Error.badResponse(response)
+            }
+        }
+        return response
+    }
+
+    /// Check response for error
+    @discardableResult func check(_ response: ClientResponse) throws -> ClientResponse {
+        guard response.status == .ok || response.status == .noContent else {
+            if let error = try? response.content.decode(ErrorMessage.self) {
+                throw Error.errorResponse(response.status, error)
+            } else {
+                throw Error.badClientResponse(response)
             }
         }
         return response
@@ -85,8 +96,8 @@ extension S3 {
     
     /// Get mime type for file
     static func mimeType(forFileAtUrl url: URL) -> String {
-        guard let mediaType = MediaType.fileExtension(url.pathExtension) else {
-            return MediaType(type: "application", subType: "octet-stream").description
+        guard let mediaType = HTTPMediaType.fileExtension(url.pathExtension) else {
+            return HTTPMediaType(type: "application", subType: "octet-stream").description
         }
         return mediaType.description
     }
@@ -97,8 +108,8 @@ extension S3 {
     }
     
     /// Create URL builder
-    func urlBuilder(for container: Container) -> URLBuilder {
-        return urlBuilder ?? S3URLBuilder(container, defaultBucket: defaultBucket, config: signer.config)
+    func makeURLBuilder() -> URLBuilder {
+        return urlBuilder ?? S3URLBuilder(defaultBucket: defaultBucket, config: signer.config)
     }
     
 }
