@@ -5,10 +5,9 @@
 //  Created by Ondrej Rafaj on 19/04/2018.
 //
 
-import Foundation
-import Service
 @_exported import S3Signer
-
+import Foundation
+import Vapor
 
 extension Services {
 

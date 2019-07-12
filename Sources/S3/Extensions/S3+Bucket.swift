@@ -16,17 +16,23 @@ extension S3 {
     // MARK: Buckets
     
     /// Get bucket location
-    public func location(bucket: String, on container: Container) throws -> Future<Region> {
-        let builder = urlBuilder(for: container)
+    public func location(bucket: String, on eventLoop: EventLoop) -> EventLoopFuture<Region> {
+        let url: URL
+        let awsHeaders: HTTPHeaders
         let region = Region.euWest2
-        let url = try builder.url(region: region, bucket: bucket, path: nil)
-        
-        let awsHeaders = try signer.headers(for: .GET, urlString: url.absoluteString, region: region, bucket: bucket, payload: .none)
-        return try make(request: url, method: .GET, headers: awsHeaders, data: emptyData(), on: container).map(to: Region.self) { response in
-            if response.http.status == .notFound {
+
+        do {
+            url = try makeURLBuilder().url(region: region, bucket: bucket, path: nil)
+            awsHeaders = try signer.headers(for: .GET, urlString: url.absoluteString, region: region, bucket: bucket, payload: .none)
+        } catch let error {
+            return eventLoop.future(error: error)
+        }
+
+        return make(request: url, method: .GET, headers: awsHeaders, data: emptyData(), on: eventLoop).flatMapThrowing { response in
+            if response.status == .notFound {
                 throw Error.notFound
             }
-            if response.http.status == .ok {
+            if response.status == .ok {
                 return region
             } else {
                 if let error = try? response.decode(to: ErrorMessage.self), error.code == "PermanentRedirect", let endpoint = error.endpoint {
@@ -49,36 +55,41 @@ extension S3 {
     }
     
     /// Delete bucket
-    public func delete(bucket: String, region: Region? = nil, on container: Container) throws -> Future<Void> {
-        let builder = urlBuilder(for: container)
-        let url = try builder.url(region: region, bucket: bucket, path: nil)
-        
-        let awsHeaders = try signer.headers(for: .DELETE, urlString: url.absoluteString, region: region, bucket: bucket, payload: .none)
-        return try make(request: url, method: .DELETE, headers: awsHeaders, data: emptyData(), on: container).map(to: Void.self) { response in
-            try self.check(response)
-            return Void()
+    public func delete(bucket: String, region: Region? = nil, on eventLoop: EventLoop) -> EventLoopFuture<Void> {
+        let url: URL
+        let awsHeaders: HTTPHeaders
+
+        do {
+            url = try makeURLBuilder().url(region: region, bucket: bucket, path: nil)
+            awsHeaders = try signer.headers(for: .DELETE, urlString: url.absoluteString, region: region, bucket: bucket, payload: .none)
+        } catch let error {
+            return eventLoop.future(error: error)
         }
+
+        return make(request: url, method: .DELETE, headers: awsHeaders, data: emptyData(), on: eventLoop).flatMapThrowing(self.check).transform(to: ())
     }
     
     /// Create a bucket
-    public func create(bucket: String, region: Region? = nil, on container: Container) throws -> Future<Void> {
+    public func create(bucket: String, region: Region? = nil, on eventLoop: EventLoop) -> EventLoopFuture<Void> {
         let region = region ?? signer.config.region
-        
-        let builder = urlBuilder(for: container)
-        let url = try builder.url(region: region, bucket: bucket, path: nil)
-        
         let content = """
-            <CreateBucketConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
-                <LocationConstraint>\(region.name)</LocationConstraint>
-            </CreateBucketConfiguration>
-            """
-        
-        let data = content.convertToData()
-        let awsHeaders = try signer.headers(for: .PUT, urlString: url.absoluteString, region: region, bucket: bucket, payload: .bytes(data))
-        return try make(request: url, method: .PUT, headers: awsHeaders, data: data, on: container).map(to: Void.self) { response in
-            try self.check(response)
-            return Void()
+        <CreateBucketConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
+            <LocationConstraint>\(region.name)</LocationConstraint>
+        </CreateBucketConfiguration>
+        """
+        let data = Data(content.utf8)
+
+        let awsHeaders: HTTPHeaders
+        let url: URL
+
+        do {
+            url = try makeURLBuilder().url(region: region, bucket: bucket, path: nil)
+            awsHeaders = try signer.headers(for: .PUT, urlString: url.absoluteString, region: region, bucket: bucket, payload: .bytes(data))
+        } catch let error {
+            return eventLoop.future(error: error)
         }
+
+        return make(request: url, method: .PUT, headers: awsHeaders, data: data, on: eventLoop).flatMapThrowing(self.check).transform(to: ())
     }
     
 }

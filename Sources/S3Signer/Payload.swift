@@ -1,5 +1,5 @@
 import Vapor
-import Crypto
+import CryptoKit
 
 
 /// Payload object
@@ -21,16 +21,16 @@ extension Payload {
         case .bytes(let bytes):
             return bytes
         default:
-            return "".convertToData()
+            return Data("".utf8)
         }
     }
     
     func hashed() throws -> String {
         switch self {
         case .bytes(let bytes):
-            return try SHA256.hash(bytes).hexEncodedString()
+            return try SHA256.hash(.data(bytes)).hexEncodedString()
         case .none:
-            return try SHA256.hash(Data()).hexEncodedString()
+            return try SHA256.hash(.data(Data())).hexEncodedString()
         case .unsigned:
             return "UNSIGNED-PAYLOAD"
         }

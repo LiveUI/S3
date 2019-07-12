@@ -14,30 +14,32 @@ extension S3 {
     // MARK: Copy
     
     /// Copy file on S3
-    public func copy(file: LocationConvertible, to: LocationConvertible, headers: [String: String], on container: Container) throws -> Future<File.CopyResponse> {
-        let builder = urlBuilder(for: container)
-        let originPath = "\(file.bucket ?? defaultBucket)/\(file.path)"
-        let destinationUrl = try builder.url(file: to)
+    public func copy(file: LocationConvertible, to: LocationConvertible, headers strHeaders: [String: String], on eventLoop: EventLoop) -> EventLoopFuture<File.CopyResponse> {
+        let headers: HTTPHeaders
+        let destinationUrl: URL
+
+        do {
+            destinationUrl = try makeURLBuilder().url(file: to)
+
+            var awsHeaders: [String: String] = strHeaders
+            awsHeaders["x-amz-copy-source"] = "\(file.bucket ?? defaultBucket)/\(file.path)"
+            headers = try signer.headers(
+                for: .PUT,
+                urlString: destinationUrl.absoluteString,
+                headers: awsHeaders,
+                payload: .none
+            )
+        } catch let error {
+            return eventLoop.future(error: error)
+        }
         
-        var awsHeaders: [String: String] = headers
-        awsHeaders["x-amz-copy-source"] = originPath
-        let headers = try signer.headers(
-            for: .PUT,
-            urlString: destinationUrl.absoluteString,
-            headers: awsHeaders,
-            payload: .none
-        )
-        
-        let request = Request(using: container)
-        request.http.method = .PUT
-        request.http.headers = headers
-        request.http.body = .empty
-        request.http.url = destinationUrl
-        
-        let client = try container.make(Client.self)
-        return client.send(request).map {
-            try self.check($0)
-            return try $0.decode(to: File.CopyResponse.self)
+        var request = ClientRequest()
+        request.method = .PUT
+        request.headers = headers
+        request.url = URI(string: destinationUrl.description)
+
+        return self.execute(request, on: eventLoop).flatMapThrowing { response in
+            return try self.check(response).content.decode(File.CopyResponse.self)
         }
     }
     

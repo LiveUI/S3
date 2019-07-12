@@ -1,11 +1,10 @@
 import Foundation
-import Service
-import HTTP
-import Crypto
+import CryptoKit
+import Vapor
 
 
 /// S3 Client: All network calls to and from AWS' S3 servers
-public final class S3Signer: Service {
+public final class S3Signer {
     
     /// Errors
     public enum Error: Swift.Error {
@@ -21,7 +20,7 @@ public final class S3Signer: Service {
     }
     
     /// S3 Configuration
-    public struct Config: Service {
+    public struct Config {
         /// AWS authentication version
         let authVersion: Version
 
@@ -65,7 +64,7 @@ public final class S3Signer: Service {
 extension S3Signer {
     
     /// Generates auth headers for Simple Storage Services
-    public func headers(for httpMethod: HTTPMethod, urlString: URLRepresentable, region: Region? = nil, bucket: String? = nil, headers: [String: String] = [:], payload: Payload) throws -> HTTPHeaders {
+    public func headers(for httpMethod: HTTPMethod, urlString: String, region: Region? = nil, bucket: String? = nil, headers: [String: String] = [:], payload: Payload) throws -> HTTPHeaders {
         return try self.headers(for: httpMethod, urlString: urlString, region: region, bucket: bucket, headers: headers, payload: payload, dates: Dates(Date()))
     }
     

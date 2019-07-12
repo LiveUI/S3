@@ -1,5 +1,5 @@
 import Foundation
-import HTTP
+import NIOHTTP1
 
 
 extension HTTPMethod {
@@ -38,6 +38,8 @@ extension HTTPMethod {
             return "PURGE"
         case .NOTIFY:
             return "NOTIFY"
+        case .SOURCE:
+            return "SOURCE"
         case .SEARCH:
             return "SEARCH"
         case .UNLOCK:

@@ -13,9 +13,6 @@ import S3Signer
 /// URL builder
 public final class S3URLBuilder: URLBuilder {
     
-    /// Container
-    let container: Container
-    
     /// Default bucket
     let defaultBucket: String
     
@@ -23,8 +20,7 @@ public final class S3URLBuilder: URLBuilder {
     let config: S3Signer.Config
     
     /// Initializer
-    public init(_ container: Container, defaultBucket: String, config: S3Signer.Config) {
-        self.container = container
+    public init(defaultBucket: String, config: S3Signer.Config) {
         self.defaultBucket = defaultBucket
         self.config = config
     }

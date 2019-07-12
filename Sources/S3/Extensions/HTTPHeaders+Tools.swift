@@ -12,8 +12,7 @@ import Vapor
 extension HTTPHeaders {
     
     func string(_ name: String) -> String? {
-        let header = HTTPHeaderName(name)
-        return self[header].first
+        return self[name].first
     }
     
     func int(_ name: String) -> Int? {

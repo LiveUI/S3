@@ -15,21 +15,24 @@ extension S3 {
     // MARK: Delete
     
     /// Delete file from S3
-    public func delete(file: LocationConvertible, headers: [String: String], on container: Container) throws -> Future<Void> {
-        let builder = urlBuilder(for: container)
-        let url = try builder.url(file: file)
-        
-        let headers = try signer.headers(for: .DELETE, urlString: url.absoluteString, headers: headers, payload: .none)
-        return try make(request: url, method: .DELETE, headers: headers, data: emptyData(), on: container).map(to: Void.self) { response in
-            try self.check(response)
-            
-            return Void()
+    public func delete(file: LocationConvertible, headers strHeaders: [String: String], on eventLoop: EventLoop) -> EventLoopFuture<Void> {
+        let headers: HTTPHeaders
+        let url: URL
+
+        do {
+            url = try makeURLBuilder().url(file: file)
+            headers = try signer.headers(for: .DELETE, urlString: url.absoluteString, headers: strHeaders, payload: .none)
+        } catch let error {
+            return eventLoop.future(error: error)
         }
+
+        return make(request: url, method: .DELETE, headers: headers, data: emptyData(), on: eventLoop).flatMapThrowing(self.check).transform(to: ())
     }
     
     /// Delete file from S3
-    public func delete(file: LocationConvertible, on container: Container) throws -> Future<Void> {
-        return try delete(file: file, headers: [:], on: container)
+    public func delete(file: LocationConvertible, on eventLoop: EventLoop) -> EventLoopFuture<Void> {
+        return
+            delete(file: file, headers: [:], on: eventLoop)
     }
     
 }
