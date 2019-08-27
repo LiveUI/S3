@@ -1,13 +1,4 @@
-//
-//  S3.swift
-//  S3
-//
-//  Created by Ondrej Rafaj on 01/12/2016.
-//  Copyright © 2016 manGoweb UK Ltd. All rights reserved.
-//
-
-@_exported import S3Signer
-import Foundation
+import S3Signer
 import Vapor
 
 /// Main S3 class
@@ -36,12 +27,9 @@ public class S3: S3Client {
     // MARK: Initialization
     
     /// Basic initialization method, also registers S3Signer and self with services
-    @discardableResult public convenience init(defaultBucket: String, config: S3Signer.Config, services: inout Services) throws {
+    @discardableResult public convenience init(defaultBucket: String, config: S3Signer.Config) throws {
         let signer = try S3Signer(config)
         try self.init(defaultBucket: defaultBucket, signer: signer)
-
-        services.instance(signer)
-        services.instance(S3Client.self, self)
     }
     
     /// Basic initialization method

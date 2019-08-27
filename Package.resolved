@@ -2,6 +2,15 @@
   "object": {
     "pins": [
       {
+        "package": "async-http-client",
+        "repositoryURL": "https://github.com/swift-server/async-http-client.git",
+        "state": {
+          "branch": null,
+          "revision": "64851a1a0a2a9e8fa7ae7b3508ce46a1da4a2e1d",
+          "version": "1.0.0-alpha.2"
+        }
+      },
+      {
         "package": "async-kit",
         "repositoryURL": "https://github.com/vapor/async-kit.git",
         "state": {
@@ -15,26 +24,17 @@
         "repositoryURL": "https://github.com/vapor/console-kit.git",
         "state": {
           "branch": null,
-          "revision": "252a8b8e22cc70ebe8a073b241b7275a3b3880d9",
-          "version": "4.0.0-alpha.1"
+          "revision": "58d000a6236df517e84f162d21afeca757afc2d1",
+          "version": "4.0.0-alpha.2"
         }
       },
       {
-        "package": "crypto-kit",
-        "repositoryURL": "https://github.com/vapor/crypto-kit.git",
+        "package": "open-crypto",
+        "repositoryURL": "https://github.com/vapor/open-crypto.git",
         "state": {
           "branch": null,
-          "revision": "9d5e780ad8f621e14226f0c2824648a9c062d37c",
-          "version": "4.0.0-alpha.1"
-        }
-      },
-      {
-        "package": "nio-websocket-client",
-        "repositoryURL": "https://github.com/vapor/nio-websocket-client.git",
-        "state": {
-          "branch": null,
-          "revision": "3e515024c4c9eab6adb1ab516be15777a28a233e",
-          "version": "1.0.0-alpha.1"
+          "revision": "06d26edb8e28295bb7103b4f950d5ea58d634c1b",
+          "version": "4.0.0-alpha.2"
         }
       },
       {
@@ -51,8 +51,8 @@
         "repositoryURL": "https://github.com/apple/swift-log.git",
         "state": {
           "branch": null,
-          "revision": "f4240bf022a69815241a883c03645444b58ac553",
-          "version": "1.1.0"
+          "revision": "e8aabbe95db22e064ad42f1a4a9f8982664c70ed",
+          "version": "1.1.1"
         }
       },
       {
@@ -60,8 +60,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio.git",
         "state": {
           "branch": null,
-          "revision": "7f20464df31e85f86bedf4a8afdd1785e0cb5059",
-          "version": "2.3.0"
+          "revision": "32760eae40e6b7cb81d4d543bb0a9f548356d9a2",
+          "version": "2.7.1"
         }
       },
       {
@@ -69,17 +69,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio-extras.git",
         "state": {
           "branch": null,
-          "revision": "96e8335180ca61c7187efe47058a1c99eadaf265",
-          "version": "1.1.0"
-        }
-      },
-      {
-        "package": "swift-nio-http-client",
-        "repositoryURL": "https://github.com/vapor/swift-nio-http-client.git",
-        "state": {
-          "branch": null,
-          "revision": "93682abeb568b3df47f0744558c4436bb325f860",
-          "version": "0.0.0"
+          "revision": "66f9a509ed3cc56b6eb367515e421beca4a0af53",
+          "version": "1.2.0"
         }
       },
       {
@@ -87,8 +78,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio-http2.git",
         "state": {
           "branch": null,
-          "revision": "06880b0abdc5d2aa68b96d6b3b29b089cb423922",
-          "version": "1.3.0"
+          "revision": "86ce1dcd0df501401eb1a0d445dbd90aaad84a64",
+          "version": "1.5.0"
         }
       },
       {
@@ -96,8 +87,8 @@
         "repositoryURL": "https://github.com/apple/swift-nio-ssl.git",
         "state": {
           "branch": null,
-          "revision": "77173ac9038e8e9b92f3efe8780923447e3c890b",
-          "version": "2.1.1"
+          "revision": "f5dd7a60ff56f501ff7bf9be753e4b1875bfaf20",
+          "version": "2.4.0"
         }
       },
       {
@@ -105,8 +96,8 @@
         "repositoryURL": "https://github.com/vapor/vapor.git",
         "state": {
           "branch": null,
-          "revision": "e415cbcacc14a5f8d02e3b6e1aea36f86064b98e",
-          "version": "4.0.0-alpha.1.5"
+          "revision": "3a65a17ed712c77a46d8c33839a5624bf06291b1",
+          "version": "4.0.0-alpha.3"
         }
       },
       {

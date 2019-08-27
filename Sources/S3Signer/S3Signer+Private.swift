@@ -1,6 +1,6 @@
 import Foundation
-import CryptoKit
-import Vapor
+import OpenCrypto
+import NIOHTTP1
 
 
 /// Private interface
@@ -49,16 +49,16 @@ extension S3Signer {
     }
     
     func createSignature(_ stringToSign: String, timeStampShort: String, region: Region) throws -> String {
-        let dateKey = try HMAC.SHA256.authenticate(.string(timeStampShort), key: .string("AWS4\(config.secretKey)"))
-        let dateRegionKey = try HMAC.SHA256.authenticate(.string(region.name.description), key: dateKey)
-        let dateRegionServiceKey = try HMAC.SHA256.authenticate(.string(config.service), key: dateRegionKey)
-        let signingKey = try HMAC.SHA256.authenticate(.string("aws4_request"), key: dateRegionServiceKey)
-        let signature = try HMAC.SHA256.authenticate(.string(stringToSign), key: signingKey)
-        return signature.hexEncodedString()
+        let dateKey = HMAC<SHA256>.signature(timeStampShort, key: "AWS4\(config.secretKey)")
+        let dateRegionKey = HMAC<SHA256>.signature(region.name.description, key: dateKey)
+        let dateRegionServiceKey = HMAC<SHA256>.signature(config.service, key: dateRegionKey)
+        let signingKey = HMAC<SHA256>.signature("aws4_request", key: dateRegionServiceKey)
+        let signature = HMAC<SHA256>.signature(stringToSign, key: signingKey)
+        return signature
     }
     
     func createStringToSign(_ canonicalRequest: String, dates: Dates, region: Region) throws -> String {
-        let canonRequestHash = try SHA256.hash(.string(canonicalRequest)).hexEncodedString()
+        let canonRequestHash = SHA256.hash(data: [UInt8](canonicalRequest.utf8)).description
         return ["AWS4-HMAC-SHA256", dates.long, credentialScope(dates.short, region: region), canonRequestHash].joined(separator: "\n")
     }
     
@@ -84,7 +84,7 @@ extension S3Signer {
 		canonical += path.isEmpty ? "/" : path
 
 		if let bucket = bucket, !bucket.isEmpty, url.path.isEmpty || url.path == "/" {
-			return "/\(bucket)".finished(with: "/")
+            return "/\(bucket.trimmingCharacters(in: CharacterSet.init(charactersIn: "/")))/"
 		}
 		if url.path.isEmpty {
 			return "/"
@@ -121,8 +121,8 @@ extension S3Signer {
 		let canonicalizedAmzHeaders = canonicalHeadersV2(headers)
 		let canonicalizedResource = canonicalResourceV2(url: url, region: region, bucket: bucket)
 		let stringToSign = "\(method)\n\(contentMD5)\n\(contentType)\n\(date)\n\(canonicalizedAmzHeaders)\n\(canonicalizedResource)"
-		let signature = try Data(HMAC.SHA1.authenticate(.string(stringToSign), key: .string(config.secretKey)).bytes()).base64EncodedString()
-		let authHeader = "AWS \(config.accessKey):\(signature)"
+        let signature = HMAC<Insecure.SHA1>.signature(stringToSign, key: config.secretKey)
+        let authHeader = "AWS \(config.accessKey):\(signature)"
 		return authHeader
 	}
 
@@ -216,23 +216,33 @@ extension S3Signer {
         return presignedURL
     }
 
-    func headers(for httpMethod: HTTPMethod, urlString: String, region: Region? = nil, bucket: String? = nil, headers: [String: String] = [:], payload: Payload, dates: Dates) throws -> HTTPHeaders {
+    func headers(
+        for httpMethod: HTTPMethod,
+        urlString: String,
+        region: Region? = nil,
+        bucket: String? = nil,
+        headers: [String: String] = [:],
+        payload: Payload,
+        dates: Dates
+    ) throws -> HTTPHeaders {
         guard let url = URL(string: urlString) else {
             throw Error.badURL("\(urlString)")
         }
 
-		let bodyDigest = (config.authVersion == .v4) ? try payload.hashed() : ""
+		let bodyDigest = (config.authVersion == .v4) ? payload.hashed() : ""
         let region = region ?? config.region
         var updatedHeaders = update(headers: headers, url: url, longDate: dates.long, bodyDigest: bodyDigest, region: region)
 
         if httpMethod == .PUT && payload.isBytes {
-            updatedHeaders["content-md5"] = try Data(MD5.hash(.data(payload.bytes)).bytes()).base64EncodedString()
+            let s: String = Insecure.MD5.hash(data: [UInt8](payload.bytes)).description
+            updatedHeaders["content-md5"] = s
         }
         
         if httpMethod == .PUT || httpMethod == .DELETE {
             updatedHeaders["content-length"] = payload.size()
             if httpMethod == .PUT && url.pathExtension != "" {
-                updatedHeaders["content-type"] = (HTTPMediaType.fileExtension(url.pathExtension) ?? .plainText).description
+                fatalError()
+//                updatedHeaders["content-type"] = (HTTPMediaType.fileExtension(url.pathExtension) ?? .plainText).description
             }
         }
 

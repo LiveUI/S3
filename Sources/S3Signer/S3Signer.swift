@@ -1,6 +1,6 @@
 import Foundation
-import CryptoKit
-import Vapor
+import OpenCrypto
+import NIOHTTP1
 
 
 /// S3 Client: All network calls to and from AWS' S3 servers

@@ -1,12 +1,4 @@
-//
-//  File.swift
-//  S3
-//
-//  Created by Ondrej Rafaj on 12/05/2018.
-//
-
-import Foundation
-@_exported import Vapor
+import Vapor
 
 
 /// File data

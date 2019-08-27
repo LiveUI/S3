@@ -1,11 +1,4 @@
-//
-//  Region+Tools.swift
-//  S3Signer
-//
-//  Created by Ondrej Rafaj on 19/04/2018.
-//
-
-@_exported import S3Signer
+import S3Signer
 import Foundation
 
 

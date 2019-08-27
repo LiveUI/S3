@@ -1,9 +1,10 @@
-import Vapor
-import CryptoKit
+import Foundation
+import OpenCrypto
 
 
 /// Payload object
 public enum Payload {
+    
     /// Data payload
     case bytes(Data)
     
@@ -12,6 +13,7 @@ public enum Payload {
     
     /// Unsigned payload
     case unsigned
+    
 }
 
 extension Payload {
@@ -25,12 +27,12 @@ extension Payload {
         }
     }
     
-    func hashed() throws -> String {
+    func hashed() -> String {
         switch self {
         case .bytes(let bytes):
-            return try SHA256.hash(.data(bytes)).hexEncodedString()
+            return SHA256.hash(data: [UInt8](bytes)).description
         case .none:
-            return try SHA256.hash(.data(Data())).hexEncodedString()
+            return SHA256.hash(data: []).description
         case .unsigned:
             return "UNSIGNED-PAYLOAD"
         }

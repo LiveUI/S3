@@ -1,12 +1,4 @@
-//
-//  Service+S3.swift
-//  S3Signer
-//
-//  Created by Ondrej Rafaj on 19/04/2018.
-//
-
-@_exported import S3Signer
-import Foundation
+import S3Signer
 import Vapor
 
 extension Services {

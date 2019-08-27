@@ -1,11 +1,3 @@
-//
-//  S3.swift
-//  S3
-//
-//  Created by Ondrej Rafaj on 18/04/2018.
-//
-
-import Foundation
 @testable import S3
 import Vapor
 
