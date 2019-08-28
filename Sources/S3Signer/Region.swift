@@ -1,16 +1,18 @@
 /// AWS Region
 public struct Region {
     
-    /// name of the region, see Name
+    /// Name of the region, see Name
     public let name: Name
     
-    /// name of the custom host, can contain IP and/or port (e.g. 127.0.0.1:9000)
+    /// Name of the custom host, can contain IP and/or port (e.g. 127.0.0.1:9000)
     public let hostName: String?
     
-    /// use TLS/https (defaults to true)
+    /// Use TLS/https (defaults to true)
     public let useTLS: Bool
     
     public struct Name: ExpressibleByStringLiteral, LosslessStringConvertible {
+        
+        public typealias StringLiteralType = String
         
         /// US East (N. Virginia)
         public static let usEast1: Name = "us-east-1"
@@ -60,30 +62,34 @@ public struct Region {
         /// South America (São Paulo)
         public static let saEast1: Name = "sa-east-1"
         
+        
+        /// Custom region
+        /// - Parameter name: region identifier
+        public static func custom(_ identifier: String) -> Name {
+            return .init(stringLiteral: identifier)
+        }
+        
+        /// Region as string
         public let description: String
         
-        public init(_ value: String) {
+        /// Initializer
+        public init(stringLiteral value: String) {
             self.description = value
         }
         
-        public init(stringLiteral value: String) {
-            self.init(value)
+        /// Initializer
+        public init(_ value: String) {
+            self.init(stringLiteral: value)
         }
+        
     }
     
-    /// initializer for a (custom) region. If you use a custom hostName, you
-    /// still need a region (e.g. use usEast1 for Minio)
+    /// Initializer for a (custom) region. If you use a custom hostName, you
+    ///     - Note: still need a region (e.g. use usEast1 for Minio)
     public init(name: Name, hostName: String? = nil, useTLS: Bool = true) {
         self.name = name
         self.hostName = hostName
         self.useTLS = useTLS
-    }
-    
-    @available(*, deprecated, renamed: "init(name:)", message: "This initializer has been deprecated, please use init(name:hostName:useTLS:) instead")
-    public init?(rawValue value: String) {
-        self.name = Name(value)
-        self.hostName = nil
-        self.useTLS = true
     }
     
 }
@@ -95,6 +101,7 @@ extension Region {
     public var host: String {
         return hostName ?? "s3.\(name).amazonaws.com"
     }
+    
 }
 
 extension Region {
@@ -146,18 +153,20 @@ extension Region {
     
     /// convenience var for South America (São Paulo)
     public static let saEast1 = Region(name: .saEast1)
+    
 }
 
 /// Codable support for Region
 extension Region: Codable {
     
-    /// decodes a string (see Name) to a Region (does not support custom hosts)
+    /// Decodes a string (see Name) to a Region (does not support custom hosts)
     public init(from decoder: Decoder) throws {
         try self.init(name: .init(.init(from: decoder)))
     }
     
-    /// encodes the name (see Name, does not support custom hosts)
+    /// Encodes the name (see Name, does not support custom hosts)
     public func encode(to encoder: Encoder) throws {
         try name.description.encode(to: encoder)
     }
+    
 }

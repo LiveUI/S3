@@ -1,6 +1,7 @@
 import Foundation
 import OpenCrypto
 import NIOHTTP1
+import HTTPMediaTypes
 
 
 /// Private interface
@@ -49,17 +50,23 @@ extension S3Signer {
     }
     
     func createSignature(_ stringToSign: String, timeStampShort: String, region: Region) throws -> String {
-        let dateKey = HMAC<SHA256>.signature(timeStampShort, key: "AWS4\(config.secretKey)")
+        let dateKey = HMAC<SHA256>.signature(timeStampShort, key: "AWS4\(config.secretKey)".bytes)
         let dateRegionKey = HMAC<SHA256>.signature(region.name.description, key: dateKey)
         let dateRegionServiceKey = HMAC<SHA256>.signature(config.service, key: dateRegionKey)
         let signingKey = HMAC<SHA256>.signature("aws4_request", key: dateRegionServiceKey)
         let signature = HMAC<SHA256>.signature(stringToSign, key: signingKey)
-        return signature
+        return signature.description
     }
     
     func createStringToSign(_ canonicalRequest: String, dates: Dates, region: Region) throws -> String {
-        let canonRequestHash = SHA256.hash(data: [UInt8](canonicalRequest.utf8)).description
-        return ["AWS4-HMAC-SHA256", dates.long, credentialScope(dates.short, region: region), canonRequestHash].joined(separator: "\n")
+        let canonRequestHash = SHA256.hash(data: canonicalRequest.bytes).description
+        let components = [
+            "AWS4-HMAC-SHA256",
+            dates.long,
+            credentialScope(dates.short, region: region),
+            canonRequestHash
+        ]
+        return components.joined(separator: "\n")
     }
     
     func credentialScope(_ timeStampShort: String, region: Region) -> String {
@@ -67,11 +74,31 @@ extension S3Signer {
         return arr.joined(separator: "/")
     }
     
-	static fileprivate let canonicalSubresources = ["acl", "lifecycle", "location", "logging", "notification",
-													"partNumber", "policy", "requestPayment", "torrent",
-													"uploadId", "uploads", "versionId", "versioning", "versions", "website"]
-	static fileprivate let canonicalOverridingQueryItems = ["response-content-type", "response-content-language", "response-expires",
-															"response-cache-control", "response-content-disposition", "response-content-encoding"]
+	static fileprivate let canonicalSubresources = [
+        "acl",
+        "lifecycle",
+        "location",
+        "logging",
+        "notification",
+        "partNumber",
+        "policy",
+        "requestPayment",
+        "torrent",
+        "uploadId",
+        "uploads",
+        "versionId",
+        "versioning",
+        "versions",
+        "website"
+    ]
+	static fileprivate let canonicalOverridingQueryItems = [
+        "response-content-type",
+        "response-content-language",
+        "response-expires",
+        "response-cache-control",
+        "response-content-disposition",
+        "response-content-encoding"
+    ]
 
 	fileprivate func canonicalResourceV2(url: URL, region: Region, bucket: String?) -> String {
 		// unless there is a custom hostname, S3URLBuilder uses virtual hosting (bucket name is in host name part)
@@ -84,7 +111,7 @@ extension S3Signer {
 		canonical += path.isEmpty ? "/" : path
 
 		if let bucket = bucket, !bucket.isEmpty, url.path.isEmpty || url.path == "/" {
-            return "/\(bucket.trimmingCharacters(in: CharacterSet.init(charactersIn: "/")))/"
+            return "/\(bucket.trimmingCharacters(in: CharacterSet(charactersIn: "/")))/"
 		}
 		if url.path.isEmpty {
 			return "/"
@@ -121,8 +148,8 @@ extension S3Signer {
 		let canonicalizedAmzHeaders = canonicalHeadersV2(headers)
 		let canonicalizedResource = canonicalResourceV2(url: url, region: region, bucket: bucket)
 		let stringToSign = "\(method)\n\(contentMD5)\n\(contentType)\n\(date)\n\(canonicalizedAmzHeaders)\n\(canonicalizedResource)"
-        let signature = HMAC<Insecure.SHA1>.signature(stringToSign, key: config.secretKey)
-        let authHeader = "AWS \(config.accessKey):\(signature)"
+        let signature = HMAC<Insecure.SHA1>.signature(stringToSign, key: config.secretKey.bytes)
+        let authHeader = "AWS \(config.accessKey):\(signature.data.base64EncodedString())"
 		return authHeader
 	}
 
@@ -241,8 +268,7 @@ extension S3Signer {
         if httpMethod == .PUT || httpMethod == .DELETE {
             updatedHeaders["content-length"] = payload.size()
             if httpMethod == .PUT && url.pathExtension != "" {
-                fatalError()
-//                updatedHeaders["content-type"] = (HTTPMediaType.fileExtension(url.pathExtension) ?? .plainText).description
+                updatedHeaders["content-type"] = (HTTPMediaType.fileExtension(url.pathExtension) ?? .plainText).description
             }
         }
 

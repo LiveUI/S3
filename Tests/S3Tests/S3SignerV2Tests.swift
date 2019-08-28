@@ -1,9 +1,6 @@
-//
-// Created by Florent Pillet on 2019-01-25.
-//
-
 @testable import S3Signer
 import XCTest
+
 
 class S3SignerV2Tests: BaseTestCase {
 	override func setUp() {
@@ -22,7 +19,7 @@ class S3SignerV2Tests: BaseTestCase {
 		let requestURLString = region.hostUrlString()
 		let requestURL = URL(string: requestURLString)!
 
-		let updatedHeaders = try signer.update(headers: [:], url: requestURL, longDate: overridenDate.long, bodyDigest: Payload.none.hashed(), region: region)
+		let updatedHeaders = signer.update(headers: [:], url: requestURL, longDate: overridenDate.long, bodyDigest: Payload.none.hashed(), region: region)
 		let signature = try signer.generateAuthHeaderV2(.GET, url: requestURL, headers: updatedHeaders, dates: overridenDate, region: region, bucket: nil)
 
 		XCTAssertEqual(signature, "AWS AKIAIOSFODNN7EXAMPLE:6sBgrGyWpHXvBFC/ip2imdLWe1U=")
@@ -32,7 +29,7 @@ class S3SignerV2Tests: BaseTestCase {
 		let requestURLString = region.hostUrlString()
 		let requestURL = URL(string: requestURLString)!
 
-		let updatedHeaders = try signer.update(headers: [:], url: requestURL, longDate: overridenDate.long, bodyDigest: Payload.none.hashed(), region: region)
+		let updatedHeaders = signer.update(headers: [:], url: requestURL, longDate: overridenDate.long, bodyDigest: Payload.none.hashed(), region: region)
 		let signature = try signer.generateAuthHeaderV2(.GET, url: requestURL, headers: updatedHeaders, dates: overridenDate, region: region, bucket: "SomeBucket")
 
 		XCTAssertEqual(signature, "AWS AKIAIOSFODNN7EXAMPLE:MoWa/bEpN+BIPWryvy9dMxSvFsw=")
@@ -44,9 +41,10 @@ class S3SignerV2Tests: BaseTestCase {
 		let requestURLString =  region.hostUrlString()
 		let requestURL = URL(string: requestURLString)!
 
-		let updatedHeaders = try signer.update(headers: [:], url: requestURL, longDate: overridenDate.long, bodyDigest: Payload.none.hashed(), region: region)
+		let updatedHeaders = signer.update(headers: [:], url: requestURL, longDate: overridenDate.long, bodyDigest: Payload.none.hashed(), region: region)
 		let signature = try signer.generateAuthHeaderV2(.GET, url: requestURL, headers: updatedHeaders, dates: overridenDate, region: region, bucket: "SomeBucket")
 
-		XCTAssertEqual(signature, "AWS AKIAIOSFODNN7EXAMPLE:MoWa/bEpN+BIPWryvy9dMxSvFsw=")
+        XCTAssertEqual(signature, "AWS AKIAIOSFODNN7EXAMPLE:MoWa/bEpN+BIPWryvy9dMxSvFsw=")
 	}
+    
 }

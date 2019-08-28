@@ -29,6 +29,15 @@
         }
       },
       {
+        "package": "HTTPMediaTypes",
+        "repositoryURL": "https://github.com/Einstore/HTTPMediaTypes.git",
+        "state": {
+          "branch": null,
+          "revision": "cbbb333bce74fbe5ef34648de1d3c2bfef2327fa",
+          "version": "0.0.1"
+        }
+      },
+      {
         "package": "open-crypto",
         "repositoryURL": "https://github.com/vapor/open-crypto.git",
         "state": {
@@ -96,8 +105,17 @@
         "repositoryURL": "https://github.com/vapor/vapor.git",
         "state": {
           "branch": null,
-          "revision": "3a65a17ed712c77a46d8c33839a5624bf06291b1",
-          "version": "4.0.0-alpha.3"
+          "revision": "35f8dc3df0976cff76945a03bfcb763e46a16440",
+          "version": "4.0.0-alpha.3.1"
+        }
+      },
+      {
+        "package": "WebError",
+        "repositoryURL": "https://github.com/Einstore/WebErrorKit.git",
+        "state": {
+          "branch": null,
+          "revision": "183170b95c46ca5a900d0ea870980c9c280a573a",
+          "version": "0.0.1"
         }
       },
       {

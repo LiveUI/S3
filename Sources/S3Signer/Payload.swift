@@ -23,7 +23,7 @@ extension Payload {
         case .bytes(let bytes):
             return bytes
         default:
-            return Data("".utf8)
+            return Data()
         }
     }
     

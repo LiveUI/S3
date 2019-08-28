@@ -4,20 +4,20 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
-		<key>S3-Package.xcscheme_^#shared#^_</key>
+		<key>S3DemoRun.xcscheme_^#shared#^_</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>3</integer>
+		</dict>
+		<key>S3Kit-Package.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
 			<integer>0</integer>
 		</dict>
-		<key>S3.xcscheme_^#shared#^_</key>
+		<key>S3Kit.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
 			<integer>1</integer>
-		</dict>
-		<key>S3DemoRun.xcscheme_^#shared#^_</key>
-		<dict>
-			<key>orderHint</key>
-			<integer>4</integer>
 		</dict>
 		<key>S3Signer.xcscheme_^#shared#^_</key>
 		<dict>
@@ -33,6 +33,21 @@
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
 		<key>S3</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>S3DemoRun</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>S3Kit</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>S3Provider</key>
 		<dict>
 			<key>primary</key>
 			<true/>

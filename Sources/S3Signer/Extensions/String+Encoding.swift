@@ -14,5 +14,7 @@ extension String {
         allowed.insert(charactersIn: type.rawValue)
         return addingPercentEncoding(withAllowedCharacters: allowed)
     }
+
+    var bytes: [UInt8] { .init(utf8) }
     
 }

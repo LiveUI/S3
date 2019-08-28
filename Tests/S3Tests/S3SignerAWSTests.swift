@@ -58,7 +58,7 @@ class S3SignerAWSTests: BaseTestCase {
 		XCTAssertFalse(payloadUnsigned.isBytes)
 		XCTAssertTrue(payloadUnsigned.isUnsigned)
 		XCTAssertEqual(unsigned, payloadUnsigned.size())
-		XCTAssertEqual(unsigned, try! payloadUnsigned.hashed())
+		XCTAssertEqual(unsigned, payloadUnsigned.hashed())
 	}
 	
 	func test_Region_host() {

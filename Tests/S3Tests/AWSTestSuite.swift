@@ -1,6 +1,7 @@
 @testable import S3Signer
-@testable import S3
+@testable import S3Kit
 import XCTest
+
 
 class AWSTestSuite: BaseTestCase {
 	
@@ -14,7 +15,7 @@ class AWSTestSuite: BaseTestCase {
         let requestURLString = region.hostUrlString()
         let requestURL = URL(string: requestURLString)!
 
-        let updatedHeaders = try! signer.update(headers: [:], url: requestURL, longDate: overridenDate.long, bodyDigest: Payload.none.hashed(), region: region)
+        let updatedHeaders = signer.update(headers: [:], url: requestURL, longDate: overridenDate.long, bodyDigest: Payload.none.hashed(), region: region)
 
 		let expectedCanonRequest = [
 			"GET",
@@ -40,18 +41,22 @@ class AWSTestSuite: BaseTestCase {
 			"20130524T000000Z",
 			"20130524/us-east-1/s3/aws4_request",
 			"64669d70b364645a9118ecbd15e6f62aee6db08e63d2f74a7f183eb685d871cd"
-			].joined(separator: "\n")
-		
-        let stringToSign = try! signer.createStringToSign(canonRequest,
-                                                          dates: overridenDate,
-                                                          region: region)
+            ].joined(separator: "\n")
+        
+        let stringToSign = try! signer.createStringToSign(
+            canonRequest,
+            dates: overridenDate,
+            region: region
+        )
 
 		XCTAssertEqual(expectedStringToSign, stringToSign)
 		
 		let expectedSignature = "8745d16e49fb5550634d56c2c4bb6841e42d7595f8529cf9ea14d05d51935b20"
-        let signature = try! signer.createSignature(stringToSign,
-                                                    timeStampShort: overridenDate.short,
-                                                    region: region)
+        let signature = try! signer.createSignature(
+            stringToSign,
+            timeStampShort: overridenDate.short,
+            region: region
+        )
 		
 		XCTAssertEqual(expectedSignature, signature)
 		
@@ -82,7 +87,7 @@ class AWSTestSuite: BaseTestCase {
         let requestURLString = region.hostUrlString()
         let requestURL = URL(string: requestURLString)!
 
-        let updatedHeaders = try! signer.update(headers: ["My-Header1": "value4,value1,value3,value2"],
+        let updatedHeaders = signer.update(headers: ["My-Header1": "value4,value1,value3,value2"],
                                                 url: requestURL,
                                                 longDate: overridenDate.long,
                                                 bodyDigest: Payload.none.hashed(),
@@ -145,7 +150,7 @@ class AWSTestSuite: BaseTestCase {
         let requestURLString = region.hostUrlString() + "?Param1=value1"
         let requestURL = URL(string: requestURLString)!
 
-        let updatedHeaders = try! signer.update(headers: [:],
+        let updatedHeaders = signer.update(headers: [:],
                                                 url: requestURL,
                                                 longDate: overridenDate.long,
                                                 bodyDigest: Payload.none.hashed(),
@@ -209,9 +214,12 @@ class AWSTestSuite: BaseTestCase {
 
 		XCTAssertEqual(allExpectedHeadersForRequest, allHeadersForRequest.dictionaryRepresentation())
 	}
+    
 }
 
+
 extension HTTPHeaders {
+    
     func dictionaryRepresentation() -> [String: String] {
         var result = [String: String]()
         self.forEach { (header) in
@@ -219,6 +227,7 @@ extension HTTPHeaders {
         }
         return result
     }
+    
 }
 
 

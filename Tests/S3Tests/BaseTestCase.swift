@@ -1,6 +1,7 @@
 @testable import S3Signer
 import XCTest
 
+
 class BaseTestCase: XCTestCase {
 
     let accessKey = "AKIAIOSFODNN7EXAMPLE"
@@ -24,4 +25,5 @@ class BaseTestCase: XCTestCase {
             XCTFail("Could not intialize signer")
         }
     }
+    
 }

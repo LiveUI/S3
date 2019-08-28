@@ -16,7 +16,13 @@ class S3Tests: BaseTestCase {
 
     func test_Get_Object() {
 		let requestURL = URL(string: "https://examplebucket.s3.amazonaws.com/test.txt")!
-        let updatedHeaders = signer.update(headers: ["Range": "bytes=0-9"], url: requestURL, longDate: overridenDate.long, bodyDigest: try! Payload.none.hashed(), region: region)
+        let updatedHeaders = signer.update(
+            headers: ["Range": "bytes=0-9"],
+            url: requestURL,
+            longDate: overridenDate.long,
+            bodyDigest: Payload.none.hashed(),
+            region: region
+        )
 		
 		let expectedCanonRequest = [
 		"GET",
@@ -66,7 +72,7 @@ class S3Tests: BaseTestCase {
                 return
         }
 
-		let payload = try! Payload.bytes(bytes).hashed()
+		let payload = Payload.bytes(bytes).hashed()
 
 		let updatedHeaders = signer.update(headers: ["x-amz-storage-class": "REDUCED_REDUNDANCY", "Date": "Fri, 24 May 2013 00:00:00 GMT"], url: requestURL, longDate: overridenDate.long, bodyDigest: payload, region: region)
 		
@@ -114,7 +120,7 @@ class S3Tests: BaseTestCase {
 	
 	func test_Get_bucket_lifecycle() {
 		let requestURL = URL(string: "https://examplebucket.s3.amazonaws.com?lifecycle")!
-		let payload = try! Payload.none.hashed()
+		let payload = Payload.none.hashed()
 		let updatedHeaders = signer.update(headers: [:], url: requestURL, longDate: overridenDate.long, bodyDigest: payload, region: region)
 		
 		let expectedCanonRequest = [
@@ -142,7 +148,7 @@ class S3Tests: BaseTestCase {
 	
 	func test_Get_bucket_list_object() {
 		let requestURL = URL(string: "https://examplebucket.s3.amazonaws.com/?max-keys=2&prefix=J")!
-		let payload = try! Payload.none.hashed()
+		let payload = Payload.none.hashed()
 		let updatedHeaders = signer.update(headers: [:], url: requestURL, longDate: overridenDate.long, bodyDigest: payload, region: region)
 		
 		let expectedCanonRequest = [
@@ -175,7 +181,7 @@ class S3Tests: BaseTestCase {
 		let expectedCanonRequest = [
 			"GET",
 			"/test.txt",
-			"x-amz-algorithm=AWS4-HMAC-SHA256&x-amz-credential=AKIAIOSFODNN7EXAMPLE%2F20130524%2Fus-east-1%2Fs3%2Faws4_request&x-amz-date=20130524T000000Z&x-amz-expires=86400&x-amz-signedheaders=host",
+			"X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIOSFODNN7EXAMPLE%2F20130524%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20130524T000000Z&X-Amz-Expires=86400&X-Amz-SignedHeaders=host",
 			"host:examplebucket.s3.amazonaws.com",
 			"",
 			"host",
@@ -190,7 +196,8 @@ class S3Tests: BaseTestCase {
 			"AWS4-HMAC-SHA256",
 			"20130524T000000Z",
 			"20130524/us-east-1/s3/aws4_request",
-			"414cf5ed57126f2233fac1f7b5e5e4b8dcf58040010cb69d21f126d353d13df7"
+            "3bfa292879f6447bbcda7001decf97f4a54dc650c8942174ae0a9121cf58ad04"
+//			"414cf5ed57126f2233fac1f7b5e5e4b8dcf58040010cb69d21f126d353d13df7"
 		].joined(separator: "\n")
 		
 		let stringToSign = try! signer.createStringToSign(canonRequest, dates: overridenDate, region: region)
@@ -199,14 +206,15 @@ class S3Tests: BaseTestCase {
         NSLog("stringToSign: \(stringToSign)")
 		XCTAssertEqual(expectedStringToSign, stringToSign)
 		
-		let expectedSignature = "17594f59285415a5be4debfcf5227a2d78b7c2634442b7ab816cace9333ec989"
+//		let expectedSignature = "17594f59285415a5be4debfcf5227a2d78b7c2634442b7ab816cace9333ec989"
+        let expectedSignature = "aeeed9bbccd4d02ee5c0109b86d86835f995330da4c265957d157751f604d404"
 		
 		let signature = try! signer.createSignature(stringToSign, timeStampShort: overridenDate.short, region: region)
 		
 		XCTAssertEqual(expectedSignature, signature)
 
 		
-		let expectedURLString = "https://examplebucket.s3.amazonaws.com/test.txt?x-amz-algorithm=AWS4-HMAC-SHA256&x-amz-credential=AKIAIOSFODNN7EXAMPLE%2F20130524%2Fus-east-1%2Fs3%2Faws4_request&x-amz-date=20130524T000000Z&x-amz-expires=86400&x-amz-signedheaders=host&x-amz-signature=17594f59285415a5be4debfcf5227a2d78b7c2634442b7ab816cace9333ec989"
+		let expectedURLString = "https://examplebucket.s3.amazonaws.com/test.txt?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIOSFODNN7EXAMPLE%2F20130524%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20130524T000000Z&X-Amz-Expires=86400&X-Amz-SignedHeaders=host&X-Amz-Signature=17594f59285415a5be4debfcf5227a2d78b7c2634442b7ab816cace9333ec989"
 
         let presignedURL = try! signer.presignedURL(for: .GET, url: requestURL, expiration: Expiration.custom(86400), region: region, headers: [:], dates: overridenDate)
 
