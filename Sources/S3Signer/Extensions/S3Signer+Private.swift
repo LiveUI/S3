@@ -154,8 +154,12 @@ extension S3Signer {
 	}
 
     func generateAuthHeader(_ httpMethod: HTTPMethod, url: URL, headers: [String: String], bodyDigest: String, dates: Dates, region: Region) throws -> String {
+//        print("\n\n\n------------------- CRH:\n")
         let canonicalRequestHex = try createCanonicalRequest(httpMethod, url: url, headers: headers, bodyDigest: bodyDigest)
+//        print(canonicalRequestHex)
         let stringToSign = try createStringToSign(canonicalRequestHex, dates: dates, region: region)
+//        print("\n\n\n------------------- STS:\n")
+//        print(stringToSign)
         let signature = try createSignature(stringToSign, timeStampShort: dates.short, region: region)
         let authHeader = "AWS4-HMAC-SHA256 Credential=\(config.accessKey)/\(credentialScope(dates.short, region: region)), SignedHeaders=\(signed(headers: headers)), Signature=\(signature)"
         return authHeader
@@ -211,8 +215,8 @@ extension S3Signer {
     func update(headers: [String: String], url: URL, longDate: String, bodyDigest: String, region: Region?) -> [String: String] {
         var updatedHeaders = headers
         updatedHeaders["x-amz-date"] = longDate
-        if (updatedHeaders["host"] ?? updatedHeaders["host"]) == nil {
-            updatedHeaders["host"] = (url.host ?? (region ?? config.region).host)
+        if (updatedHeaders["Host"] ?? updatedHeaders["Host"]) == nil {
+            updatedHeaders["Host"] = (url.host ?? (region ?? config.region).host)
         }
 		if config.authVersion == .v4 && bodyDigest != "UNSIGNED-PAYLOAD" && config.service == "s3" {
             updatedHeaders["x-amz-content-sha256"] = bodyDigest
@@ -233,7 +237,7 @@ extension S3Signer {
 
         let region = region ?? config.region
 
-        updatedHeaders["host"] = url.host ?? region.host
+        updatedHeaders["Host"] = url.host ?? region.host
 
         let (canonRequest, fullURL) = try presignedURLCanonRequest(httpMethod, dates: dates, expiration: expiration, url: url, region: region, headers: updatedHeaders)
 
@@ -261,29 +265,29 @@ extension S3Signer {
         var updatedHeaders = update(headers: headers, url: url, longDate: dates.long, bodyDigest: bodyDigest, region: region)
 
         if httpMethod == .PUT && payload.isBytes {
-            let s: String = Insecure.MD5.hash(data: [UInt8](payload.bytes)).description
+            let s = Data(Insecure.MD5.hash(data: payload.bytes)).base64EncodedString()
             updatedHeaders["content-md5"] = s
         }
         
         if httpMethod == .PUT || httpMethod == .DELETE {
             updatedHeaders["content-length"] = payload.size()
             if httpMethod == .PUT && url.pathExtension != "" {
-                updatedHeaders["content-type"] = (HTTPMediaType.fileExtension(url.pathExtension) ?? .plainText).description
+                updatedHeaders["Content-Type"] = (HTTPMediaType.fileExtension(url.pathExtension) ?? .plainText).description
             }
         }
 
 		switch config.authVersion {
 			case .v2:
-				updatedHeaders["authorization"] = try generateAuthHeaderV2(httpMethod, url: url, headers: updatedHeaders, dates: dates, region: region, bucket: bucket)
+				updatedHeaders["Authorization"] = try generateAuthHeaderV2(httpMethod, url: url, headers: updatedHeaders, dates: dates, region: region, bucket: bucket)
 			case .v4:
-				updatedHeaders["authorization"] = try generateAuthHeader(httpMethod, url: url, headers: updatedHeaders, bodyDigest: bodyDigest, dates: dates, region: region)
+				updatedHeaders["Authorization"] = try generateAuthHeader(httpMethod, url: url, headers: updatedHeaders, bodyDigest: bodyDigest, dates: dates, region: region)
 		}
 
         var headers = HTTPHeaders()
         for (key, value) in updatedHeaders {
             headers.add(name: key, value: value)
         }
-
+        
         return headers
     }
 }

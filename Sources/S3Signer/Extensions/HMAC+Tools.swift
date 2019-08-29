@@ -23,16 +23,8 @@ extension HMAC {
 
 extension HashedAuthenticationCode {
     
-    var bytes: [UInt8] {
-        var byteBuffer: [UInt8] = []
-        withUnsafeBytes {
-            byteBuffer.append(contentsOf: $0)
-        }
-        return byteBuffer
-    }
-    
     var data: Data {
-        return Data(bytes)
+        return Data(self)
     }
     
 }

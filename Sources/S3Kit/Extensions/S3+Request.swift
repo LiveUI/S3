@@ -15,13 +15,18 @@ extension S3 {
                 body = nil
             }
             
+            var headers = headers
+            headers.add(name: "User-Agent", value: "S3Kit-for-Swift")
+            headers.add(name: "Accept", value: "*/*")
+            headers.add(name: "Connection", value: "keep-alive")
+            headers.add(name: "Content-Length", value: String(data?.count ?? 0))
+            
             let request = try HTTPClient.Request(
                 url: url.absoluteString,
                 method: method,
                 headers: headers,
                 body: body
             )
-            
             let client = HTTPClient(eventLoopGroupProvider: .shared(eventLoop))
             return client.execute(request: request)
         } catch {

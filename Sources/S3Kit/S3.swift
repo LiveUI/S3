@@ -59,8 +59,14 @@ extension S3 {
     @discardableResult func check(_ response: HTTPClient.Response) throws -> HTTPClient.Response {
         guard response.status == .ok || response.status == .noContent else {
             if let error = try? response.decode(to: ErrorMessage.self) {
+                if var body = response.body, let content = body.readString(length: body.readableBytes) {
+                    print(content)
+                }
                 throw Error.errorResponse(response.status, error)
             } else {
+                if var body = response.body, let content = body.readString(length: body.readableBytes) {
+                    print(content)
+                }
                 throw Error.badResponse(response)
             }
         }

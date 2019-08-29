@@ -19,7 +19,7 @@ extension S3 {
             return eventLoop.makeFailedFuture(error)
         }
 
-        return make(request: url, method: .DELETE, headers: headers, data: Data(), on: eventLoop).flatMapThrowing(self.check).map { _ in
+        return make(request: url, method: .DELETE, headers: headers, data: nil, on: eventLoop).flatMapThrowing(self.check).map { _ in
             return Void()
         }
     }

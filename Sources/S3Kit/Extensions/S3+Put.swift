@@ -13,11 +13,16 @@ extension S3 {
 
         do {
             url = try makeURLBuilder().url(file: file)
-
+            
             var awsHeaders: [String: String] = strHeaders
-            awsHeaders["content-type"] = file.mime.description
+            awsHeaders["Content-Type"] = file.mime.description
             awsHeaders["x-amz-acl"] = file.access.rawValue
-            headers = try signer.headers(for: .PUT, urlString: url.absoluteString, headers: awsHeaders, payload: .bytes(file.data))
+            headers = try signer.headers(
+                for: .PUT,
+                urlString: url.absoluteString,
+                headers: awsHeaders,
+                payload: .bytes(file.data)
+            )
         } catch let error {
             return eventLoop.makeFailedFuture(error)
         }

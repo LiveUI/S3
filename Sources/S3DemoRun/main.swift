@@ -44,7 +44,7 @@ func routes(_ router: Routes, _ c: Container) throws {
     
     // Delete bucket
     router.get("files")  { req -> EventLoopFuture<BucketResults> in
-        return s3.list(bucket: "booststore", region: .euCentral1, headers: [:], on: req.eventLoop).flatMapErrorThrowing { error in
+        return s3.list(bucket: DEFAULT_BUCKET, region: .euCentral1, headers: [:], on: req.eventLoop).flatMapErrorThrowing { error in
             if let error = error.s3ErrorMessage() {
                 print(error.message)
             }
@@ -54,8 +54,8 @@ func routes(_ router: Routes, _ c: Container) throws {
     }
     
     // Bucket location
-    router.get("bucket/location")  { req -> EventLoopFuture<String> in
-        return s3.location(bucket: "adfasdfasdfasdf", on: req.eventLoop).map { region in
+    router.get("bucket", "location")  { req -> EventLoopFuture<String> in
+        return s3.location(bucket: DEFAULT_BUCKET, on: req.eventLoop).map { region in
             return region.hostUrlString()
         }.recover { error -> String in
             if let error = error as? S3.Error {
@@ -71,7 +71,7 @@ func routes(_ router: Routes, _ c: Container) throws {
     }
     
     // Demonstrate work with files
-    router.get("files/test") { req -> EventLoopFuture<String> in
+    router.get("files", "test") { req -> EventLoopFuture<String> in
         let string = "Content of my example file"
         
         let fileName = "file-hu.txt"

@@ -6,6 +6,7 @@ extension Region {
     
     /// Host URL including scheme
     public func hostUrlString(bucket: String? = nil) -> String {
+//        return "http://localhost:4444/"
         if let bucket = bucket {
             return urlProtocol + host.finished(with: "/") + bucket
         }
