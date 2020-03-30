@@ -9,7 +9,7 @@ extension S3 {
     // MARK: Buckets
     
     /// Get bucket location
-    public func location(bucket: String, on eventLoop: EventLoop) -> EventLoopFuture<Region> {
+    public func location(bucket: String) -> EventLoopFuture<Region> {
         let url: URL
         let awsHeaders: HTTPHeaders
         let region = Region.euWest2
@@ -21,7 +21,7 @@ extension S3 {
             return eventLoop.makeFailedFuture(error)
         }
 
-        return make(request: url, method: .GET, headers: awsHeaders, data: Data(), on: eventLoop).flatMapThrowing { response in
+        return make(request: url, method: .GET, headers: awsHeaders, data: Data()).flatMapThrowing { response in
             if response.status == .notFound {
                 throw Error.notFound
             }
@@ -48,7 +48,7 @@ extension S3 {
     }
     
     /// Delete bucket
-    public func delete(bucket: String, region: Region? = nil, on eventLoop: EventLoop) -> EventLoopFuture<Void> {
+    public func delete(bucket: String, region: Region? = nil) -> EventLoopFuture<Void> {
         let url: URL
         let awsHeaders: HTTPHeaders
 
@@ -59,13 +59,13 @@ extension S3 {
             return eventLoop.makeFailedFuture(error)
         }
 
-        return make(request: url, method: .DELETE, headers: awsHeaders, data: Data(), on: eventLoop).flatMapThrowing(self.check).map { _ in
+        return make(request: url, method: .DELETE, headers: awsHeaders, data: Data()).flatMapThrowing(self.check).map { _ in
             return Void()
         }
     }
     
     /// Create a bucket
-    public func create(bucket: String, region: Region? = nil, on eventLoop: EventLoop) -> EventLoopFuture<Void> {
+    public func create(bucket: String, region: Region? = nil) -> EventLoopFuture<Void> {
         let region = region ?? signer.config.region
         let content = """
         <CreateBucketConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
@@ -84,7 +84,7 @@ extension S3 {
             return eventLoop.makeFailedFuture(error)
         }
 
-        return make(request: url, method: .PUT, headers: awsHeaders, data: data, on: eventLoop).flatMapThrowing(self.check).map { _ in
+        return make(request: url, method: .PUT, headers: awsHeaders, data: data).flatMapThrowing(self.check).map { _ in
             return Void()
         }
     }

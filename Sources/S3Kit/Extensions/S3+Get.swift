@@ -16,7 +16,7 @@ extension S3 {
     // MARK: Get
     
     /// Retrieve file data from S3
-    public func get(file: LocationConvertible, headers strHeaders: [String: String], on eventLoop: EventLoop) -> EventLoopFuture<File.Response> {
+    public func get(file: LocationConvertible, headers strHeaders: [String: String]) -> EventLoopFuture<File.Response> {
         let url: URL
         let headers: HTTPHeaders
 
@@ -27,7 +27,7 @@ extension S3 {
             return eventLoop.makeFailedFuture(error)
         }
 
-        return make(request: url, method: .GET, headers: headers, on: eventLoop).flatMapThrowing { response in
+        return make(request: url, method: .GET, headers: headers).flatMapThrowing { response in
             try self.check(response)
             
             guard var b = response.body, let data = b.readBytes(length: b.readableBytes) else {
@@ -40,8 +40,8 @@ extension S3 {
     }
     
     /// Retrieve file data from S3
-    public func get(file: LocationConvertible, on eventLoop: EventLoop) -> EventLoopFuture<File.Response> {
-        return get(file: file, headers: [:], on: eventLoop)
+    public func get(file: LocationConvertible) -> EventLoopFuture<File.Response> {
+        return get(file: file, headers: [:])
     }
     
 }

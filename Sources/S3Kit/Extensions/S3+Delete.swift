@@ -8,7 +8,7 @@ extension S3 {
     // MARK: Delete
     
     /// Delete file from S3
-    public func delete(file: LocationConvertible, headers strHeaders: [String: String], on eventLoop: EventLoop) -> EventLoopFuture<Void> {
+    public func delete(file: LocationConvertible, headers strHeaders: [String: String]) -> EventLoopFuture<Void> {
         let headers: HTTPHeaders
         let url: URL
 
@@ -19,15 +19,15 @@ extension S3 {
             return eventLoop.makeFailedFuture(error)
         }
 
-        return make(request: url, method: .DELETE, headers: headers, data: nil, on: eventLoop).flatMapThrowing(self.check).map { _ in
+        return make(request: url, method: .DELETE, headers: headers, data: nil).flatMapThrowing(self.check).map { _ in
             return Void()
         }
     }
     
     /// Delete file from S3
-    public func delete(file: LocationConvertible, on eventLoop: EventLoop) -> EventLoopFuture<Void> {
+    public func delete(file: LocationConvertible) -> EventLoopFuture<Void> {
         return
-            delete(file: file, headers: [:], on: eventLoop)
+            delete(file: file, headers: [:])
     }
     
 }

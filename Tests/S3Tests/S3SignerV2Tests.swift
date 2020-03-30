@@ -5,12 +5,7 @@ import XCTest
 class S3SignerV2Tests: BaseTestCase {
 	override func setUp() {
 		super.setUp()
-		signer = try! S3Signer(S3Signer.Config(accessKey: accessKey, secretKey: secretKey, region: region, version: .v2))
-		if let s = try? S3Signer(S3Signer.Config(accessKey: accessKey, secretKey: secretKey, region: region, version: .v2)) {
-			signer = s
-		} else {
-			XCTFail("Could not intialize signer")
-		}
+        signer = S3Signer(S3Signer.Config(accessKey: accessKey, secretKey: secretKey, region: region, version: .v2, defaultBucket: ""))
 	}
 
 	// TOOD: appropriate testing would try various cases (where URL has signable query items, etc)

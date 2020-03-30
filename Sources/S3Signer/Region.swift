@@ -32,6 +32,9 @@ public struct Region {
         /// EU (Frankfurt)
         public static let euCentral1: Name = "eu-central-1"
         
+        /// EU (Stockholm)
+        public static let euNorth1: Name = "eu-north-1"
+        
         /// EU (Ireland)
         public static let euWest1: Name = "eu-west-1"
         
@@ -123,6 +126,9 @@ extension Region {
     
     /// convenience var for EU (Frankfurt)
     public static let euCentral1 = Region(name: .euCentral1)
+    
+    /// EU (Stockholm)
+    public static let euNorth1 = Region(name: .euNorth1)
     
     /// convenience var for EU (Ireland)
     public static let euWest1 = Region(name: .euWest1)

@@ -1,5 +1,5 @@
 import Foundation
-import OpenCrypto
+import Crypto
 import NIOHTTP1
 import WebErrorKit
 
@@ -65,6 +65,9 @@ public final class S3Signer {
         /// AWS Service type
         let service: String = "s3"
         
+        /// Default bucket name
+        public let defaultBucket: String
+        
         
         /// Initalizer
         /// - Parameter accessKey: S3 access token
@@ -72,12 +75,13 @@ public final class S3Signer {
         /// - Parameter region: Region
         /// - Parameter version: Signing version
         /// - Parameter securityToken: Temporary security token
-        public init(accessKey: String, secretKey: String, region: Region, version: Version = .v4, securityToken: String? = nil) {
+        public init(accessKey: String, secretKey: String, region: Region, version: Version = .v4, securityToken: String? = nil, defaultBucket: String) {
             self.accessKey = accessKey
             self.secretKey = secretKey
             self.region = region
             self.securityToken = securityToken
             self.authVersion = version
+            self.defaultBucket = defaultBucket
         }
         
     }
@@ -86,7 +90,7 @@ public final class S3Signer {
     public private(set) var config: Config
     
     /// Initializer
-    public init(_ config: Config) throws {
+    public init(_ config: Config) {
         self.config = config
     }
     

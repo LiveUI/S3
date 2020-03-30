@@ -6,6 +6,8 @@ import AsyncHTTPClient
 
 /// Main S3 class
 public class S3: S3Client {    
+    public let eventLoop: EventLoop
+    public let httpClient: HTTPClient
     
     /// Error messages
     public enum Error: Swift.Error {
@@ -30,23 +32,27 @@ public class S3: S3Client {
     // MARK: Initialization
     
     /// Basic initialization method, also registers S3Signer and self with services
-    @discardableResult public convenience init(defaultBucket: String, config: S3Signer.Config) throws {
-        let signer = try S3Signer(config)
-        try self.init(defaultBucket: defaultBucket, signer: signer)
+    public convenience init(config: S3Signer.Config, eventLoop: EventLoop, httpClient: HTTPClient) {
+        let signer = S3Signer(config)
+        self.init(defaultBucket: config.defaultBucket, signer: signer, eventLoop: eventLoop, httpClient: httpClient)
     }
     
     /// Basic initialization method
-    public init(defaultBucket: String, signer: S3Signer) throws {
+    public init(defaultBucket: String, signer: S3Signer, eventLoop: EventLoop, httpClient: HTTPClient) {
         self.defaultBucket = defaultBucket
         self.signer = signer
         self.urlBuilder = nil
+        self.eventLoop = eventLoop
+        self.httpClient = httpClient
     }
     
     /// Basic initialization method
-    public init(urlBuilder: URLBuilder, defaultBucket: String, signer: S3Signer) throws {
+    public init(urlBuilder: URLBuilder, defaultBucket: String, signer: S3Signer, eventLoop: EventLoop, httpClient: HTTPClient) {
         self.defaultBucket = defaultBucket
         self.signer = signer
         self.urlBuilder = nil
+        self.eventLoop = eventLoop
+        self.httpClient = httpClient
     }
     
 }

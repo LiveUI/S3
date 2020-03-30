@@ -7,7 +7,7 @@ import NIOHTTP1
 extension S3 {
     
     /// Get list of objects
-    public func list(bucket: String, region: Region? = nil, headers: [String: String], on eventLoop: EventLoop) -> EventLoopFuture<BucketResults> {
+    public func list(bucket: String, region: Region? = nil, headers: [String: String]) -> EventLoopFuture<BucketResults> {
         let region = region ?? signer.config.region
         guard let baseUrl = URL(string: region.hostUrlString(bucket: bucket)), let host = baseUrl.host,
             var components = URLComponents(string: baseUrl.absoluteString) else {
@@ -30,15 +30,15 @@ extension S3 {
             return eventLoop.makeFailedFuture(error)
         }
 
-        return make(request: url, method: .GET, headers: awsHeaders, data: Data(), on: eventLoop).flatMapThrowing { response in
+        return make(request: url, method: .GET, headers: awsHeaders, data: Data()).flatMapThrowing { response in
             try self.check(response)
             return try response.decode(to: BucketResults.self)
         }
     }
     
     /// Get list of objects
-    public func list(bucket: String, region: Region? = nil, on eventLoop: EventLoop) -> EventLoopFuture<BucketResults> {
-        return list(bucket: bucket, region: region, headers: [:], on: eventLoop)
+    public func list(bucket: String, region: Region? = nil) -> EventLoopFuture<BucketResults> {
+        return list(bucket: bucket, region: region, headers: [:])
     }
     
 }
