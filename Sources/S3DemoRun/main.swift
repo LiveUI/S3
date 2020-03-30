@@ -39,7 +39,7 @@ func routes(_ app: Application) throws {
         }
     }
 
-    // Delete bucket
+    // List files
     app.get("files")  { req -> EventLoopFuture<BucketResults> in
         return req.s3.list(bucket: DEFAULT_BUCKET, region: .euCentral1, headers: [:]).flatMapErrorThrowing { error in
             if let error = error.s3ErrorMessage() {

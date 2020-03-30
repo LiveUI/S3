@@ -31,7 +31,7 @@ let package = Package(
             ]
         ),
         .target(
-            name: "S3Provider",
+            name: "S3",
             dependencies: [
                 .target(name: "S3Kit"),
                 .product(name: "Vapor", package: "vapor")
@@ -40,7 +40,7 @@ let package = Package(
         .target(
             name: "S3DemoRun",
             dependencies: [
-                .target(name: "S3Provider"),
+                .target(name: "S3"),
                 .product(name: "Vapor", package: "vapor")
             ]
         ),

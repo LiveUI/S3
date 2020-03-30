@@ -26,50 +26,30 @@ Update dependencies and targets in Package.swift
 ```swift
 dependencies: [
     ...
-    .package(url: "https://github.com/LiveUI/S3.git", from: "3.0.0-RC3.2"),
+    .package(url: "https://github.com/LiveUI/S3.git", from: "4.0.0-rc.1"),
 ],
 targets: [
-        .target(name: "App", dependencies: ["Vapor", "S3"]),
+    .target(name: "App", dependencies: [
+        .package(name: "S3", package: "S3Kit") 
+    ],
         ...
 ]
 ```
 
-Run ```vapor update```
-
-Register S3Client as a service in your configure method
+Configure S3 in your `configure` method:
 
 ```swift
-try services.register(s3: S3Signer.Config(...), defaultBucket: "my-bucket")
+app.s3.configuration = .init(accessKey: "<access_key>", secretKey: "<secret_key>", region: Region.euNorth1, defaultBucket: "my-bucket")
 ```
 
-to use a custom Minio server, use this Config/Region:
-
-```
-S3Signer.Config(accessKey: accessKey,
-                secretKey: secretKey,
-                region: Region(name: RegionName.usEast1,
-                               hostName: "127.0.0.1:9000",
-                               useTLS: false)
-```
-
-use S3Client
+Using S3 inside your route handlers
 
 ```swift
 import S3
 
-let s3 = try req.makeS3Client() // or req.make(S3Client.self) as? S3
-s3.put(...)
-s3.get(...)
-s3.delete(...)
-```
-
-if you only want to use the signer
-
-```swift
-import S3Signer
-
-let s3 = try req.makeS3Signer() // or req.make(S3Signer.self)
-s3.headers(...)
+app.get("buckets")  { req -> EventLoopFuture<BucketsInfo> in
+    req.s3.buckets()
+}
 ```
 
 ### Available methods
@@ -82,178 +62,166 @@ public protocol S3Client: Service {
     func buckets(on: Container) -> EventLoopFuture<BucketsInfo>
     
     /// Create a bucket
-    func create(bucket: String, region: Region?, on container: Container) -> EventLoopFuture<Void>
+    func create(bucket: String, region: Region?) -> EventLoopFuture<Void>
     
     /// Delete a bucket
-    func delete(bucket: String, region: Region?, on container: Container) -> EventLoopFuture<Void>
+    func delete(bucket: String, region: Region?) -> EventLoopFuture<Void>
     
     /// Get bucket location
-    func location(bucket: String, on container: Container) -> EventLoopFuture<Region>
+    func location(bucket: String) -> EventLoopFuture<Region>
     
     /// Get list of objects
-    func list(bucket: String, region: Region?, on container: Container) -> EventLoopFuture<BucketResults>
+    func list(bucket: String, region: Region?) -> EventLoopFuture<BucketResults>
     
     /// Get list of objects
-    func list(bucket: String, region: Region?, headers: [String: String], on container: Container) -> EventLoopFuture<BucketResults>
+    func list(bucket: String, region: Region?, headers: [String: String]) -> EventLoopFuture<BucketResults>
     
     /// Upload file to S3
-    func put(file: File.Upload, headers: [String: String], on: Container) throws -> EventLoopEventLoopFuture<File.Response>
+    func put(file: File.Upload, headers: [String: String]) throws -> EventLoopEventLoopFuture<File.Response>
     
     /// Upload file to S3
-    func put(file url: URL, destination: String, access: AccessControlList, on: Container) -> EventLoopFuture<File.Response>
+    func put(file url: URL, destination: String, access: AccessControlList) -> EventLoopFuture<File.Response>
     
     /// Upload file to S3
-    func put(file url: URL, destination: String, bucket: String?, access: AccessControlList, on: Container) -> EventLoopFuture<File.Response>
+    func put(file url: URL, destination: String, bucket: String?, access: AccessControlList) -> EventLoopFuture<File.Response>
     
     /// Upload file to S3
-    func put(file path: String, destination: String, access: AccessControlList, on: Container) -> EventLoopFuture<File.Response>
+    func put(file path: String, destination: String, access: AccessControlList) -> EventLoopFuture<File.Response>
     
     /// Upload file to S3
-    func put(file path: String, destination: String, bucket: String?, access: AccessControlList, on: Container) -> EventLoopFuture<File.Response>
+    func put(file path: String, destination: String, bucket: String?, access: AccessControlList) -> EventLoopFuture<File.Response>
     
     /// Upload file to S3
-    func put(string: String, destination: String, on: Container) -> EventLoopFuture<File.Response>
+    func put(string: String, destination: String) -> EventLoopFuture<File.Response>
     
     /// Upload file to S3
-    func put(string: String, destination: String, access: AccessControlList, on: Container) -> EventLoopFuture<File.Response>
+    func put(string: String, destination: String, access: AccessControlList) -> EventLoopFuture<File.Response>
     
     /// Upload file to S3
-    func put(string: String, mime: MediaType, destination: String, on: Container) -> EventLoopFuture<File.Response>
+    func put(string: String, mime: MediaType, destination: String) -> EventLoopFuture<File.Response>
     
     /// Upload file to S3
-    func put(string: String, mime: MediaType, destination: String, access: AccessControlList, on: Container) -> EventLoopFuture<File.Response>
+    func put(string: String, mime: MediaType, destination: String, access: AccessControlList) -> EventLoopFuture<File.Response>
     
     /// Upload file to S3
-    func put(string: String, mime: MediaType, destination: String, bucket: String?, access: AccessControlList, on: Container) -> EventLoopFuture<File.Response>
+    func put(string: String, mime: MediaType, destination: String, bucket: String?, access: AccessControlList) -> EventLoopFuture<File.Response>
     
     /// Retrieve file data from S3
-    func get(fileInfo file: LocationConvertible, on container: Container) -> EventLoopFuture<File.Info>
+    func get(fileInfo file: LocationConvertible) -> EventLoopFuture<File.Info>
     
     /// Retrieve file data from S3
-    func get(fileInfo file: LocationConvertible, headers: [String: String], on container: Container) -> EventLoopFuture<File.Info>
+    func get(fileInfo file: LocationConvertible, headers: [String: String]) -> EventLoopFuture<File.Info>
     
     /// Retrieve file data from S3
-    func get(file: LocationConvertible, on: Container) -> EventLoopFuture<File.Response>
+    func get(file: LocationConvertible) -> EventLoopFuture<File.Response>
     
     /// Retrieve file data from S3
-    func get(file: LocationConvertible, headers: [String: String], on: Container) -> EventLoopFuture<File.Response>
+    func get(file: LocationConvertible, headers: [String: String]) -> EventLoopFuture<File.Response>
     
     /// Delete file from S3
-    func delete(file: LocationConvertible, on: Container) -> EventLoopFuture<Void>
+    func delete(file: LocationConvertible) -> EventLoopFuture<Void>
     
     /// Delete file from S3
-    func delete(file: LocationConvertible, headers: [String: String], on: Container) -> EventLoopFuture<Void>
+    func delete(file: LocationConvertible, headers: [String: String]) -> EventLoopFuture<Void>
 }
 ```
 
 ### Example usage
 
 ```swift
-public func routes(_ router: Router) throws {
-    
+public func routes(_ app: Application) throws {
     // Get all available buckets
-    router.get("buckets")  { req -> EventLoopFuture<BucketsInfo> in
-        let s3 = try req.makeS3Client()
-        return try s3.buckets(on: req)
+    app.get("buckets")  { req -> EventLoopFuture<BucketsInfo> in
+        req.s3.buckets()
     }
     
     // Create new bucket
-    router.put("bucket")  { req -> EventLoopFuture<String> in
-        let s3 = try req.makeS3Client()
-        return try s3.create(bucket: "api-created-bucket", region: .euCentral1, on: req).map(to: String.self) {
+    app.put("bucket")  { req -> EventLoopFuture<String> in
+        return req.s3.create(bucket: "api-created-bucket", region: .euCentral1).map {
             return ":)"
-            }.catchMap({ (error) -> (String) in
-                if let error = error.s3ErrorMessage() {
-                    return error.message
-                }
-                return ":("
+        }.recover { error in
+            if let error = error.s3ErrorMessage() {
+                return error.message
             }
-        )
+            return ":("
+        }
     }
-    
-    // Locate bucket (get region)
-    router.get("bucket/location")  { req -> EventLoopFuture<String> in
-        let s3 = try req.makeS3Client()
-        return try s3.location(bucket: "bucket-name", on: req).map(to: String.self) { region in
-            return region.hostUrlString()
-        }.catchMap({ (error) -> (String) in
-                if let error = error as? S3.Error {
-                    switch error {
-                    case .errorResponse(_, let error):
-                        return error.message
-                    default:
-                        return "S3 :("
-                    }
-                }
-                return ":("
-            }
-        )
-    }
+
     // Delete bucket
-    router.delete("bucket")  { req -> EventLoopFuture<String> in
-        let s3 = try req.makeS3Client()
-        return try s3.delete(bucket: "api-created-bucket", region: .euCentral1, on: req).map(to: String.self) {
+    app.delete("bucket")  { req -> EventLoopFuture<String> in
+        return req.s3.delete(bucket: "api-created-bucket", region: .euCentral1).map {
             return ":)"
-            }.catchMap({ (error) -> (String) in
-                if let error = error.s3ErrorMessage() {
-                    return error.message
-                }
-                return ":("
-                }
-        )
+        }.recover { error in
+            if let error = error.s3ErrorMessage() {
+                return error.message
+            }
+            return ":("
+        }
     }
-    
-    // Get list of objects
-    router.get("files")  { req -> EventLoopFuture<BucketResults> in
-        let s3 = try req.makeS3Client()
-        return try s3.list(bucket: "booststore", region: .usEast1, headers: [:], on: req).catchMap({ (error) -> (BucketResults) in
+
+    // List files
+    app.get("files")  { req -> EventLoopFuture<BucketResults> in
+        return req.s3.list(bucket: DEFAULT_BUCKET, region: .euCentral1, headers: [:]).flatMapErrorThrowing { error in
             if let error = error.s3ErrorMessage() {
                 print(error.message)
             }
+
             throw error
-        })
+        }
     }
-    
+
+    // Bucket location
+    app.get("bucket", "location")  { req -> EventLoopFuture<String> in
+        return req.s3.location(bucket: DEFAULT_BUCKET).map { region in
+            return region.hostUrlString()
+        }.recover { error -> String in
+            if let error = error as? S3.Error {
+                switch error {
+                case .errorResponse(_, let error):
+                    return error.message
+                default:
+                    return "S3 :("
+                }
+            }
+            return ":("
+        }
+    }
+
     // Demonstrate work with files
-    router.get("files/test") { req -> EventLoopFuture<String> in
+    app.get("files", "test") { req -> EventLoopFuture<String> in
         let string = "Content of my example file"
-        
+
         let fileName = "file-hu.txt"
-        
-        let s3 = try req.makeS3Client()
-        do {
-            // Upload a file from string
-            return try s3.put(string: string, destination: fileName, access: .publicRead, on: req).flatMap(to: String.self) { putResponse in
-                print("PUT response:")
-                print(putResponse)
-                // Get the content of the newly uploaded file
-                return try s3.get(file: fileName, on: req).flatMap(to: String.self) { getResponse in
-                    print("GET response:")
-                    print(getResponse)
-                    print(String(data: getResponse.data, encoding: .utf8) ?? "Unknown content!")
-                    // Get info about the file (HEAD)
-                    return try s3.get(fileInfo: fileName, on: req).flatMap(to: String.self) { infoResponse in
-                        print("HEAD/Info response:")
-                        print(infoResponse)
-                        // Delete the file
-                        return try s3.delete(file: fileName, on: req).map() { response in
-                            print("DELETE response:")
-                            print(response)
-                            let json = try JSONEncoder().encode(infoResponse)
-                            return String(data: json, encoding: .utf8) ?? "Unknown content!"
-                            }.catchMap({ error -> (String) in
-                                if let error = error.s3ErrorMessage() {
-                                    return error.message
-                                }
-                                return ":("
-                            }
-                        )
+        return req.s3.put(string: string, destination: fileName, access: .publicRead).flatMap { putResponse -> EventLoopFuture<String> in
+            print("PUT response:")
+            print(putResponse)
+            return req.s3.get(file: fileName).flatMap { getResponse in
+                print("GET response:")
+                print(getResponse)
+                print(String(data: getResponse.data, encoding: .utf8) ?? "Unknown content!")
+
+                return req.s3.get(fileInfo: fileName).flatMap { infoResponse in
+                    print("HEAD/Info response:")
+                    print(infoResponse)
+
+                    return req.s3.delete(file: fileName).flatMapThrowing { response in
+                        print("DELETE response:")
+                        print(response)
+                        let json = try JSONEncoder().encode(infoResponse)
+                        return String(data: json, encoding: .utf8) ?? "Unknown content!"
+                    }.recover { error -> (String) in
+                        if let error = error.s3ErrorMessage() {
+                            return error.message
+                        }
+                        return ":("
                     }
                 }
             }
-        } catch {
-            print(error)
-            fatalError()
+        }.recover { error -> (String) in
+            if let error = error.s3ErrorMessage() {
+                return error.message
+            }
+            return ":("
         }
     }
 }
