@@ -1,5 +1,5 @@
 import Vapor
-import S3Provider
+import S3
 
 let DEFAULT_BUCKET = "test-bucket-s3-vapor"
 
