@@ -9,19 +9,19 @@ extension S3 {
     
     /// Get acl file information (ACL)
     /// https://docs.aws.amazon.com/AmazonS3/latest/API/RESTObjectGETacl.html
-    public func get(acl file: LocationConvertible, headers: [String: String], on eventLoop: EventLoop) -> EventLoopFuture<File.Info> {
+    public func get(acl file: LocationConvertible, headers: [String: String]) -> EventLoopFuture<File.Info> {
         fatalError("Not implemented")
     }
     
     /// Get acl file information
     /// https://docs.aws.amazon.com/AmazonS3/latest/API/RESTObjectGETacl.html
-    func get(acl file: LocationConvertible, on eventLoop: EventLoop) -> EventLoopFuture<File.Info> {
-        return get(fileInfo: file, headers: [:], on: eventLoop)
+    func get(acl file: LocationConvertible) -> EventLoopFuture<File.Info> {
+        return get(fileInfo: file, headers: [:])
     }
     
     /// Get file information (HEAD)
     /// https://docs.aws.amazon.com/AmazonS3/latest/API/RESTObjectHEAD.html
-    public func get(fileInfo file: LocationConvertible, headers strHeaders: [String: String], on eventLoop: EventLoop) -> EventLoopFuture<File.Info> {
+    public func get(fileInfo file: LocationConvertible, headers strHeaders: [String: String]) -> EventLoopFuture<File.Info> {
         let url: URL
         let headers: HTTPHeaders
 
@@ -32,7 +32,7 @@ extension S3 {
             return eventLoop.makeFailedFuture(error)
         }
 
-        return make(request: url, method: .HEAD, headers: headers, data: Data(), on: eventLoop).flatMapThrowing { response in
+        return make(request: url, method: .HEAD, headers: headers, data: Data()).flatMapThrowing { response in
             try self.check(response)
             
             let bucket = file.bucket ?? self.defaultBucket
@@ -54,8 +54,8 @@ extension S3 {
     
     /// Get file information (HEAD)
     /// https://docs.aws.amazon.com/AmazonS3/latest/API/RESTObjectHEAD.html
-    public func get(fileInfo file: LocationConvertible, on eventLoop: EventLoop) -> EventLoopFuture<File.Info> {
-        return get(fileInfo: file, headers: [:], on: eventLoop)
+    public func get(fileInfo file: LocationConvertible) -> EventLoopFuture<File.Info> {
+        return get(fileInfo: file, headers: [:])
     }
     
 }

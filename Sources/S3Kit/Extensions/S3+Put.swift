@@ -7,7 +7,7 @@ extension S3 {
     // MARK: Upload
     
     /// Upload file to S3
-    public func put(file: File.Upload, headers strHeaders: [String: String], on eventLoop: EventLoop) -> EventLoopFuture<File.Response> {
+    public func put(file: File.Upload, headers strHeaders: [String: String]) -> EventLoopFuture<File.Response> {
         let headers: HTTPHeaders
         let url: URL
 
@@ -27,7 +27,7 @@ extension S3 {
             return eventLoop.makeFailedFuture(error)
         }
 
-        return make(request: url, method: .PUT, headers: headers, data: file.data, on: eventLoop).flatMapThrowing { response in
+        return make(request: url, method: .PUT, headers: headers, data: file.data).flatMapThrowing { response in
             try self.check(response)
             let res = File.Response(data: file.data, bucket: file.bucket ?? self.defaultBucket, path: file.path, access: file.access, mime: file.mime)
             return res
@@ -35,12 +35,12 @@ extension S3 {
     }
     
     /// Upload file to S3
-    public func put(file: File.Upload, on eventLoop: EventLoop) -> EventLoopFuture<File.Response> {
-        return put(file: file, headers: [:], on: eventLoop)
+    public func put(file: File.Upload) -> EventLoopFuture<File.Response> {
+        return put(file: file, headers: [:])
     }
     
     /// Upload file by it's URL to S3
-    public func put(file url: URL, destination: String, access: AccessControlList = .privateAccess, on eventLoop: EventLoop) -> EventLoopFuture<File.Response> {
+    public func put(file url: URL, destination: String, access: AccessControlList = .privateAccess) -> EventLoopFuture<File.Response> {
         let data: Data
         do {
             data = try Data(contentsOf: url)
@@ -49,17 +49,17 @@ extension S3 {
         }
 
         let file = File.Upload(data: data, bucket: nil, destination: destination, access: access, mime: mimeType(forFileAtUrl: url))
-        return put(file: file, on: eventLoop)
+        return put(file: file)
     }
     
     /// Upload file by it's path to S3
-    public func put(file path: String, destination: String, access: AccessControlList = .privateAccess, on eventLoop: EventLoop) -> EventLoopFuture<File.Response> {
+    public func put(file path: String, destination: String, access: AccessControlList = .privateAccess) -> EventLoopFuture<File.Response> {
         let url: URL = URL(fileURLWithPath: path)
-        return put(file: url, destination: destination, bucket: nil, access: access, on: eventLoop)
+        return put(file: url, destination: destination, bucket: nil, access: access)
     }
     
     /// Upload file by it's URL to S3, full set
-    public func put(file url: URL, destination: String, bucket: String?, access: AccessControlList = .privateAccess, on eventLoop: EventLoop) -> EventLoopFuture<File.Response> {
+    public func put(file url: URL, destination: String, bucket: String?, access: AccessControlList = .privateAccess) -> EventLoopFuture<File.Response> {
         let data: Data
         do {
             data = try Data(contentsOf: url)
@@ -68,13 +68,13 @@ extension S3 {
         }
         
         let file = File.Upload(data: data, bucket: bucket, destination: destination, access: access, mime: mimeType(forFileAtUrl: url))
-        return put(file: file, on: eventLoop)
+        return put(file: file)
     }
     
     /// Upload file by it's path to S3, full set
-    public func put(file path: String, destination: String, bucket: String?, access: AccessControlList = .privateAccess, on eventLoop: EventLoop) -> EventLoopFuture<File.Response> {
+    public func put(file path: String, destination: String, bucket: String?, access: AccessControlList = .privateAccess) -> EventLoopFuture<File.Response> {
         let url: URL = URL(fileURLWithPath: path)
-        return put(file: url, destination: destination, bucket: bucket, access: access, on: eventLoop)
+        return put(file: url, destination: destination, bucket: bucket, access: access)
     }
     
 }

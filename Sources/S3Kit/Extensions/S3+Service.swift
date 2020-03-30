@@ -7,7 +7,7 @@ extension S3 {
     // MARK: Buckets
     
     /// Get list of buckets
-    public func buckets(on eventLoop: EventLoop) -> EventLoopFuture<BucketsInfo> {
+    public func buckets() -> EventLoopFuture<BucketsInfo> {
         let headers: HTTPHeaders
         let url: URL
 
@@ -18,7 +18,7 @@ extension S3 {
             return eventLoop.makeFailedFuture(error)
         }
 
-        return make(request: url, method: .GET, headers: headers, data: Data(), on: eventLoop).flatMapThrowing { response in
+        return make(request: url, method: .GET, headers: headers, data: Data()).flatMapThrowing { response in
             try self.check(response)
             return try response.decode(to: BucketsInfo.self)
         }

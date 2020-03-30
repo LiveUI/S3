@@ -1,5 +1,5 @@
 import Foundation
-import OpenCrypto
+import Crypto
 import NIOHTTP1
 import HTTPMediaTypes
 
@@ -55,11 +55,11 @@ extension S3Signer {
         let dateRegionServiceKey = HMAC<SHA256>.signature(config.service, key: dateRegionKey)
         let signingKey = HMAC<SHA256>.signature("aws4_request", key: dateRegionServiceKey)
         let signature = HMAC<SHA256>.signature(stringToSign, key: signingKey)
-        return signature.description
+        return Data(signature).hexString
     }
     
     func createStringToSign(_ canonicalRequest: String, dates: Dates, region: Region) throws -> String {
-        let canonRequestHash = SHA256.hash(data: canonicalRequest.bytes).description
+        let canonRequestHash = Data(SHA256.hash(data: canonicalRequest.bytes)).hexString
         let components = [
             "AWS4-HMAC-SHA256",
             dates.long,

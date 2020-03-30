@@ -63,12 +63,12 @@
       <EnvironmentVariables>
          <EnvironmentVariable
             key = "S3_ACCESS_KEY"
-            value = "AKIA4DAU3CQ7FUTC2H5X"
+            value = "AKIARLE6YJEZ7WWRY2JO"
             isEnabled = "YES">
          </EnvironmentVariable>
          <EnvironmentVariable
             key = "S3_SECRET"
-            value = "LID0R+s5VuSU7gwFDkTWzJMm52WiZcbZmSV7i1h8"
+            value = "nVQoUObvEmjt2QFLCrJpXCiV16Hfhpgu/LwxlDMl"
             isEnabled = "YES">
          </EnvironmentVariable>
       </EnvironmentVariables>

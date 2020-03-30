@@ -1,5 +1,4 @@
-import OpenCrypto
-
+import Crypto
 
 extension HMAC {
     
@@ -26,5 +25,4 @@ extension HashedAuthenticationCode {
     var data: Data {
         return Data(self)
     }
-    
 }

@@ -4,97 +4,96 @@ import HTTPMediaTypes
 
 
 /// S3 client Protocol
-public protocol S3Client {
-    
+public protocol S3Client {    
     /// Get list of objects
-    func buckets(on eventLoop: EventLoop) -> EventLoopFuture<BucketsInfo>
+    func buckets() -> EventLoopFuture<BucketsInfo>
     
     /// Create a bucket
-    func create(bucket: String, region: Region?, on eventLoop: EventLoop) -> EventLoopFuture<Void>
+    func create(bucket: String, region: Region?) -> EventLoopFuture<Void>
     
     /// Delete a bucket wherever it is
 //    func delete(bucket: String, on container: Container) -> EventLoopFuture<Void>
     
     /// Delete a bucket
-    func delete(bucket: String, region: Region?, on eventLoop: EventLoop) -> EventLoopFuture<Void>
+    func delete(bucket: String, region: Region?) -> EventLoopFuture<Void>
     
     /// Get bucket location
-    func location(bucket: String, on eventLoop: EventLoop) -> EventLoopFuture<Region>
+    func location(bucket: String) -> EventLoopFuture<Region>
     
     /// Get list of objects
-    func list(bucket: String, region: Region?, on eventLoop: EventLoop) -> EventLoopFuture<BucketResults>
+    func list(bucket: String, region: Region?) -> EventLoopFuture<BucketResults>
     
     /// Get list of objects
-    func list(bucket: String, region: Region?, headers: [String: String], on eventLoop: EventLoop) -> EventLoopFuture<BucketResults>
+    func list(bucket: String, region: Region?, headers: [String: String]) -> EventLoopFuture<BucketResults>
     
     /// Upload file to S3
-    func put(file: File.Upload, on eventLoop: EventLoop) -> EventLoopFuture<File.Response>
+    func put(file: File.Upload) -> EventLoopFuture<File.Response>
     
     /// Upload file to S3
-    func put(file: File.Upload, headers: [String: String], on eventLoop: EventLoop) -> EventLoopFuture<File.Response>
+    func put(file: File.Upload, headers: [String: String]) -> EventLoopFuture<File.Response>
     
     /// Upload file to S3
-    func put(file url: URL, destination: String, access: AccessControlList, on eventLoop: EventLoop) -> EventLoopFuture<File.Response>
+    func put(file url: URL, destination: String, access: AccessControlList) -> EventLoopFuture<File.Response>
     
     /// Upload file to S3
-    func put(file url: URL, destination: String, bucket: String?, access: AccessControlList, on eventLoop: EventLoop) -> EventLoopFuture<File.Response>
+    func put(file url: URL, destination: String, bucket: String?, access: AccessControlList) -> EventLoopFuture<File.Response>
     
     /// Upload file to S3
-    func put(file path: String, destination: String, access: AccessControlList, on eventLoop: EventLoop) -> EventLoopFuture<File.Response>
+    func put(file path: String, destination: String, access: AccessControlList) -> EventLoopFuture<File.Response>
     
     /// Upload file to S3
-    func put(file path: String, destination: String, bucket: String?, access: AccessControlList, on eventLoop: EventLoop) -> EventLoopFuture<File.Response>
+    func put(file path: String, destination: String, bucket: String?, access: AccessControlList) -> EventLoopFuture<File.Response>
     
     /// Upload file to S3
-    func put(string: String, destination: String, on eventLoop: EventLoop) -> EventLoopFuture<File.Response>
+    func put(string: String, destination: String) -> EventLoopFuture<File.Response>
     
     /// Upload file to S3
-    func put(string: String, destination: String, access: AccessControlList, on eventLoop: EventLoop) -> EventLoopFuture<File.Response>
+    func put(string: String, destination: String, access: AccessControlList) -> EventLoopFuture<File.Response>
     
     /// Upload file to S3
-    func put(string: String, mime: HTTPMediaType, destination: String, on eventLoop: EventLoop) -> EventLoopFuture<File.Response>
+    func put(string: String, mime: HTTPMediaType, destination: String) -> EventLoopFuture<File.Response>
     
     /// Upload file to S3
-    func put(string: String, mime: HTTPMediaType, destination: String, access: AccessControlList, on eventLoop: EventLoop) -> EventLoopFuture<File.Response>
+    func put(string: String, mime: HTTPMediaType, destination: String, access: AccessControlList) -> EventLoopFuture<File.Response>
     
     /// Upload file to S3
-    func put(string: String, mime: HTTPMediaType, destination: String, bucket: String?, access: AccessControlList, on eventLoop: EventLoop) -> EventLoopFuture<File.Response>
+    func put(string: String, mime: HTTPMediaType, destination: String, bucket: String?, access: AccessControlList) -> EventLoopFuture<File.Response>
     
     /// File URL
     func url(fileInfo file: LocationConvertible) throws -> URL
     
     /// Retrieve file data from S3
-    func get(fileInfo file: LocationConvertible, on eventLoop: EventLoop) -> EventLoopFuture<File.Info>
+    func get(fileInfo file: LocationConvertible) -> EventLoopFuture<File.Info>
     
     /// Retrieve file data from S3
-    func get(fileInfo file: LocationConvertible, headers: [String: String], on eventLoop: EventLoop) -> EventLoopFuture<File.Info>
+    func get(fileInfo file: LocationConvertible, headers: [String: String]) -> EventLoopFuture<File.Info>
     
     /// Retrieve file data from S3
-    func get(file: LocationConvertible, on eventLoop: EventLoop) -> EventLoopFuture<File.Response>
+    func get(file: LocationConvertible) -> EventLoopFuture<File.Response>
     
     /// Retrieve file data from S3
-    func get(file: LocationConvertible, headers: [String: String], on eventLoop: EventLoop) -> EventLoopFuture<File.Response>
+    func get(file: LocationConvertible, headers: [String: String]) -> EventLoopFuture<File.Response>
     
     /// Delete file from S3
-    func delete(file: LocationConvertible, on eventLoop: EventLoop) -> EventLoopFuture<Void>
+    func delete(file: LocationConvertible) -> EventLoopFuture<Void>
     
     /// Delete file from S3
-    func delete(file: LocationConvertible, headers: [String: String], on eventLoop: EventLoop) -> EventLoopFuture<Void>
+    func delete(file: LocationConvertible, headers: [String: String]) -> EventLoopFuture<Void>
     
     /// Copy file on S3
-    func copy(file: LocationConvertible, to: LocationConvertible, headers: [String: String], on eventLoop: EventLoop) -> EventLoopFuture<File.CopyResponse>
+    func copy(file: LocationConvertible, to: LocationConvertible, headers: [String: String]) -> EventLoopFuture<File.CopyResponse>
 }
 
 extension S3Client {
     
     /// Retrieve file data from S3
-    func get(file: LocationConvertible, on eventLoop: EventLoop) -> EventLoopFuture<File.Response> {
-        return get(file: file, headers: [:], on: eventLoop)
+    func get(file: LocationConvertible) -> EventLoopFuture<File.Response> {
+        return get(file: file, headers: [:])
     }
     
     /// Copy file on S3
-    public func copy(file: LocationConvertible, to: LocationConvertible, on eventLoop: EventLoop) -> EventLoopFuture<File.CopyResponse> {
-        return self.copy(file: file, to: to, headers: [:], on: eventLoop)
+    public func copy(file: LocationConvertible, to: LocationConvertible) -> EventLoopFuture<File.CopyResponse> {
+        return self.copy(file: file, to: to, headers: [:])
     }
     
     static var dateFormatter: DateFormatter {
