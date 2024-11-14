@@ -1,4 +1,4 @@
-import OpenCrypto
+import Crypto
 
 
 extension HMAC {

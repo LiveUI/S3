@@ -1,5 +1,5 @@
 import Foundation
-import OpenCrypto
+import Crypto
 import NIOHTTP1
 import WebErrorKit
 

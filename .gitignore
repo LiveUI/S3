@@ -4,4 +4,4 @@ Packages
 *.xcodeproj
 *.xcodeproj/xcshareddata/xcbaselines/4724F8141DA88A530003BAC6.xcbaseline
 Package.pins
-
+xcuserdata
